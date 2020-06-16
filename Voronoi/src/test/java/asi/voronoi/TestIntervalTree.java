@@ -2,62 +2,82 @@
 
 package asi.voronoi;
 
-import static org.junit.Assert.assertTrue;
+import java.io.IOException;
+import org.junit.Assert;
 import org.junit.Test;
 
 public class TestIntervalTree {
     @Test
-    public void testNewNode() {
-        assertTrue("not implemented", false);
-    }    /** tests the method asi.voronoi.IntervalTree.isLeaf() */
-    
+    public void testIsLeaf() throws IOException {
+        IntervalTree i1 = new IntervalTree();
+        IntervalTree i2 = i1.newNode();
+        Assert.assertTrue("lft and rgt are null", (i2.lft()==null) && (i2.rgt()==null));
+        i1.buildTree("C:\\Users\\asi\\Documents\\USB\\Privat\\Development\\Voronoi\\src\\test\\test1.in");
+        Assert.assertTrue("root is not a leaf", !i1.isLeaf());
+        Assert.assertTrue("lft subnode is not a leaf", !i1.lft().isLeaf());
+        Assert.assertTrue("lft subnode of lft subnode is a leaf", i1.lft().lft().isLeaf());
+    }
     @Test
-    public void testIsLeaf() {
-        assertTrue("not implemented", false);
-    }    /** tests the method asi.voronoi.IntervalTree.buildTree() */
-    
+    public void testBuildTreeFromFile() throws IOException {
+        IntervalTree i1 = new IntervalTree();
+        i1.buildTree("C:\\Users\\asi\\Documents\\USB\\Privat\\Development\\Voronoi\\src\\test\\test1.in");
+        Assert.assertTrue("1st leaf is (0,0)", ((Point)i1.lft().lft().getInfo()).equals(new Point(0,0)));
+        Assert.assertTrue("2nd leaf is (0,1)", ((Point)i1.lft().rgt().getInfo()).equals(new Point(0,1)));
+        Assert.assertTrue("3rd leaf is (1,1)", ((Point)i1.rgt().lft().getInfo()).equals(new Point(1,1)));
+        Assert.assertTrue("4th leaf is (2,0)", ((Point)i1.rgt().rgt().lft().getInfo()).equals(new Point(2,0)));
+        Assert.assertTrue("5th leaf is (2,2)", ((Point)i1.rgt().rgt().rgt().getInfo()).equals(new Point(2,2)));
+    }
     @Test
-    public void testBuildTree() {
-        assertTrue("not implemented", false);
-    }    /** tests the method asi.voronoi.IntervalTree.getInfo() */
-    
+    public void testBuildTreeFromBinaryTree() {
+        IntervalTree i1 = new IntervalTree();
+        BinaryTree b = new BinaryTree(new Point(2,0));
+        b.insertNode(new Point(0,1));  
+        b.insertNode(new Point(0,0));  
+        b.insertNode(new Point(1,1));  
+        b.insertNode(new Point(2,2));  
+        i1.buildTree(b);
+        Assert.assertTrue("1st leaf is (0,0)", ((Point)i1.lft().lft().lft().getInfo()).equals(new Point(0,0)));
+        Assert.assertTrue("2nd leaf is (0,1)", ((Point)i1.lft().lft().rgt().getInfo()).equals(new Point(0,1)));
+        Assert.assertTrue("3rd leaf is (1,1)", ((Point)i1.lft().rgt().getInfo()).equals(new Point(1,1)));
+        Assert.assertTrue("4th leaf is (2,0)", ((Point)i1.rgt().lft().getInfo()).equals(new Point(2,0)));
+        Assert.assertTrue("5th leaf is (2,2)", ((Point)i1.rgt().rgt().getInfo()).equals(new Point(2,2)));
+    }
     @Test
-    public void testGetInfo() {
-        assertTrue("not implemented", false);
-    }    /** tests the method asi.voronoi.IntervalTree.lft() */
-    
+    public void testMaxX() throws IOException {
+        IntervalTree i1 = new IntervalTree();
+        i1.buildTree("C:\\Users\\asi\\Documents\\USB\\Privat\\Development\\Voronoi\\src\\test\\test1.in");
+        Assert.assertTrue("max X is 2", i1.maxX() == 2);
+    }
     @Test
-    public void testLft() {
-        assertTrue("not implemented", false);
-    }    /** tests the method asi.voronoi.IntervalTree.rgt() */
-    
+    public void testMaxY() throws IOException {
+        IntervalTree i1 = new IntervalTree();
+        i1.buildTree("C:\\Users\\asi\\Documents\\USB\\Privat\\Development\\Voronoi\\src\\test\\test1.in");
+        Assert.assertTrue("max Y is 2", i1.maxY() == 2);
+    }
     @Test
-    public void testRgt() {
-        assertTrue("not implemented", false);
-    }    /** tests the method asi.voronoi.IntervalTree.maxX() */
-    
+    public void testMinX() throws IOException {
+        IntervalTree i1 = new IntervalTree();
+        i1.buildTree("C:\\Users\\asi\\Documents\\USB\\Privat\\Development\\Voronoi\\src\\test\\test1.in");
+        Assert.assertTrue("min X is 0", i1.minX() == 0);
+    }
     @Test
-    public void testMaxX() {
-        assertTrue("not implemented", false);
-    }    /** tests the method asi.voronoi.IntervalTree.maxY() */
-    
-    @Test
-    public void testMaxY() {
-        assertTrue("not implemented", false);
-    }    /** tests the method asi.voronoi.IntervalTree.minX() */
-    
-    @Test
-    public void testMinX() {
-        assertTrue("not implemented", false);
-    }    /** tests the method asi.voronoi.IntervalTree.minY() */
-    
-    @Test
-    public void testMinY() {
-        assertTrue("not implemented", false);
-    }    /** tests the method asi.voronoi.IntervalTree.toString() */
-    
+    public void testMinY() throws IOException {
+        IntervalTree i1 = new IntervalTree();
+        i1.buildTree("C:\\Users\\asi\\Documents\\USB\\Privat\\Development\\Voronoi\\src\\test\\test1.in");
+        Assert.assertTrue("min Y is 0", i1.minY() == 0);
+    }
     @Test
     public void testToString() {
-        assertTrue("not implemented", false);
+        IntervalTree i1 = new IntervalTree();
+        BinaryTree b = new BinaryTree(new Point(2,0));
+        b.insertNode(new Point(0,1));  
+        b.insertNode(new Point(0,0));  
+        b.insertNode(new Point(1,1));  
+        b.insertNode(new Point(2,2));  
+        i1.buildTree(b);
+        String expected = "lft:\n"+"lft:\n"+"lft:\n"+"point:(0.0,0.0)\n"+
+                          "point:(0.0,1.0)\n"+"point:(1.0,1.0)\n"+"lft:\n"+
+                          "point:(2.0,0.0)\n"+"point:(2.0,2.0)\n";
+        Assert.assertTrue("not implemented", i1.toString().equals(expected));
     }
- }
+}

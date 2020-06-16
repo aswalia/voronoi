@@ -8,7 +8,7 @@ public class ConveksHullTree extends IntervalTree {
 
     @Override
     public String toString() {
-        return super.toString() + info;
+        return info.toString();
     }
 
     @Override

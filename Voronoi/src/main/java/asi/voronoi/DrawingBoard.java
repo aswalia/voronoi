@@ -27,13 +27,13 @@ public class DrawingBoard extends JFrame {
                 // one of the horirontal scrollbars
                 if (e.getSource().equals(horizontalZoom)) {
                     // the top scrollbar
-                    if (e.getValue() > zoomIn) {
-                        // scrolling to the right
-                        s = 1;
-                    } else {
-                        s = -1;
-                    }
-                    zoomIn = e.getValue();
+//                    if (e.getValue() > zoomIn) {
+//                        // scrolling to the right
+//                        s = 1;
+//                    } else {
+//                        s = -1;
+//                    }
+                    s = e.getValue();
                     dObj.setScale(s);
                 } else {
                     // the bottom scrollbar

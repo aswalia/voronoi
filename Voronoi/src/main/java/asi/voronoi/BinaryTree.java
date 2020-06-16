@@ -36,9 +36,9 @@ public class BinaryTree implements java.io.Serializable, ModelObject {
         if (p.equals(t)) {
             ret = true;
         } else if (p.isLess(t)) {
-            ret = (lft == null) ? false : lft.inTree(t);
-        } else {
             ret = (rgt == null) ? false : rgt.inTree(t);
+        } else {
+            ret = (lft == null) ? false : lft.inTree(t);
         }
         return ret;
     }
@@ -46,9 +46,9 @@ public class BinaryTree implements java.io.Serializable, ModelObject {
     public BinaryTree insertNode(Point p) {
         if (!this.p.equals(p)) {
             if (this.p.isLess(p)) {
-                lft = (lft == null) ? newNode(p) : lft.insertNode(p);
-            } else {
                 rgt = (rgt == null) ? newNode(p) : rgt.insertNode(p);
+            } else {
+                lft = (lft == null) ? newNode(p) : lft.insertNode(p);
             }
         }
         return this;

@@ -28,20 +28,20 @@ public class AVLTree extends BinaryTree {
                     f = q;
                 }
                 q = p1;
-                p1 = p1.p.isLess(t) ? (AVLTree) p1.lft : (AVLTree) p1.rgt;
+                p1 = p1.p.isLess(t) ? (AVLTree) p1.rgt : (AVLTree) p1.lft;
             } while (p1 != null);
             y = newNode(t);
             if (q.p.isLess(t)) {
-                q.lft = y;
-            } else {
                 q.rgt = y;
+            } else {
+                q.lft = y;
             }
-            p1 = a.p.isLess(t) ? (AVLTree) a.lft : (AVLTree) a.rgt;
-            d = a.p.isLess(t) ? (short) 1 : (short) - 1;
+            p1 = a.p.isLess(t) ? (AVLTree) a.rgt : (AVLTree) a.lft;
+            d = a.p.isLess(t) ? (short) -1 : (short) 1;
             b = p1;
             while (p1 != y) {
-                p1.bf = p1.p.isLess(t) ? (short) 1 : (short) - 1;
-                p1 = p1.p.isLess(t) ? (AVLTree) p1.lft : (AVLTree) p1.rgt;
+                p1.bf = p1.p.isLess(t) ? (short) -1 : (short) 1;
+                p1 = p1.p.isLess(t) ? (AVLTree) p1.rgt : (AVLTree) p1.lft;
             }
             if (a.bf == 0) {
                 a.bf = d;

@@ -33,7 +33,7 @@ public class Main {
 //                    new DrawingBoard(dvt);
 //                    new DrawingBoard(dch);
 //                    v.toFile();
-                    DrawAll da = new DrawAll(v);
+                    DrawObject da = new DrawVoronoi(v);
                     DrawingBoard drawingBoard = new DrawingBoard(da);
 //					v = (VoronoiTree)Serializer.fetch("vor"+no);
                     endTime = System.currentTimeMillis();

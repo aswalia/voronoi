@@ -63,7 +63,7 @@ public class DrawVoronoi extends DrawObject {
                 vt.buildTree(t);
             }
             vt.buildStructure();
-            DrawVoronoi dv = new DrawVoronoi(vt);
+            DrawObject dv = new DrawVoronoi(vt);
             DrawingBoard drawingBoard = new DrawingBoard(dv);
         }
     }

@@ -11,20 +11,20 @@ import org.junit.Test;
  * @stereotype tested
  * @testcase asi.voronoi.test.test.TestTestBinaryTree
  */
-public class TestBinaryTree {
+public class TestAVLTree {
     /**
      * constructor.
      * @param    aName     a test name
      */
     @Test
     public void testNewNode() {
-        BinaryTree b = new BinaryTree(new Point(1,2));
+        BinaryTree b = new AVLTree(new Point(1,2));
         BinaryTree c = b.newNode(new Point(2,1));
         Assert.assertTrue("new node", c.getP().equals(new Point(2,1)) && (c.lft() == null) && (c.rgt() == null));
     }    /** tests the method asi.voronoi.BinaryTree.isLeaf() */
     @Test
     public void testIsLeaf() {
-        BinaryTree b = new BinaryTree(new Point(2,3));
+        BinaryTree b = new AVLTree(new Point(2,3));
         Assert.assertTrue("isLeaf", b.isLeaf());
         b.insertNode(new Point(4,2));
         Assert.assertTrue("root no longer a leaf", !b.isLeaf());
@@ -33,14 +33,14 @@ public class TestBinaryTree {
     }    /** tests the method asi.voronoi.BinaryTree.getP() */
     @Test
     public void testGetP() {
-        BinaryTree b = new BinaryTree(new Point(2,3));
+        BinaryTree b = new AVLTree(new Point(2,3));
         Assert.assertTrue("getP root", b.getP().equals(new Point(2,3)));
         b.insertNode(new Point(4,2));
         Assert.assertTrue("getP node", b.rgt.getP().equals(new Point(4,2)));
     }    /** tests the method asi.voronoi.BinaryTree.lft() */
     @Test
     public void testLft() {
-        BinaryTree b = new BinaryTree(new Point(2,3));
+        BinaryTree b = new AVLTree(new Point(2,3));
         Assert.assertTrue("lft and rgt null", (b.lft()==null) && (b.rgt()==null));
         b.insertNode(new Point(1,3));
         Assert.assertTrue("lft = (1,3) and rgt() null", b.lft().getP().equals(new Point(1,3)) && (b.rgt()==null));
@@ -49,7 +49,7 @@ public class TestBinaryTree {
     }    /** tests the method asi.voronoi.BinaryTree.rgt() */
     @Test
     public void testRgt() {
-        BinaryTree b = new BinaryTree(new Point(2,3));
+        BinaryTree b = new AVLTree(new Point(2,3));
         Assert.assertTrue("lft and rgt null", (b.lft()==null) && (b.rgt()==null));
         b.insertNode(new Point(3,3));
         Assert.assertTrue("rgt = (3,3) and lft() null", b.rgt().getP().equals(new Point(3,3)) && (b.lft()==null));
@@ -58,7 +58,7 @@ public class TestBinaryTree {
     }    /** tests the method asi.voronoi.BinaryTree.inTree() */
     @Test
     public void testInTree() {
-        BinaryTree b = new BinaryTree(new Point(3,4));
+        BinaryTree b = new AVLTree(new Point(3,4));
         Assert.assertTrue("find root", b.inTree(new Point(3,4)));
         b.insertNode(new Point(5,2));
         b.insertNode(new Point(2,2));
@@ -71,7 +71,7 @@ public class TestBinaryTree {
     }    /** tests the method asi.voronoi.BinaryTree.insertNode() */
     @Test
     public void testInsertNode() {
-        BinaryTree b = new BinaryTree(new Point(3,4));
+        BinaryTree b = new AVLTree(new Point(3,4));
         Assert.assertTrue("lft and rgt null", (b.lft()==null) && (b.rgt()==null));
         b.insertNode(new Point(4,4));
         Assert.assertTrue("insert right", b.rgt().getP().equals(new Point(4,4)));
@@ -82,11 +82,11 @@ public class TestBinaryTree {
         b.insertNode(new Point(7,5));
         Assert.assertTrue("insert deep down", b.rgt().rgt().getP().equals(new Point(7,5)));
         b.insertNode(new Point(5,2));
-        Assert.assertTrue("insert even deeper down", b.rgt().rgt().lft().getP().equals(new Point(5,2)));
+        Assert.assertTrue("insert and rebalance tree", b.rgt().getP().equals(new Point(5,2)));
     }    /** tests the method asi.voronoi.BinaryTree.max() */
     @Test
     public void testMax() {
-        BinaryTree b = new BinaryTree(new Point(3,4));
+        BinaryTree b = new AVLTree(new Point(3,4));
         Assert.assertTrue("only root", b.max().equals(new Point(3,4)));
         b.insertNode(new Point(4,4));
         Assert.assertTrue("insert right new max", b.max().equals(new Point(4,4)));
@@ -99,7 +99,7 @@ public class TestBinaryTree {
     }    /** tests the method asi.voronoi.BinaryTree.min() */
     @Test
     public void testMin() {
-        BinaryTree b = new BinaryTree(new Point(3,4));
+        BinaryTree b = new AVLTree(new Point(3,4));
         Assert.assertTrue("only root", b.min().equals(new Point(3,4)));
         b.insertNode(new Point(4,4));
         Assert.assertTrue("insert right same min", b.min().equals(new Point(3,4)));
@@ -112,7 +112,7 @@ public class TestBinaryTree {
     }    /** tests the method asi.voronoi.BinaryTree.minY() */
     @Test
     public void testMinY() {
-        BinaryTree b = new BinaryTree(new Point(3,4));
+        BinaryTree b = new AVLTree(new Point(3,4));
         Assert.assertTrue("only root", b.minY()==4);
         b.insertNode(new Point(2,5));
         Assert.assertTrue("same min", b.minY()==4);
@@ -125,7 +125,7 @@ public class TestBinaryTree {
     }    /** tests the method asi.voronoi.BinaryTree.maxY() */
     @Test
     public void testMaxY() {
-        BinaryTree b = new BinaryTree(new Point(3,4));
+        BinaryTree b = new AVLTree(new Point(3,4));
         Assert.assertTrue("only root", b.maxY()==4);
         b.insertNode(new Point(2,5));
         Assert.assertTrue("new max", b.maxY()==5);
@@ -138,7 +138,7 @@ public class TestBinaryTree {
     }    /** tests the method asi.voronoi.BinaryTree.minX() */
     @Test
     public void testMinX() {
-        BinaryTree b = new BinaryTree(new Point(3,4));
+        BinaryTree b = new AVLTree(new Point(3,4));
         Assert.assertTrue("only root", b.minX()==3);
         b.insertNode(new Point(4,4));
         Assert.assertTrue("insert right same min", b.minX()==3);
@@ -151,7 +151,7 @@ public class TestBinaryTree {
     }    /** tests the method asi.voronoi.BinaryTree.maxX() */
     @Test
     public void testMaxX() {
-        BinaryTree b = new BinaryTree(new Point(3,4));
+        BinaryTree b = new AVLTree(new Point(3,4));
         Assert.assertTrue("only root", b.maxX()==3);
         b.insertNode(new Point(4,4));
         Assert.assertTrue("insert right new max", b.maxX()==4);
@@ -164,7 +164,7 @@ public class TestBinaryTree {
     }    /** tests the method asi.voronoi.BinaryTree.maxX() */
     @Test
     public void testToString() {
-        BinaryTree b = new BinaryTree(new Point(3,4));
+        BinaryTree b = new AVLTree(new Point(3,4));
         Assert.assertTrue("only root", b.toString().equals("[(3.0,4.0)]\n"));
         b.insertNode(new Point(4,4));
         Assert.assertTrue("insert 1",  b.toString().equals(("(3.0,4.0)\n"+"N "+"[(4.0,4.0)]\n")));
@@ -173,13 +173,13 @@ public class TestBinaryTree {
         b.insertNode(new Point(6,4));
         Assert.assertTrue("insert 3", b.toString().equals(("(3.0,4.0)\n"+"[(2.0,4.0)] "+"(4.0,4.0)\n"+"N "+"[(6.0,4.0)]\n")));
         b.insertNode(new Point(5,4));
-        Assert.assertTrue("insert 4", b.toString().equals(("(3.0,4.0)\n"+"[(2.0,4.0)] "+"(4.0,4.0)\n"+"N "+"(6.0,4.0)\n"+"[(5.0,4.0)] "+"N\n")));
+        Assert.assertTrue("insert 4: "+b.toString(), b.toString().equals(("(3.0,4.0)\n"+"[(2.0,4.0)] "+"(5.0,4.0)\n"+"[(4.0,4.0)] "+"[(6.0,4.0)]\n")));
         b.insertNode(new Point(1,1));
-        Assert.assertTrue(b.toString(), b.toString().equals(("(3.0,4.0)\n"+"(2.0,4.0) "+"(4.0,4.0)\n"+"[(1.0,1.0)] N N "+"(6.0,4.0)\n"+"[(5.0,4.0)] "+"N\n")));
+        Assert.assertTrue("insert 5: "+b.toString(), b.toString().equals(("(3.0,4.0)\n"+"(2.0,4.0) "+"(5.0,4.0)\n"+"[(1.0,1.0)] "+"N "+"[(4.0,4.0)] "+"[(6.0,4.0)]\n")));
     }    /** tests the method asi.voronoi.BinaryTree.count() */
     @Test
     public void testCount() {
-        BinaryTree b = new BinaryTree(new Point(3,4));
+        BinaryTree b = new AVLTree(new Point(3,4));
         Assert.assertTrue("only root", b.count()==1);
         b.insertNode(new Point(4,4));
         Assert.assertTrue("insert 1", b.count()==2);

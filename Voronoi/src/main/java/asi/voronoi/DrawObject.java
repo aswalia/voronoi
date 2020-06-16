@@ -25,8 +25,8 @@ abstract public class DrawObject {
     }
 
     public Point transformPoint(Point p) {
-        double x = s * p.x() * fx + tX + ox;
-        double y = s * (-p.y()) * fy + tY + oy;
+        double x = s * (p.x() * fx + tX + ox);
+        double y = s * ((-p.y()) * fy + tY + oy);
         return new Point(x,y);
     }
 

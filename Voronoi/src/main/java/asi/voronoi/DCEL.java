@@ -1,5 +1,7 @@
 package asi.voronoi;
 
+import java.util.LinkedList;
+
 public class DCEL implements Constant, java.io.Serializable {
     DCELNode node;
     Point upLft, downLft, upRgt, downRgt;
@@ -38,7 +40,13 @@ public class DCEL implements Constant, java.io.Serializable {
             ret = new ConveksHull(node.f_l, node.f_r);
         } else {
             DCEL d = findOuterEdge();
-            Point start = d.node.f_l;
+            Point start;
+            if (d.node.p_b != null) {
+            // left point
+                start = d.node.f_l;
+            } else {
+                start = d.node.f_r;
+            }
             Point next = start;
             ret = new ConveksHull();
             do {
@@ -51,6 +59,16 @@ public class DCEL implements Constant, java.io.Serializable {
     }
 
     public DCEL merge(Point p) throws Exception {
+        // build initial and final edge of DCEL
+        ConveksHull ch = vor2CH();
+        ch.merge(p);
+        PointPair pp = ch.getUpSupport();
+        if (pp == null) {
+            throw new Exception("3 points on a line " + p + " " + node.f_l + " " + node.f_r);
+        }
+        upLft = pp.getLft(); upRgt = pp.getRgt();
+        pp = ch.getDownSupport();
+        downLft = pp.getLft(); downRgt = pp.getRgt();
         DCEL lftNext, rgtNext;
         DCEL current = new DCEL(upLft, upRgt);
         DCEL ret = current;
@@ -58,19 +76,8 @@ public class DCEL implements Constant, java.io.Serializable {
         java.util.LinkedList mergeList = new java.util.LinkedList();
         DCELPair listElem;
         Point lftPoint = upLft, rgtPoint = upRgt;
-        if (node.f_l.isLess(p)) // p is to the left of current vor diagram
+        if (node.f_l.isLess(p)) // p is to the right of current vor diagram
         {
-            rgtNext = initCell(upRgt);
-            do {
-                rgtNext = rgtNext.initEdge(rgtPoint, false);
-                rgtNext = rgtNext.trackSet(current, false);
-                next = current.findNextEdge(null, rgtNext);
-                rgtPoint = next.otherPoint(rgtPoint);
-                tmp = current;
-                current = (new DCEL(lftPoint, rgtPoint)).createSigmaChain(current, next);
-                mergeList.addLast(new DCELPair(tmp, next, current));
-            } while (!rgtPoint.equals(downRgt));
-        } else {
             lftNext = initCell(upLft);
             do {
                 lftNext = lftNext.initEdge(lftPoint, true);
@@ -81,6 +88,17 @@ public class DCEL implements Constant, java.io.Serializable {
                 current = (new DCEL(lftPoint, rgtPoint)).createSigmaChain(current, next);
                 mergeList.addLast(new DCELPair(tmp, next, current));
             } while (!lftPoint.equals(downLft));
+        } else { // p is to the left of current vor diagram
+            rgtNext = initCell(upRgt);
+            do {
+                rgtNext = rgtNext.initEdge(rgtPoint, false);
+                rgtNext = rgtNext.trackSet(current, false);
+                next = current.findNextEdge(null, rgtNext);
+                rgtPoint = next.otherPoint(rgtPoint);
+                tmp = current;
+                current = (new DCEL(lftPoint, rgtPoint)).createSigmaChain(current, next);
+                mergeList.addLast(new DCELPair(tmp, next, current));
+            } while (!rgtPoint.equals(downRgt));
         }
         do {
             listElem = (DCELPair) mergeList.removeFirst();
@@ -90,6 +108,14 @@ public class DCEL implements Constant, java.io.Serializable {
     }
 
     public DCEL merge(DCEL subVor) throws Exception {
+        // build initial and final edge of DCEL
+        ConveksHull ch1 = vor2CH();
+        ConveksHull ch2 = subVor.vor2CH();
+        ch1.merge(ch2);
+        PointPair pp = ch1.getUpSupport();
+        upLft = pp.getLft(); upRgt = pp.getRgt();
+        pp = ch1.getDownSupport();
+        downLft = pp.getLft(); downRgt = pp.getRgt();
         DCEL lftNext, rgtNext;
         Point lftPoint = upLft, rgtPoint = upRgt;
         DCEL next, tmp;
@@ -97,13 +123,13 @@ public class DCEL implements Constant, java.io.Serializable {
         DCEL ret = current;
         java.util.LinkedList mergeList = new java.util.LinkedList();
         DCELPair listElem;
-        if (node.f_l.isLess(subVor.node.f_l)) // subVor to the left to current vor
+        if (node.f_l.isLess(subVor.node.f_l)) // subVor to the right to current vor
         {
-            lftNext = subVor.initCell(upLft);
-            rgtNext = initCell(upRgt);
-        } else {
             lftNext = initCell(upLft);
             rgtNext = subVor.initCell(upRgt);
+        } else {
+            lftNext = subVor.initCell(upLft);
+            rgtNext = initCell(upRgt);
         }
         lftNext = lftNext.initEdge(lftPoint, true);
         rgtNext = rgtNext.initEdge(rgtPoint, false);
@@ -147,6 +173,21 @@ public class DCEL implements Constant, java.io.Serializable {
 
     void setDownRgt(Point p) {
         downRgt = p;
+    }
+    
+    private boolean pointInList(Point p, LinkedList<Point> pl) {
+        boolean ret;
+        // assume list always contains one or more elements
+        int index = 0;
+        while ((index < pl.size()) && !pl.get(index).equals(p)) {
+            index++;
+        }
+        if (index == pl.size()) {
+            ret = false;
+        } else {
+            ret = true;
+        }
+        return ret;
     }
 
     private Point otherPoint(Point p) {
@@ -432,46 +473,46 @@ public class DCEL implements Constant, java.io.Serializable {
             DCEL a1 = new DCEL(new Point(4, 19), new Point(5, 9));
             ConveksHull aa1 = new ConveksHull(new Point(4, 19), new Point(5, 9));
             aa1.merge(new Point(4, 0));
-            a1.setUpLft(aa1.getUpLft());
-            a1.setUpRgt(aa1.getUpRgt());
-            a1.setDownLft(aa1.getDownLft());
-            a1.setDownRgt(aa1.getDownRgt());
+            a1.setUpLft(aa1.getLft());
+            a1.setUpRgt(aa1.getRgt());
+            a1.setDownLft(aa1.getUp());
+            a1.setDownRgt(aa1.getDown());
             a1 = a1.merge(new Point(4, 0));
             aa1.merge(new Point(1, 14));
-            a1.setUpLft(aa1.getUpLft());
-            a1.setUpRgt(aa1.getUpRgt());
-            a1.setDownLft(aa1.getDownLft());
-            a1.setDownRgt(aa1.getDownRgt());
+            a1.setUpLft(aa1.getLft());
+            a1.setUpRgt(aa1.getRgt());
+            a1.setDownLft(aa1.getUp());
+            a1.setDownRgt(aa1.getDown());
             a1 = a1.merge(new Point(1, 14));
             System.out.println("a1: " + a1);
             DCEL b1 = new DCEL(new Point(10, 12), new Point(10, 20));
             ConveksHull bb1 = new ConveksHull(new Point(10, 12), new Point(10, 20));
             bb1.merge(new Point(8, 5));
-            b1.setUpLft(bb1.getUpLft());
-            b1.setUpRgt(bb1.getUpRgt());
-            b1.setDownLft(bb1.getDownLft());
-            b1.setDownRgt(bb1.getDownRgt());
+            b1.setUpLft(bb1.getLft());
+            b1.setUpRgt(bb1.getRgt());
+            b1.setDownLft(bb1.getUp());
+            b1.setDownRgt(bb1.getDown());
             b1 = b1.merge(new Point(8, 5));
             DCEL b2 = new DCEL(new Point(11, 6), new Point(12, 16));
             ConveksHull bb2 = new ConveksHull(new Point(11, 6), new Point(12, 16));
             bb1.merge(bb2);
-            b1.setUpLft(bb1.getUpLft());
-            b1.setUpRgt(bb1.getUpRgt());
-            b1.setDownLft(bb1.getDownLft());
-            b1.setDownRgt(bb1.getDownRgt());
+            b1.setUpLft(bb1.getLft());
+            b1.setUpRgt(bb1.getRgt());
+            b1.setDownLft(bb1.getUp());
+            b1.setDownRgt(bb1.getDown());
             b1 = b1.merge(b2);
             bb1.merge(new Point(8, 0));
-            b1.setUpLft(bb1.getUpLft());
-            b1.setUpRgt(bb1.getUpRgt());
-            b1.setDownLft(bb1.getDownLft());
-            b1.setDownRgt(bb1.getDownRgt());
+            b1.setUpLft(bb1.getLft());
+            b1.setUpRgt(bb1.getRgt());
+            b1.setDownLft(bb1.getUp());
+            b1.setDownRgt(bb1.getDown());
             b1 = b1.merge(new Point(8, 0));
             System.out.println("b1: " + b1);
             aa1.merge(bb1);
-            a1.setUpLft(aa1.getUpLft());
-            a1.setUpRgt(aa1.getUpRgt());
-            a1.setDownLft(aa1.getDownLft());
-            a1.setDownRgt(aa1.getDownRgt());
+            a1.setUpLft(aa1.getLft());
+            a1.setUpRgt(aa1.getRgt());
+            a1.setDownLft(aa1.getUp());
+            a1.setDownRgt(aa1.getDown());
             a1 = a1.merge(b1);
             System.out.println("merge: " + a1);
 
@@ -480,16 +521,16 @@ public class DCEL implements Constant, java.io.Serializable {
             DCEL c2 = new DCEL(new Point(18, 19), new Point(18, 23));
             ConveksHull cc2 = new ConveksHull(new Point(18, 19), new Point(18, 23));
             cc1.merge(cc2);
-            c1.setUpLft(cc1.getUpLft());
-            c1.setUpRgt(cc1.getUpRgt());
-            c1.setDownLft(cc1.getDownLft());
-            c1.setDownRgt(cc1.getDownRgt());
+            c1.setUpLft(cc1.getLft());
+            c1.setUpRgt(cc1.getRgt());
+            c1.setDownLft(cc1.getUp());
+            c1.setDownRgt(cc1.getDown());
             c1 = c1.merge(c2);
             cc1.merge(new Point(19, 13));
-            c1.setUpLft(cc1.getUpLft());
-            c1.setUpRgt(cc1.getUpRgt());
-            c1.setDownLft(cc1.getDownLft());
-            c1.setDownRgt(cc1.getDownRgt());
+            c1.setUpLft(cc1.getLft());
+            c1.setUpRgt(cc1.getRgt());
+            c1.setDownLft(cc1.getUp());
+            c1.setDownRgt(cc1.getDown());
             c1 = c1.merge(new Point(19, 13));
             System.out.println("c1: " + c1);
             DCEL d1 = new DCEL(new Point(19, 16), new Point(22, 7));
@@ -497,32 +538,32 @@ public class DCEL implements Constant, java.io.Serializable {
             DCEL d2 = new DCEL(new Point(22, 12), new Point(22, 16));
             ConveksHull dd2 = new ConveksHull(new Point(22, 12), new Point(22, 16));
             dd1.merge(dd2);
-            d1.setUpLft(dd1.getUpLft());
-            d1.setUpRgt(dd1.getUpRgt());
-            d1.setDownLft(dd1.getDownLft());
-            d1.setDownRgt(dd1.getDownRgt());
+            d1.setUpLft(dd1.getLft());
+            d1.setUpRgt(dd1.getRgt());
+            d1.setDownLft(dd1.getUp());
+            d1.setDownRgt(dd1.getDown());
             d1 = d1.merge(d2);
             System.out.println("d1: " + d1);
             cc1.merge(dd1);
-            c1.setUpLft(cc1.getUpLft());
-            c1.setUpRgt(cc1.getUpRgt());
-            c1.setDownLft(cc1.getDownLft());
-            c1.setDownRgt(cc1.getDownRgt());
+            c1.setUpLft(cc1.getLft());
+            c1.setUpRgt(cc1.getRgt());
+            c1.setDownLft(cc1.getUp());
+            c1.setDownRgt(cc1.getDown());
             c1 = c1.merge(d1);
             System.out.println("c1: " + c1);
             cc1.merge(new Point(15, 9));
-            c1.setUpLft(cc1.getUpLft());
-            c1.setUpRgt(cc1.getUpRgt());
-            c1.setDownLft(cc1.getDownLft());
-            c1.setDownRgt(cc1.getDownRgt());
+            c1.setUpLft(cc1.getLft());
+            c1.setUpRgt(cc1.getRgt());
+            c1.setDownLft(cc1.getUp());
+            c1.setDownRgt(cc1.getDown());
             c1 = c1.merge(new Point(15, 9));
             System.out.println("merge: " + c1);
 
             aa1.merge(cc1);
-            a1.setUpLft(aa1.getUpLft());
-            a1.setUpRgt(aa1.getUpRgt());
-            a1.setDownLft(aa1.getDownLft());
-            a1.setDownRgt(aa1.getDownRgt());
+            a1.setUpLft(aa1.getLft());
+            a1.setUpRgt(aa1.getRgt());
+            a1.setDownLft(aa1.getUp());
+            a1.setDownRgt(aa1.getDown());
             a1 = a1.merge(c1);
             System.out.println("merge: " + a1);
         }

@@ -1,112 +1,189 @@
 package asi.voronoi;
 
 public class ConveksHull implements Constant, java.io.Serializable, ModelObject {
-    private LinkedList head;
-    private Point upLft, downLft, upRgt, downRgt;
+    private CircularLinkedList head;
+    private Point lft, up, rgt, down;
+    private PointPair upSupport, downSupport;
 
     public ConveksHull(ConveksHull c) {
         head = c.head.copy();
+        lft = c.getLft(); rgt = c.getRgt();
+        up = c.getUp(); down = c.getDown();
     }
 
     public ConveksHull() {
-        head = null;
     }
-
-    public ConveksHull(Point lft, Point rgt) {
-        head = new LinkedList(lft);
-        head.add(rgt);
+    
+    public ConveksHull(Point p) {
+        head = new CircularLinkedList(p);
+        lft = rgt = up = down = p;
     }
-
-    public LinkedList getHead() {
-        return head;
-    }
-
-    public void add(Point p) {
-        if (head == null) {
-            head = new LinkedList(p);
+    
+    public ConveksHull(Point lft, Point rgt) {       
+        head = new CircularLinkedList(lft);
+        head.add(0, -1, rgt);
+        this.lft = lft;
+        this.rgt = rgt;
+        if (lft.y() >= rgt.y()) {
+            up = lft;
+            down = rgt;
         } else {
-            head.addFront(p);
+            up = rgt;
+            down = lft;
         }
+    }
+    
+    public int size() {
+        return (head == null) ? 0 : head.length(); 
     }
 
     @Override
     public String toString() {
         String ret = "ConveksHull:" + "\n";
-        ret += head;
+        ret += head+"\n";
+        ret += "lft:" + lft + " rgt:" + rgt + " up:" + up + " down:" + down+"\n";
         return ret;
     }
+    
+    private void setPerimeter(Point p) {
+        if (p.isLess(lft)) {
+            lft = p;
+        } else if (rgt.isLess(p)) {
+            rgt = p;
+        }
+        if (up.y() < p.y()) {
+            up = p;
+        } else if (p.y() < down.y()) {
+            down = p;
+        }
+        
+    }
 
+    public void setUpSupport(Point lft, Point rgt) {
+        upSupport = new PointPair(lft,rgt);
+    }
+    
+    public void setDownSupport(Point lft, Point rgt) {
+        downSupport = new PointPair(lft,rgt);
+    }
+    
+    public PointPair getUpSupport() {
+        return upSupport;
+    }
+    
+    public PointPair getDownSupport() {
+        return downSupport;
+    }
+    
     public void merge(Point p) {
-        if (head.element().isLess(p)) // p is to the left of this CH
-        {
-            upLft = downLft = p;
-            downRgt = findUp(p);
-            upRgt = findDown(p);
+        int index=0;
+        if (Point.area(p, head.get(0), head.get(index-1)) == 0) {
+            // if CH is a line and
+            // new point also on same line
+            if ((p.x() > lft.x()) &&
+                (p.x() < rgt.x())) {
+                // new point between the two edges
+                boolean done = false;
+                do {
+                    if ((p.x() < head.get(index).x()) &&
+                        (p.x() > head.get(index+1).x())) {
+                        head.add(index, index-1, p); 
+                        done = true;
+                    }
+                    index++;
+                } while (!done);
+            } else {
+                // new point either to the left of head or
+                // to the right of head.next.
+                if (p.x() < lft.x()) {
+                    lft = up = p;
+                    rgt = down = head.get(-1);
+                }  else {
+                    lft = up = head.get(0);
+                    rgt = down = p;
+                }
+                head.add(0, -1, p);
+            }
         } else {
-            upRgt = downRgt = p;
-            upLft = findUp(p);
-            downLft = findDown(p);
+            boolean doneFront, doneBack;
+            doneFront = doneBack = false;
+            int addFront, addBack;
+            addFront = addBack = index;
+            do {
+                if ((Point.area(p, head.get(index), head.get(index+1)) >= 0) &&
+                    (Point.area(p, head.get(index), head.get(index-1)) >= 0)) {
+                    addFront = index;
+                    doneFront = true;
+                }
+                if ((Point.area(p, head.get(index), head.get(index+1)) <= 0) &&
+                    (Point.area(p, head.get(index), head.get(index-1)) <= 0)) {
+                    addBack = index;
+                    doneBack = true;
+                }
+                index++;
+            } while(!doneFront || !doneBack);
+            if (rgt.isLess(p)) { // p to the rgt of CH
+                setUpSupport(head.get(addFront), p);
+                setDownSupport(head.get(addBack), p);
+            } else {
+                setUpSupport(p, head.get(addBack));
+                setDownSupport(p, head.get(addFront));                
+            }
+            head.add(addFront, addBack, p);
+            setPerimeter(p);
         }
-        head.mergeList(upLft, upRgt, downLft, downRgt, new LinkedList(p));
     }
-
+    
     public void merge(ConveksHull subCH) {
-        Point tmpLft, tmpRgt;
-        if (head.element().isLess(subCH.head.element())) // subCH is to the left of this CH
+        Point tmpLft, tmpRgt, upLft, upRgt, downLft, downRgt;
+        int index = 0;
+        if (head.get(index).isLess(subCH.head.get(index))) // subCH is to the right of this CH
         {
-            do //locate bottom supporting points
-            {
-                tmpRgt = head.element();
-                tmpLft = subCH.head.element();
-                downLft = subCH.findDown(tmpRgt);
-                downRgt = findUp(tmpLft);
-            } while (!tmpLft.equals(downLft) || !tmpRgt.equals(downRgt));
-            do // locate top supporting points
-            {
-                tmpRgt = head.element();
-                tmpLft = subCH.head.element();
-                upLft = subCH.findUp(tmpRgt);
-                upRgt = findDown(tmpLft);
-            } while (!tmpLft.equals(upLft) || !tmpRgt.equals(upRgt));
-        } else // subCH is to the right of this
+            tmpRgt = subCH.head.get(0);
+            tmpLft = head.get(0);
+            downLft = findDown(index, tmpRgt);
+            downRgt = subCH.findUp(index, tmpLft);
+            upLft = findUp(index, tmpRgt);
+            upRgt = subCH.findDown(index, tmpLft);
+                
+        } else // subCH is to the left of this
         {
-            do //locate bottom supporting points
-            {
-                tmpRgt = subCH.head.element();
-                tmpLft = head.element();
-                downLft = findDown(tmpRgt);
-                downRgt = subCH.findUp(tmpLft);
-            } while (!tmpLft.equals(downLft) || !tmpRgt.equals(downRgt));
-            do // locate top supporting points
-            {
-                tmpRgt = subCH.head.element();
-                tmpLft = head.element();
-                upLft = findUp(tmpRgt);
-                upRgt = subCH.findDown(tmpLft);
-            } while (!tmpLft.equals(upLft) || !tmpRgt.equals(upRgt));
+            tmpRgt = head.get(0);
+            tmpLft = subCH.head.get(0);
+            downLft = subCH.findDown(index, tmpRgt);
+            downRgt = findUp(index, tmpLft);
+            upLft = subCH.findUp(index, tmpRgt);
+            upRgt = findDown(index, tmpLft);
         }
-        head.mergeList(upLft, upRgt, downLft, downRgt, subCH.head);
+        setUpSupport(upLft, upRgt);
+        setDownSupport(downLft, downRgt);
+        head.mergeList(upLft, upRgt, downLft, downRgt, subCH.head);    
+        setPerimeter(subCH.lft);
+        setPerimeter(subCH.rgt);
+        setPerimeter(subCH.up);
+        setPerimeter(subCH.down);
+        subCH.head = null;
     }
 
-    public Point getUpLft() {
-        return upLft;
+    public Point getLft() {
+        return lft;
     }
 
-    public Point getUpRgt() {
-        return upRgt;
+    public Point getRgt() {
+        return rgt;
     }
 
-    public Point getDownLft() {
-        return downLft;
+    public Point getUp() {
+        return up;
     }
 
-    public Point getDownRgt() {
-        return downRgt;
+    public Point getDown() {
+        return down;
     }
 
     @Override
     public double maxX() {
-        double ret = head.element().x(), mx;
+/*        double ret = head.element().x(), mx;
         Point last = head.previous();
         for (; !head.element().equals(last); head.front()) {
             if ((mx = head.element().x()) > ret) {
@@ -116,12 +193,12 @@ public class ConveksHull implements Constant, java.io.Serializable, ModelObject 
         if ((mx = head.element().x()) > ret) {
             ret = mx;
         }
-        return ret;
+*/        return rgt.x();
     }
 
     @Override
     public double minX() {
-        double ret = head.element().x(), mx;
+/*        double ret = head.element().x(), mx;
         Point last = head.previous();
         for (; !head.element().equals(last); head.front()) {
             if ((mx = head.element().x()) < ret) {
@@ -131,12 +208,12 @@ public class ConveksHull implements Constant, java.io.Serializable, ModelObject 
         if ((mx = head.element().x()) < ret) {
             ret = mx;
         }
-        return ret;
+*/        return lft.x();
     }
 
     @Override
     public double maxY() {
-        double ret = head.element().y(), mx;
+ /*       double ret = head.element().y(), mx;
         Point last = head.previous();
         for (; !head.element().equals(last); head.front()) {
             if ((mx = head.element().y()) > ret) {
@@ -146,12 +223,12 @@ public class ConveksHull implements Constant, java.io.Serializable, ModelObject 
         if ((mx = head.element().y()) > ret) {
             ret = mx;
         }
-        return ret;
+*/        return up.y();
     }
 
     @Override
     public double minY() {
-        double ret = head.element().y(), mx;
+/*        double ret = head.element().y(), mx;
         Point last = head.previous();
         for (; !head.element().equals(last); head.front()) {
             if ((mx = head.element().y()) < ret) {
@@ -161,72 +238,90 @@ public class ConveksHull implements Constant, java.io.Serializable, ModelObject 
         if ((mx = head.element().y()) < ret) {
             ret = mx;
         }
-        return ret;
+*/        return down.y();
+    }
+
+    public CircularLinkedList getHead() {
+        return head;
+    }
+
+    public void add(Point p) {
+        // build a CH by adding 1 Point at a time
+        // only the first adding of the first two points 
+        // is interesting as the rest can bedone with merge
+        if (head == null) {
+            head = new CircularLinkedList(p);
+            lft = rgt = up = down = p;
+        } else {
+            merge(p);
+        }
     }
 
     public static ConveksHull fetch(String filename) throws java.io.IOException, ClassNotFoundException {
         return (ConveksHull) Serializer.fetch(filename);
     }
 
-    private short test(Point p) {
-        short back = Point.area(p, head.element(), head.previous());
-        short front = Point.area(p, head.element(), head.next());
+    private short test(int index, Point p) {
+        short back = Point.area(p, head.get(index), head.get(index-1));
+        short front = Point.area(p, head.get(index), head.get(index+1));
         short ret = (back * front >= 0) ? SUPPORT : ((back >= 0) ? REFLEX : CONCAVE);
         return ret;
     }
 
-    private Point findUp(Point p) {
+    private Point findUp(int index, Point p) {
+        int i = index;
         boolean done = false;
         do {
-            switch (test(p)) {
+            switch (test(i,p)) {
                 case CONCAVE:
-                    head.back();
+                    i--;
                     break;
                 case REFLEX:
-                    head.front();
+                    i++;
                     break;
                 case SUPPORT:
-                    switch (Point.area(p, head.element(), head.previous())) {
+                    switch (Point.area(p, head.get(i), head.get(i-1))) {
                         case 0:
-                            if (head.next().equals(head.previous()) && (Point.direction(head.element(), head.previous(), p) < 0)) {
+                            if (head.get(i+1).equals(head.get(i-1)) && (Point.direction(head.get(i), head.get(i-1), p) < 0)) {
                                 done = true;
                             } else {
-                                head.back();
+                                i--;
                             }
                             break;
                         case 1:
                             done = true;
                             break;
                         case - 1:
-                            head.back();
+                            i--;
                             break;
                     }
             }
         } while (!done);
-        return head.element();
+        return head.get(i);
     }
 
-    private Point findDown(Point p) {
+    private Point findDown(int index, Point p) {
+        int i = index;
         boolean done = false;
         do {
-            switch (test(p)) {
+            switch (test(i,p)) {
                 case CONCAVE:
-                    head.front();
+                    i++;
                     break;
                 case REFLEX:
-                    head.back();
+                    i--;
                     break;
                 case SUPPORT:
-                    switch (Point.area(p, head.element(), head.next())) {
+                    switch (Point.area(p, head.get(i), head.get(i+1))) {
                         case 0:
-                            if (head.next().equals(head.previous()) && (Point.direction(head.element(), head.next(), p) < 0)) {
+                            if (head.get(i+1).equals(head.get(i-1)) && (Point.direction(head.get(i), head.get(i+1), p) < 0)) {
                                 done = true;
                             } else {
-                                head.front();
+                                i++;
                             }
                             break;
                         case 1:
-                            head.front();
+                            i++;
                             break;
                         case - 1:
                             done = true;
@@ -234,7 +329,7 @@ public class ConveksHull implements Constant, java.io.Serializable, ModelObject 
                     }
             }
         } while (!done);
-        return head.element();
+        return head.get(i);
     }
 
     static class Test {
@@ -242,7 +337,7 @@ public class ConveksHull implements Constant, java.io.Serializable, ModelObject 
             /*
              * ConveksHull t = new ConveksHull(new Point(-1,0),new Point(-1,2)); ConveksHull s = new ConveksHull(new Point(2,0),new Point(2,2)); System.out.println(t.head); System.out.println(s.head);
              * s.mergePoint(new Point(1,1)); System.out.println(s.head); s.mergePoint(new Point(0,1)); System.out.println(s.head); s.mergePoint(new Point(3,1)); System.out.println(s.head);
-             * s.mergeConveksHull(t); System.out.println(s.head); System.out.println("Points: "+s.upLft+s.upRgt+s.downLft+s.downRgt);
+             * s.mergeConveksHull(t); System.out.println(s.head); System.out.println("Points: "+s.lft+s.rgt+s.up+s.down);
              *
              * ConveksHull a = new ConveksHull(new Point(0,4),new Point(1,0)); ConveksHull b = new ConveksHull(new Point(4,2),new Point(8,4)); ConveksHull c = new ConveksHull(new Point(11,0),new
              * Point(12,5)); ConveksHull d = new ConveksHull(new Point(15,2),new Point(19,4));
@@ -253,22 +348,21 @@ public class ConveksHull implements Constant, java.io.Serializable, ModelObject 
              */
 
             ConveksHull a = new ConveksHull(new Point(0, 6), new Point(1, 0));
-            System.out.println("a: " + a.head);
+            System.out.println("a: \n" + a);
             ConveksHull b = new ConveksHull(new Point(4, 1), new Point(4, 6));
             b.merge(new Point(6, 4));
-            System.out.println("b: " + b.head);
+            System.out.println("b: \n" + b);
             ConveksHull c = new ConveksHull(new Point(7, 5), new Point(8, 2));
             c.merge(new Point(8, 7));
-            System.out.println("c: " + c.head);
+            System.out.println("c: \n" + c);
             ConveksHull d = new ConveksHull(new Point(11, 9), new Point(13, 1));
-            System.out.println("d: " + d.head);
+            System.out.println("d: \n" + d);
             a.merge(b);
-            System.out.println("a: " + a.head);
+            System.out.println("a merge b: \n" + a);
             d.merge(c);
-            System.out.println("c: " + c.head);
+            System.out.println("d merge c: \n" + d);
             d.merge(a);
-            System.out.println("a: " + a.head);
-            System.out.println(d);
+            System.out.println("d merge a: \n" + d);
             System.out.println("maxX: " + d.maxX());
             System.out.println("minX: " + d.minX());
             System.out.println("maxY: " + d.maxY());

@@ -79,7 +79,7 @@ public class Point implements java.io.Serializable {
     }
 
     public boolean isLess(Point t) {
-        return (this.x > t.x) || ((this.x == t.x) && (this.y > t.y));
+        return (this.x < t.x) || ((this.x == t.x) && (this.y < t.y));
     }
 
     @Override

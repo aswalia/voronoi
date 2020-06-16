@@ -26,14 +26,16 @@ public class VoronoiTree extends IntervalTree {
                 info = (DCEL) rgt.info;
                 ConveksHull c = ((DCEL) info).vor2CH();
                 c.merge((Point) lft.info);
-                ((DCEL) info).setUpLft(c.getUpLft());
-                ((DCEL) info).setUpRgt(c.getUpRgt());
-                ((DCEL) info).setDownLft(c.getDownLft());
-                ((DCEL) info).setDownRgt(c.getDownRgt());
+                PointPair pp = c.getUpSupport();
+                if (pp == null) {
+                    throw new Exception("3 points on a line ");
+                }
+                ((DCEL) info).setUpLft(pp.getLft()); ((DCEL) info).setUpRgt(pp.getRgt());
+                pp = c.getDownSupport();
+                ((DCEL) info).setDownLft(pp.getLft()); ((DCEL) info).setDownRgt(pp.getRgt());
                 info = ((DCEL) info).merge((Point) lft.info);
             } catch (Exception e) {
-                e.printStackTrace();
-                System.exit(-1);
+                throw new RuntimeException(e.getMessage());
             }
         } else if (rgt.isLeaf()) {
             try {
@@ -41,14 +43,16 @@ public class VoronoiTree extends IntervalTree {
                 info = (DCEL) lft.info;
                 ConveksHull c = ((DCEL) info).vor2CH();
                 c.merge((Point) rgt.info);
-                ((DCEL) info).setUpLft(c.getUpLft());
-                ((DCEL) info).setUpRgt(c.getUpRgt());
-                ((DCEL) info).setDownLft(c.getDownLft());
-                ((DCEL) info).setDownRgt(c.getDownRgt());
+                PointPair pp = c.getUpSupport();
+                if (pp == null) {
+                    throw new Exception("3 points on a line ");
+                }
+                ((DCEL) info).setUpLft(pp.getLft()); ((DCEL) info).setUpRgt(pp.getRgt());
+                pp = c.getDownSupport();
+                ((DCEL) info).setDownLft(pp.getLft()); ((DCEL) info).setDownRgt(pp.getRgt());
                 info = ((DCEL) info).merge((Point) rgt.info);
             } catch (Exception e) {
-                e.printStackTrace();
-                System.exit(-1);
+                throw new RuntimeException(e.getMessage());
             }
         } else {
             try {
@@ -58,14 +62,16 @@ public class VoronoiTree extends IntervalTree {
                 ConveksHull d = ((DCEL) rgt.info).vor2CH();
                 c.merge(d);
                 info = (DCEL) lft.info;
-                ((DCEL) info).setUpLft(c.getUpLft());
-                ((DCEL) info).setUpRgt(c.getUpRgt());
-                ((DCEL) info).setDownLft(c.getDownLft());
-                ((DCEL) info).setDownRgt(c.getDownRgt());
+                PointPair pp = c.getUpSupport();
+                if (pp == null) {
+                    throw new Exception("3 points on a line ");
+                }
+                ((DCEL) info).setUpLft(pp.getLft()); ((DCEL) info).setUpRgt(pp.getRgt());
+                pp = c.getDownSupport();
+                ((DCEL) info).setDownLft(pp.getLft()); ((DCEL) info).setDownRgt(pp.getRgt());
                 info = ((DCEL) info).merge((DCEL) rgt.info);
             } catch (Exception e) {
-                e.printStackTrace();
-                System.exit(-1);
+                throw new RuntimeException(e.getMessage());
             }
         }
     }

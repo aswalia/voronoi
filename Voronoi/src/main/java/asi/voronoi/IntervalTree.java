@@ -189,8 +189,8 @@ public class IntervalTree implements java.io.Serializable, ModelObject {
 
     static class Test {
         public static void main(String[] argv) throws IOException {
-            int n = Integer.parseInt(argv[0]);
-            Point p = new Point((int) (Math.random() * n), (int) (Math.random() * n));
+//            int n = Integer.parseInt(argv[0]);
+/*            Point p = new Point((int) (Math.random() * n), (int) (Math.random() * n));
             AVLTree b = new AVLTree(p);
             for (int i = 0; i < n; i++) {
                 p = new Point((int) (Math.random() * n), (int) (Math.random() * n));
@@ -198,13 +198,31 @@ public class IntervalTree implements java.io.Serializable, ModelObject {
             }
             IntervalTree t = new IntervalTree();
             t.buildTree(b);
-            if (argv.length == 1) {
+*/
+            AVLTree b = new AVLTree(new Point(0,5));
+            b = (AVLTree) b.insertNode(new Point(1,0));
+            b = (AVLTree) b.insertNode(new Point(2,4));
+            b = (AVLTree) b.insertNode(new Point(2,7));
+            b = (AVLTree) b.insertNode(new Point(5,0));
+            b = (AVLTree) b.insertNode(new Point(5,4));
+            b = (AVLTree) b.insertNode(new Point(6,7));
+            b = (AVLTree) b.insertNode(new Point(7,3));
+            
+            System.out.println("AVLTree: \n" + b);
+            
+            IntervalTree iT = new IntervalTree();
+            iT.buildTree(b);
+
+/*            if (argv.length == 1) {
                 // default output to screen
-                System.out.println(t);
+                System.out.println(iT);
             } else {
-                t.writeTree(argv[1]);
+                iT.writeTree(argv[1]);
             }
-            System.out.println("maxX: " + t.maxX() + " maxY: " + t.maxY() + " minX: " + t.minX() + " minY: " + t.minY());
+*/            
+            iT.writeTree(argv[0]);
+            System.out.println("maxX: " + iT.maxX() + " maxY: " + iT.maxY() + " minX: " + iT.minX() + " minY: " + iT.minY());
+
         }
     }
 }
