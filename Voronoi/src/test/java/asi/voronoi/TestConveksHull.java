@@ -133,6 +133,49 @@ public class TestConveksHull {
     }
     
     @Test
+    public void testMerge_ConveksHull_Line() {
+        // subCH make a line with CH - horizontal
+        ConveksHull ch1 = new ConveksHull(new Point(0,4),new Point(1,4));
+        ConveksHull ch2 = new ConveksHull(new Point(2,4),new Point(5,4));
+        assertTrue(ch1.getLft().equals(new Point(0,4)));
+        assertTrue(ch1.getRgt().equals(new Point(1,4)));
+        assertTrue(ch2.getLft().equals(new Point(2,4)));
+        assertTrue(ch2.getRgt().equals(new Point(5,4)));
+        ch1.merge(ch2);
+        assertTrue(ch1.getLft().equals(new Point(0,4)));
+        assertTrue(ch1.getRgt().equals(new Point(5,4)));
+        String act = ch1.toString();
+        String exp = "(0.0,4.0)(5.0,4.0)(2.0,4.0)(1.0,4.0)";
+        assertTrue(act.contains(new StringBuffer(exp)));        
+        // subCH make a line with CH - vertical
+        ch1 = new ConveksHull(new Point(5,7),new Point(5,10));
+        ch2 = new ConveksHull(new Point(5,0),new Point(5,4));
+        assertTrue(ch1.getLft().equals(new Point(5,7)));
+        assertTrue(ch1.getRgt().equals(new Point(5,10)));
+        assertTrue(ch2.getLft().equals(new Point(5,0)));
+        assertTrue(ch2.getRgt().equals(new Point(5,4)));
+        ch1.merge(ch2);
+        assertTrue(ch1.getLft().equals(new Point(5,0)));
+        assertTrue(ch1.getRgt().equals(new Point(5,10)));
+        act = ch1.toString();
+        exp = "(5.0,0.0)(5.0,10.0)(5.0,7.0)(5.0,4.0)";
+        assertTrue(act.contains(new StringBuffer(exp)));        
+        // subCH make a line with CH - line with an angle
+        ch1 = new ConveksHull(new Point(0,10),new Point(2,7));
+        ch2 = new ConveksHull(new Point(4,4),new Point(6,1));
+        assertTrue(ch1.getLft().equals(new Point(0,10)));
+        assertTrue(ch1.getRgt().equals(new Point(2,7)));
+        assertTrue(ch2.getLft().equals(new Point(4,4)));
+        assertTrue(ch2.getRgt().equals(new Point(6,1)));
+        ch2.merge(ch1);
+        assertTrue(ch2.getLft().equals(new Point(0,10)));
+        assertTrue(ch2.getRgt().equals(new Point(6,1)));
+        act = ch2.toString();
+        exp = "(0.0,10.0)(6.0,1.0)(4.0,4.0)(2.0,7.0)";
+        assertTrue(act.contains(new StringBuffer(exp)));        
+    }
+    
+    @Test
     public void testMerge_ConveksHull() {
         // subCH is to the right
         c1.merge(c2);

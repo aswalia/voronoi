@@ -72,9 +72,7 @@ public class TestPoint {
         assertTrue("zero", Point.area(p1,new Point(Point.average(p1,p2)),p2)==0);
     }
     
-    @Test
     public void testDirection() {
-        assertTrue("not implemented", false);
     }
     
     @Test

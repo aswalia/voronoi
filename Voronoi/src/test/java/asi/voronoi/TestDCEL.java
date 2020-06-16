@@ -41,19 +41,13 @@ public class TestDCEL {
     @Test
     public void testVor2CH() throws Exception {
         ConveksHull ch1 = d1.vor2CH();
-        System.out.println(ch1);
         ConveksHull ch2 = d2.vor2CH();
-        System.out.println(ch2);
         d2.merge(d1);
         ConveksHull ch12 = d2.vor2CH();
-        System.out.println(ch12);
         ConveksHull ch3 = d3.vor2CH();
-        System.out.println(ch3);
         ConveksHull ch4 = d4.vor2CH();
-        System.out.println(ch4);
         d3.merge(d4);
         ConveksHull ch34 = d3.vor2CH();
-        System.out.println(ch34);
     }
 
     @Test
@@ -190,7 +184,6 @@ public class TestDCEL {
         String exp14 = "lft and rgt: (2.0,4.0) (5.0,0.0)";
         String exp15 = "lft and rgt: (1.0,0.0) (5.0,0.0)";
         actual = d2.toString();
-        System.out.println(d2);
         assertTrue("contains (0.0,5.0) (2.0,7.0)",actual.contains(new StringBuffer(exp1)));
         assertTrue("contains (2.0,4.0) (2.0,7.0)",actual.contains(new StringBuffer(exp4)));
         assertTrue("contains (0.0,5.0) (2.0,4.0)",actual.contains(new StringBuffer(exp5)));

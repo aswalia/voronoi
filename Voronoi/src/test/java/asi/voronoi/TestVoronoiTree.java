@@ -71,8 +71,8 @@ public class TestVoronoiTree {
             c.buildStructure();
             fail("Exception expected");
         } catch(Exception e) {
-            String expected = "3 points on a line";
-            assertTrue("Contains "+expected,e.getMessage().contains(new StringBuffer(expected)));
+            String expected = "4 points on a line";
+            assertTrue("Contains "+e.getMessage(),e.getMessage().contains(new StringBuffer(expected)));
         }
     }
  

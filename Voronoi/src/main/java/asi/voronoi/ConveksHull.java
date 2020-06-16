@@ -157,7 +157,16 @@ public class ConveksHull implements Constant, java.io.Serializable, ModelObject 
         }
         setUpSupport(upLft, upRgt);
         setDownSupport(downLft, downRgt);
-        head.mergeList(upLft, upRgt, downLft, downRgt, subCH.head);    
+        if (upLft.equals(downLft) && upRgt.equals(downRgt)) {
+            // CH and subCH on a line
+            if (head.get(0).isLess(subCH.head.get(0))) {
+                head.mergeLinearCH(true, subCH.head);
+            } else {
+                head.mergeLinearCH(false, subCH.head);                
+            }
+        } else {
+            head.mergeList(upLft, upRgt, downLft, downRgt, subCH.head);            
+        }
         setPerimeter(subCH.lft);
         setPerimeter(subCH.rgt);
         setPerimeter(subCH.up);

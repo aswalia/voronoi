@@ -175,21 +175,6 @@ public class DCEL implements Constant, java.io.Serializable {
         downRgt = p;
     }
     
-    private boolean pointInList(Point p, LinkedList<Point> pl) {
-        boolean ret;
-        // assume list always contains one or more elements
-        int index = 0;
-        while ((index < pl.size()) && !pl.get(index).equals(p)) {
-            index++;
-        }
-        if (index == pl.size()) {
-            ret = false;
-        } else {
-            ret = true;
-        }
-        return ret;
-    }
-
     private Point otherPoint(Point p) {
         Point ret;
         if (node.f_l.equals(p)) {

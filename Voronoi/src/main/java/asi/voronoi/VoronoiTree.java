@@ -33,6 +33,10 @@ public class VoronoiTree extends IntervalTree {
                 ((DCEL) info).setUpLft(pp.getLft()); ((DCEL) info).setUpRgt(pp.getRgt());
                 pp = c.getDownSupport();
                 ((DCEL) info).setDownLft(pp.getLft()); ((DCEL) info).setDownRgt(pp.getRgt());
+                if (((DCEL)info).upLft.equals(((DCEL)info).downLft) &&
+                    ((DCEL)info).upRgt.equals(((DCEL)info).downRgt)) {
+                    throw new Exception("4 points on a line ");                    
+                } 
                 info = ((DCEL) info).merge((Point) lft.info);
             } catch (Exception e) {
                 throw new RuntimeException(e.getMessage());
@@ -50,6 +54,10 @@ public class VoronoiTree extends IntervalTree {
                 ((DCEL) info).setUpLft(pp.getLft()); ((DCEL) info).setUpRgt(pp.getRgt());
                 pp = c.getDownSupport();
                 ((DCEL) info).setDownLft(pp.getLft()); ((DCEL) info).setDownRgt(pp.getRgt());
+                if (((DCEL)info).upLft.equals(((DCEL)info).downLft) &&
+                    ((DCEL)info).upRgt.equals(((DCEL)info).downRgt)) {
+                    throw new Exception("4 points on a line ");                    
+                } 
                 info = ((DCEL) info).merge((Point) rgt.info);
             } catch (Exception e) {
                 throw new RuntimeException(e.getMessage());
@@ -69,6 +77,10 @@ public class VoronoiTree extends IntervalTree {
                 ((DCEL) info).setUpLft(pp.getLft()); ((DCEL) info).setUpRgt(pp.getRgt());
                 pp = c.getDownSupport();
                 ((DCEL) info).setDownLft(pp.getLft()); ((DCEL) info).setDownRgt(pp.getRgt());
+                if (((DCEL)info).upLft.equals(((DCEL)info).downLft) &&
+                    ((DCEL)info).upRgt.equals(((DCEL)info).downRgt)) {
+                    throw new Exception("4 points on a line ");                    
+                } 
                 info = ((DCEL) info).merge((DCEL) rgt.info);
             } catch (Exception e) {
                 throw new RuntimeException(e.getMessage());

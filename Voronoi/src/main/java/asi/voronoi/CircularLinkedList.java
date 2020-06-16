@@ -138,6 +138,25 @@ public class CircularLinkedList {
         } while (!h.equals(head));
         return ret;
     }
+    
+    public void mergeLinearCH(boolean subCHRgt, CircularLinkedList subList) {
+        Node chLast = head.next;
+        Node subListLast = subList.head.next;
+        if (subCHRgt) // sublist to the right of this
+        {
+            head.next = subListLast;
+            subListLast.prev = head;
+            subList.head.next = chLast;
+            chLast.prev = subList.head;
+        } else { // sublist to the left of this
+            subList.head.next = chLast;
+            chLast.prev = subList.head;
+            subListLast.prev = head;
+            head.next = subListLast;
+            // set head
+            head = subList.head;
+        }        
+    }
 
     public void mergeList(Point upLft, Point upRgt, Point downLft, Point downRgt, CircularLinkedList subList) {
         int tmpUpLft, tmpUpRgt, tmpDownLft, tmpDownRgt;
