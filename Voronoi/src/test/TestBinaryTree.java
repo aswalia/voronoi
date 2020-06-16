@@ -2,25 +2,12 @@
 
 package asi.voronoi;
 
-import asi.voronoi.BinaryTree;
-import junit.framework.*;
-import junitx.framework.*;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 
-import asi.voronoi.Point;
-/**
- * @stereotype test 
- * @testedclass asi.voronoi.BinaryTree
- * @stereotype tested
- * @testcase asi.voronoi.test.test.TestTestBinaryTree
- */
-public class TestBinaryTree extends PrivateTestCase {
-    /**
-     * constructor.
-     * @param    aName     a test name
-     */
-    public TestBinaryTree(String aName) {
-        super(aName);
-    }    /** tests the method asi.voronoi.BinaryTree.newNode() */
+
+public class TestBinaryTree {
+    @Test
     public void testNewNode() {
         System.out.println("The \"testNewNode\" is started");
         BinaryTree b = new BinaryTree(new Point(1,2));
@@ -28,6 +15,8 @@ public class TestBinaryTree extends PrivateTestCase {
         assertTrue("new node", c.getP().equals(new Point(2,1)) && (c.lft() == null) && (c.rgt() == null));
         System.out.println("The \"testNewNode\" is finished");
     }    /** tests the method asi.voronoi.BinaryTree.isLeaf() */
+    
+    @Test
     public void testIsLeaf() {
         System.out.println("The \"testIsLeaf\" is started");
         BinaryTree b = new BinaryTree(new Point(2,3));
@@ -36,12 +25,16 @@ public class TestBinaryTree extends PrivateTestCase {
         assertTrue("not isLeaf", !b.isLeaf());
         System.out.println("The \"testIsLeaf\" is finished");
     }    /** tests the method asi.voronoi.BinaryTree.getP() */
+    
+    @Test
     public void testGetP() {
         System.out.println("The \"testGetP\" is started");
         BinaryTree b = new BinaryTree(new Point(2,3));
         assertTrue("getP", b.getP().equals(new Point(2,3)));
         System.out.println("The \"testGetP\" is finished");
     }    /** tests the method asi.voronoi.BinaryTree.lft() */
+    
+    @Test
     public void testLft() {
         System.out.println("The \"testLft\" is started");
         BinaryTree b = new BinaryTree(new Point(2,3));
@@ -50,6 +43,8 @@ public class TestBinaryTree extends PrivateTestCase {
         assertTrue("lft = (1,3) and rgt() null", b.lft().getP().equals(new Point(1,3)) && (b.rgt()==null));
         System.out.println("The \"testLft\" is finished");
     }    /** tests the method asi.voronoi.BinaryTree.rgt() */
+    
+    @Test
     public void testRgt() {
         System.out.println("The \"testRgt\" is started");
         BinaryTree b = new BinaryTree(new Point(2,3));
@@ -58,6 +53,8 @@ public class TestBinaryTree extends PrivateTestCase {
         assertTrue("rgt = (3,3) and lft() null", b.rgt().getP().equals(new Point(3,3)) && (b.lft()==null));
         System.out.println("The \"testRgt\" is finished");
     }    /** tests the method asi.voronoi.BinaryTree.inTree() */
+    
+    @Test
     public void testInTree() {
         System.out.println("The \"testInTree\" is started");
         BinaryTree b = new BinaryTree(new Point(3,4));
@@ -68,6 +65,8 @@ public class TestBinaryTree extends PrivateTestCase {
         assertTrue("cannot find non existent leave", !b.inTree(new Point(5,4)));
         System.out.println("The \"testInTree\" is finished");
     }    /** tests the method asi.voronoi.BinaryTree.insertNode() */
+    
+    @Test
     public void testInsertNode() {
         System.out.println("The \"testInsertNode\" is started");
         BinaryTree b = new BinaryTree(new Point(3,4));
@@ -80,6 +79,8 @@ public class TestBinaryTree extends PrivateTestCase {
         assertTrue("insert existing point (no change)", b.count()==3);
         System.out.println("The \"testInsertNode\" is finished");
     }    /** tests the method asi.voronoi.BinaryTree.max() */
+    
+    @Test
     public void testMax() {
         System.out.println("The \"testMax\" is started");
         BinaryTree b = new BinaryTree(new Point(3,4));
@@ -94,6 +95,8 @@ public class TestBinaryTree extends PrivateTestCase {
         assertTrue("insert lft same max", b.max().equals(new Point(6,4)));
         System.out.println("The \"testMax\" is finished");
     }    /** tests the method asi.voronoi.BinaryTree.min() */
+    
+    @Test
     public void testMin() {
         System.out.println("The \"testMin\" is started");
         BinaryTree b = new BinaryTree(new Point(3,4));
@@ -108,6 +111,8 @@ public class TestBinaryTree extends PrivateTestCase {
         assertTrue("insert lft new min", b.min().equals(new Point(1,4)));
         System.out.println("The \"testMin\" is finished");
     }    /** tests the method asi.voronoi.BinaryTree.minY() */
+    
+    @Test
     public void testMinY() {
         System.out.println("The \"testMinY\" is started");
         BinaryTree b = new BinaryTree(new Point(3,4));
@@ -122,6 +127,8 @@ public class TestBinaryTree extends PrivateTestCase {
         assertTrue("new min", b.minY()==1);
         System.out.println("The \"testMinY\" is finished");
     }    /** tests the method asi.voronoi.BinaryTree.maxY() */
+    
+    @Test
     public void testMaxY() {
         System.out.println("The \"testMaxY\" is started");
         BinaryTree b = new BinaryTree(new Point(3,4));
@@ -136,6 +143,8 @@ public class TestBinaryTree extends PrivateTestCase {
         assertTrue("same max", b.maxY()==6);
         System.out.println("The \"testMaxY\" is finished");
     }    /** tests the method asi.voronoi.BinaryTree.minX() */
+    
+    @Test
     public void testMinX() {
         System.out.println("The \"testMinX\" is started");
         BinaryTree b = new BinaryTree(new Point(3,4));
@@ -150,6 +159,8 @@ public class TestBinaryTree extends PrivateTestCase {
         assertTrue("insert lft new min", b.minX()==1);
         System.out.println("The \"testMinX\" is finished");
     }    /** tests the method asi.voronoi.BinaryTree.maxX() */
+    
+    @Test
     public void testMaxX() {
         System.out.println("The \"testMaxX\" is started");
         BinaryTree b = new BinaryTree(new Point(3,4));
@@ -164,22 +175,26 @@ public class TestBinaryTree extends PrivateTestCase {
         assertTrue("insert lft same max", b.maxX()==6);
         System.out.println("The \"testMaxX\" is finished");
     }    /** tests the method asi.voronoi.BinaryTree.toString() */
+    
+    @Test
     public void testToString() {
         System.out.println("The \"testToString\" is started");
         BinaryTree b = new BinaryTree(new Point(3,4));
-        assertTrue("only root", b.toString().equals(new String("[(3.0,4.0)]\n")));
+        assertTrue("only root", b.toString().equals("[(3.0,4.0)]\n"));
         b.insertNode(new Point(4,4));
-        assertTrue("insert 1",  b.toString().equals(new String("(3.0,4.0)\n"+"N "+"[(4.0,4.0)]\n")));
+        assertTrue("insert 1",  b.toString().equals(("(3.0,4.0)\n"+"N "+"[(4.0,4.0)]\n")));
         b.insertNode(new Point(2,4));
-        assertTrue("insert 2", b.toString().equals(new String("(3.0,4.0)\n"+"[(2.0,4.0)] "+"[(4.0,4.0)]\n")));
+        assertTrue("insert 2", b.toString().equals(("(3.0,4.0)\n"+"[(2.0,4.0)] "+"[(4.0,4.0)]\n")));
         b.insertNode(new Point(6,4));
-        assertTrue("insert 3", b.toString().equals(new String("(3.0,4.0)\n"+"[(2.0,4.0)] "+"(4.0,4.0)\n"+"N "+"[(6.0,4.0)]\n")));
+        assertTrue("insert 3", b.toString().equals(("(3.0,4.0)\n"+"[(2.0,4.0)] "+"(4.0,4.0)\n"+"N "+"[(6.0,4.0)]\n")));
         b.insertNode(new Point(5,4));
-        assertTrue("insert 4", b.toString().equals(new String("(3.0,4.0)\n"+"[(2.0,4.0)] "+"(4.0,4.0)\n"+"N "+"(6.0,4.0)\n"+"[(5.0,4.0)] "+"N\n")));
+        assertTrue("insert 4", b.toString().equals(("(3.0,4.0)\n"+"[(2.0,4.0)] "+"(4.0,4.0)\n"+"N "+"(6.0,4.0)\n"+"[(5.0,4.0)] "+"N\n")));
         b.insertNode(new Point(1,1));
-        assertTrue(b.toString(), b.toString().equals(new String("(3.0,4.0)\n"+"(2.0,4.0) "+"(4.0,4.0)\n"+"[(1.0,1.0)] N N "+"(6.0,4.0)\n"+"[(5.0,4.0)] "+"N\n")));
+        assertTrue(b.toString(), b.toString().equals(("(3.0,4.0)\n"+"(2.0,4.0) "+"(4.0,4.0)\n"+"[(1.0,1.0)] N N "+"(6.0,4.0)\n"+"[(5.0,4.0)] "+"N\n")));
         System.out.println("The \"testToString\" is finished");
     }    /** tests the method asi.voronoi.BinaryTree.count() */
+    
+    @Test
     public void testCount() {
         System.out.println("The \"testCount\" is started");
         BinaryTree b = new BinaryTree(new Point(3,4));
@@ -193,13 +208,5 @@ public class TestBinaryTree extends PrivateTestCase {
         b.insertNode(new Point(5,4));
         assertTrue("insert 4", b.count()==5);
         System.out.println("The \"testCount\" is finished");
-    }/**
- * @link
- * @shapeType PatternLink
- * @pattern <{TestCase}>
- * @clientRole tests
- * @supplierRole tested
- * @hidden 
- */
-/*# private BinaryTree _binaryTree; */
-}
+    }
+ }

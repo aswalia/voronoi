@@ -2,89 +2,62 @@
 
 package asi.voronoi;
 
-import asi.voronoi.IntervalTree;
-import junit.framework.*;
-import junitx.framework.*;
+import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 
-/**
- * @stereotype test 
- * @testedclass asi.voronoi.IntervalTree
- */
-public class TestIntervalTree extends PrivateTestCase {
-    /**
-     * constructor.
-     * @param    aName     a test name
-     */
-    public TestIntervalTree(String aName) {
-        super(aName);
-    }    /** tests the method asi.voronoi.IntervalTree.buildTreeFromFile() */
-    public void testBuildTreeFromFile() throws TestAccessException {
-        System.out.println("The \"testBuildTreeFromFile\" is started");
-        Object obj = newInstance("asi.voronoi.IntervalTree", null);
-		asi.voronoi.IntervalTree ITObj = (asi.voronoi.IntervalTree)obj;
-        assertTrue("not implemented", false);
-        System.out.println("The \"testBuildTreeFromFile\" is finished");
-    }    /** tests the method asi.voronoi.IntervalTree.newNode() */
+public class TestIntervalTree {
+    @Test
     public void testNewNode() {
-        System.out.println("The \"testNewNode\" is started");
         assertTrue("not implemented", false);
-        System.out.println("The \"testNewNode\" is finished");
     }    /** tests the method asi.voronoi.IntervalTree.isLeaf() */
+    
+    @Test
     public void testIsLeaf() {
-        System.out.println("The \"testIsLeaf\" is started");
         assertTrue("not implemented", false);
-        System.out.println("The \"testIsLeaf\" is finished");
     }    /** tests the method asi.voronoi.IntervalTree.buildTree() */
+    
+    @Test
     public void testBuildTree() {
-        System.out.println("The \"testBuildTree\" is started");
         assertTrue("not implemented", false);
-        System.out.println("The \"testBuildTree\" is finished");
     }    /** tests the method asi.voronoi.IntervalTree.getInfo() */
+    
+    @Test
     public void testGetInfo() {
-        System.out.println("The \"testGetInfo\" is started");
         assertTrue("not implemented", false);
-        System.out.println("The \"testGetInfo\" is finished");
     }    /** tests the method asi.voronoi.IntervalTree.lft() */
+    
+    @Test
     public void testLft() {
-        System.out.println("The \"testLft\" is started");
         assertTrue("not implemented", false);
-        System.out.println("The \"testLft\" is finished");
     }    /** tests the method asi.voronoi.IntervalTree.rgt() */
+    
+    @Test
     public void testRgt() {
-        System.out.println("The \"testRgt\" is started");
         assertTrue("not implemented", false);
-        System.out.println("The \"testRgt\" is finished");
     }    /** tests the method asi.voronoi.IntervalTree.maxX() */
+    
+    @Test
     public void testMaxX() {
-        System.out.println("The \"testMaxX\" is started");
         assertTrue("not implemented", false);
-        System.out.println("The \"testMaxX\" is finished");
     }    /** tests the method asi.voronoi.IntervalTree.maxY() */
+    
+    @Test
     public void testMaxY() {
-        System.out.println("The \"testMaxY\" is started");
         assertTrue("not implemented", false);
-        System.out.println("The \"testMaxY\" is finished");
     }    /** tests the method asi.voronoi.IntervalTree.minX() */
+    
+    @Test
     public void testMinX() {
-        System.out.println("The \"testMinX\" is started");
         assertTrue("not implemented", false);
-        System.out.println("The \"testMinX\" is finished");
     }    /** tests the method asi.voronoi.IntervalTree.minY() */
+    
+    @Test
     public void testMinY() {
-        System.out.println("The \"testMinY\" is started");
         assertTrue("not implemented", false);
-        System.out.println("The \"testMinY\" is finished");
     }    /** tests the method asi.voronoi.IntervalTree.toString() */
+    
+    @Test
     public void testToString() {
-        System.out.println("The \"testToString\" is started");
         assertTrue("not implemented", false);
-        System.out.println("The \"testToString\" is finished");
-    }/**
- * @link
- * @shapeType PatternLink
- * @pattern <{TestCase}>
- * @clientRole tests
- * @supplierRole tested
- * @hidden 
- */
-/*# private IntervalTree _intervalTree; */}
+    }
+ }
