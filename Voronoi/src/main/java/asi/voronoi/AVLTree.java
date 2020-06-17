@@ -112,15 +112,4 @@ public class AVLTree extends BinaryTree {
         }
         return self;
     }
-
-    static class Test {
-        public static void main(String[] argv) {
-            AVLTree t = new AVLTree(new Point(0, 0));
-            t = (AVLTree) t.insertNode(new Point(0, 2));
-            t = (AVLTree) t.insertNode(new Point(1, 1));
-            t = (AVLTree) t.insertNode(new Point(2, 2));
-            t = (AVLTree) t.insertNode(new Point(2, 0));
-            System.out.println(t);
-        }
-    }
 }

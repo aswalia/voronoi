@@ -40,31 +40,4 @@ public class DrawVoronoi extends DrawObject {
             drawLine(g,dn.drawEdge());
         }
     }
-
-    static class Test {
-        public static void main(String[] argv) throws Exception {
-            String fileName = "";
-            BinaryTree t = null;
-            try {
-                int n = Integer.parseInt(argv[0]);
-                Point p = new Point((int) (Math.random() * 100 + 10), (int) (Math.random() * 100 + 10));
-                t = new BinaryTree(p);
-                for (int i = 0; i < n; i++) {
-                    p = new Point((int) (Math.random() * 100 + 10), (int) (Math.random() * 100 + 10));
-                    t = t.insertNode(p);
-                }
-            } catch(NumberFormatException e) {
-                fileName = argv[0];
-            }
-            VoronoiTree vt = new VoronoiTree();
-            if (!fileName.equals("")) {
-                vt.buildTree(fileName);
-            } else {
-                vt.buildTree(t);
-            }
-            vt.buildStructure();
-            DrawObject dv = new DrawVoronoi(vt);
-            DrawingBoard drawingBoard = new DrawingBoard(dv);
-        }
-    }
 }

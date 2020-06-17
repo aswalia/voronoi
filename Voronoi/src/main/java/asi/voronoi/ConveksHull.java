@@ -340,42 +340,4 @@ public class ConveksHull implements Constant, java.io.Serializable, ModelObject 
         } while (!done);
         return head.get(i);
     }
-
-    static class Test {
-        public static void main(String args[]) {
-            /*
-             * ConveksHull t = new ConveksHull(new Point(-1,0),new Point(-1,2)); ConveksHull s = new ConveksHull(new Point(2,0),new Point(2,2)); System.out.println(t.head); System.out.println(s.head);
-             * s.mergePoint(new Point(1,1)); System.out.println(s.head); s.mergePoint(new Point(0,1)); System.out.println(s.head); s.mergePoint(new Point(3,1)); System.out.println(s.head);
-             * s.mergeConveksHull(t); System.out.println(s.head); System.out.println("Points: "+s.lft+s.rgt+s.up+s.down);
-             *
-             * ConveksHull a = new ConveksHull(new Point(0,4),new Point(1,0)); ConveksHull b = new ConveksHull(new Point(4,2),new Point(8,4)); ConveksHull c = new ConveksHull(new Point(11,0),new
-             * Point(12,5)); ConveksHull d = new ConveksHull(new Point(15,2),new Point(19,4));
-             *
-             * a.mergeConveksHull(b); System.out.println("a: "+a.head); c.mergeConveksHull(d); System.out.println("c: "+c.head);
-             *
-             * a.mergeConveksHull(c); System.out.println("a: "+a.head);
-             */
-
-            ConveksHull a = new ConveksHull(new Point(0, 6), new Point(1, 0));
-            System.out.println("a: \n" + a);
-            ConveksHull b = new ConveksHull(new Point(4, 1), new Point(4, 6));
-            b.merge(new Point(6, 4));
-            System.out.println("b: \n" + b);
-            ConveksHull c = new ConveksHull(new Point(7, 5), new Point(8, 2));
-            c.merge(new Point(8, 7));
-            System.out.println("c: \n" + c);
-            ConveksHull d = new ConveksHull(new Point(11, 9), new Point(13, 1));
-            System.out.println("d: \n" + d);
-            a.merge(b);
-            System.out.println("a merge b: \n" + a);
-            d.merge(c);
-            System.out.println("d merge c: \n" + d);
-            d.merge(a);
-            System.out.println("d merge a: \n" + d);
-            System.out.println("maxX: " + d.maxX());
-            System.out.println("minX: " + d.minX());
-            System.out.println("maxY: " + d.maxY());
-            System.out.println("minY: " + d.minY());
-        }
-    }
 }

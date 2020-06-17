@@ -185,18 +185,4 @@ public class BinaryTree implements java.io.Serializable, ModelObject {
     public static BinaryTree fetch(String filename) throws java.io.IOException, ClassNotFoundException {
         return (BinaryTree) Serializer.fetch(filename);
     }
-
-    static class Test {
-        public static void main(String[] argv) {
-            Point p = new Point((int) (Math.random() * 100), (int) (Math.random() * 100));
-            BinaryTree t = new BinaryTree(p);
-            for (int i = 0; i < Integer.parseInt(argv[0]); i++) {
-                p = new Point((int) (Math.random() * 100), (int) (Math.random() * 100));
-                t = t.insertNode(p);
-            }
-            System.out.println(t);
-            System.out.println("#items: " + t.count() + " max: " + t.max() + " min: " + t.min());
-            System.out.println("maxX: " + t.maxX() + " maxY: " + t.maxY() + " minX: " + t.minX() + " minY: " + t.minY());
-        }
-    }
 }

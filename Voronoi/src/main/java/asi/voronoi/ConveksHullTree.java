@@ -30,13 +30,4 @@ public class ConveksHullTree extends IntervalTree {
             ((ConveksHull) info).merge(new ConveksHull((ConveksHull) rgt.info));
         }
     }
-
-    static class Test {
-        public static void main(String[] argv) throws java.io.IOException {
-            ConveksHullTree v = new ConveksHullTree();
-            v.buildTree(argv[0]);
-            v.buildStructure();
-            System.out.println(v);
-        }
-    }
 }

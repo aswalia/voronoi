@@ -39,18 +39,4 @@ public class DrawBinaryTree extends DrawObject {
 //            g2.drawString(p.toString(), (int) p.x(), (int) p.y());
         }
     }
-
-    static class Test {
-        public static void main(String[] argv) {
-            Point p = new Point((int) (Math.random() * 100), (int) (Math.random() * 100));
-            BinaryTree t = new BinaryTree(p);
-            for (int i = 0; i < Integer.parseInt(argv[0]); i++) {
-                p = new Point((int) (Math.random() * 100), (int) (Math.random() * 100));
-                t = t.insertNode(p);
-            }
-            DrawBinaryTree dbt = new DrawBinaryTree(t);
-            DrawingBoard db = new DrawingBoard(dbt);
-            db.setGeometry(true);
-        }
-    }
 }

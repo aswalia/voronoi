@@ -40,20 +40,4 @@ public class DrawIntervalTree extends DrawObject {
             drawPoint(g,p);
         }
     }
-
-    static class Test {
-        public static void main(String[] argv) {
-            Point p = new Point((int) (Math.random() * 100), (int) (Math.random() * 100));
-            AVLTree t = new AVLTree(p);
-            for (int i = 0; i < Integer.parseInt(argv[0]); i++) {
-                p = new Point((int) (Math.random() * 100), (int) (Math.random() * 100));
-                t = (AVLTree) t.insertNode(p);
-            }
-            IntervalTree it = new IntervalTree();
-            it.buildTree(t);
-            DrawIntervalTree dbt = new DrawIntervalTree(it);
-            DrawingBoard db = new DrawingBoard(dbt);
-            db.setGeometry(true);
-        }
-    }
 }
