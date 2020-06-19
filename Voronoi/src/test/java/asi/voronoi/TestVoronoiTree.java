@@ -5,6 +5,9 @@
  */
 package asi.voronoi;
 
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.Test;
@@ -77,6 +80,34 @@ public class TestVoronoiTree {
     }
  
     @Test
+    public void testBuildStructure_4_In_Line() {
+        // subCH make a line with CH - vertical
+        BinaryTree b = new BinaryTree(new Point(5,4)); b.insertNode(new Point(5,0));
+        b.insertNode(new Point(5,7)); b.insertNode(new Point(5,10));
+        IntervalTree c = new VoronoiTree();
+        c.buildTree(b);
+        try {
+            c.buildStructure();
+            fail("Exception expected");
+        } catch(Exception e) {
+            String expected = "4 points on a line";
+            assertTrue("Contains "+e.getMessage(),e.getMessage().contains(new StringBuffer(expected)));
+        }
+        // subCH make a line with CH - line with an angle
+        b = new BinaryTree(new Point(2,7)); b.insertNode(new Point(0,10));
+        b.insertNode(new Point(4,4)); b.insertNode(new Point(6,1));
+        c = new VoronoiTree();
+        c.buildTree(b);
+        try {
+            c.buildStructure();
+            fail("Exception expected");
+        } catch(Exception e) {
+            String expected = "4 points on a line";
+            assertTrue("Contains "+e.getMessage(),e.getMessage().contains(new StringBuffer(expected)));
+        }
+    }
+    
+    @Test
     public void testBuildStructure_complete() {
         // lft and rgt CH are multiple points
         BinaryTree b = new BinaryTree(new Point(5,0));
@@ -118,5 +149,17 @@ public class TestVoronoiTree {
         assertTrue("Expected: "+expected+" actual: "+actual,actual.contains(new StringBuffer(expected)));
         expected = "(2.0,7.0) (5.0,4.0)";
         assertTrue("Expected: "+expected+" actual: "+actual,actual.contains(new StringBuffer(expected)));
+    }
+    
+    @Test
+    public void testBuildstructure_From_File() {
+            try {
+                IntervalTree c = new VoronoiTree();
+                c.buildTree("\\C:\\Users\\asi\\Documents\\Development\\Voronoi\\src\\test\\resources\\test2_1.out");
+                c.buildStructure();
+                System.out.println(c);
+        } catch (IOException ex) {
+            fail("unexpected exception: "+ex.getMessage());
+        }
     }
 }
