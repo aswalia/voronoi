@@ -21,17 +21,9 @@ public class IntervalTree implements java.io.Serializable, ModelObject {
 
     public void buildTree(String filename) throws IOException {
         FileReader fr;
-        String s, delim = " " + ":" + "(" + ")" + "," + "\t\n\r\f";
         fr = new FileReader(filename);
         br = new BufferedReader(fr);
-        s = br.readLine();
-        if (s != null) {
-            st = new StringTokenizer(s, delim);
-            iToken = st.nextToken();
-            if (iToken.equalsIgnoreCase("lft")) {
-                buildTreeFromFile();
-            }
-        }
+        buildTreeFromFile();
     }
 
     public Object getInfo() {
@@ -150,40 +142,78 @@ public class IntervalTree implements java.io.Serializable, ModelObject {
     @Override
     public String toString() {
         String ret = "";
-        if (isLeaf()) {
-            ret += "point:" + info + "\n";
+        if (lft.isLeaf() && rgt.isLeaf()) {
+            ret += "node-point:" + lft.info + " " + rgt.info + "\n"; 
+        } else if (lft.isLeaf()) {
+            ret += "lft-point:" + lft.info + "\n";
+            ret += rgt;
+        } else if (rgt.isLeaf()) {
+            ret += "rgt-point:" + rgt.info + "\n";
+            ret += lft;            
         } else {
-            ret += "lft:\n";
+            ret += "node\n";
             ret += lft;
             ret += rgt;
         }
         return ret;
     }
 
-    private void buildTreeFromFile() throws IOException {
-        String s, delim = " " + ":" + "(" + ")" + "," + "\t\n\r\f";
-        if (iToken.equalsIgnoreCase("lft")) {
-            lft = newNode();
-            rgt = newNode();
-            s = br.readLine();
-            if (s != null) {
-                st = new StringTokenizer(s, delim);
-                iToken = st.nextToken();
-                lft.buildTreeFromFile();
-                rgt.buildTreeFromFile();
-            }
-        } else { // assume leaf, ie. iToken is = "point"
-            double x, y;
-            iToken = st.nextToken(); // x-coordinat
-            x = Double.parseDouble(iToken);
-            iToken = st.nextToken(); // y-coordinat
-            y = Double.parseDouble(iToken);
-            info = new Point(x, y);
-            s = br.readLine();
-            if (s != null) {
-                st = new StringTokenizer(s, delim);
-                iToken = st.nextToken();
-            }
-        }
+    private void getNextToken() throws IOException  {
+        String s, delim = " " + ":" + "(" + ")" + "," + "\t\n\r\f";        
+        s = br.readLine();
+        if (s != null) {
+            st = new StringTokenizer(s, delim);
+            iToken = st.nextToken();
+        }        
+    }
+    
+    private IntervalTree parsePoint() {
+        IntervalTree node = newNode();
+        double x, y;
+        iToken = st.nextToken(); // x-coordinat
+        x = Double.parseDouble(iToken);
+        iToken = st.nextToken(); // y-coordinat
+        y = Double.parseDouble(iToken);
+        node.info = new Point(x, y);
+        return node;
+    }
+    
+    private void handleNode() throws IOException  {
+        lft = newNode();
+        rgt = newNode();
+        lft.buildTreeFromFile();
+        rgt.buildTreeFromFile();
+    }
+    
+    private void handleLftPoint() throws IOException {
+        lft = parsePoint();
+        rgt = newNode();
+        rgt.buildTreeFromFile();
+    }
+    
+    private void handleRgtPoint() throws IOException {
+        rgt = parsePoint();
+        lft = newNode();
+        lft.buildTreeFromFile();
+    }
+    
+    private void handleNodePoint() {
+        lft = parsePoint();
+        rgt = parsePoint();
+    }
+    
+    private void buildTreeFromFile() throws IOException {       
+        getNextToken();                
+        switch(iToken) {
+            case "node" : handleNode();
+                          break;
+            case "lft-point" : handleLftPoint();
+                               break;
+            case "rgt-point" : handleRgtPoint();
+                               break;
+            case "node-point" : handleNodePoint();
+                                break;
+            default : throw new RuntimeException("Invalid Tree description");
+        } 
     }
 }

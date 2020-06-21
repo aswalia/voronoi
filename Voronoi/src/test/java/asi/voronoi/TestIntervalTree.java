@@ -75,9 +75,9 @@ public class TestIntervalTree {
         b.insertNode(new Point(1,1));  
         b.insertNode(new Point(2,2));  
         i1.buildTree(b);
-        String expected = "lft:\n"+"lft:\n"+"lft:\n"+"point:(0.0,0.0)\n"+
-                          "point:(0.0,1.0)\n"+"point:(1.0,1.0)\n"+"lft:\n"+
-                          "point:(2.0,0.0)\n"+"point:(2.0,2.0)\n";
-        Assert.assertTrue("not implemented", i1.toString().equals(expected));
+        String expected = "node\n" + "rgt-point:(1.0,1.0)\n" +
+                          "node-point:(0.0,0.0) (0.0,1.0)\n" +
+                          "node-point:(2.0,0.0) (2.0,2.0)\n";
+        Assert.assertEquals(i1.toString(),(expected));
     }
 }
