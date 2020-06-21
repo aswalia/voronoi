@@ -167,51 +167,39 @@ public class IntervalTree implements java.io.Serializable, ModelObject {
         }        
     }
     
-    private void handleNode() throws IOException  {
-        lft = newNode();
-        rgt = newNode();
-        lft.buildTreeFromFile();
-        rgt.buildTreeFromFile();
-    }
-    
-    private void handleLftPoint() throws IOException {
-        lft = newNode();
+    private IntervalTree parsePoint() {
+        IntervalTree node = newNode();
         double x, y;
         iToken = st.nextToken(); // x-coordinat
         x = Double.parseDouble(iToken);
         iToken = st.nextToken(); // y-coordinat
         y = Double.parseDouble(iToken);
-        lft.info = new Point(x, y);
+        node.info = new Point(x, y);
+        return node;
+    }
+    
+    private void handleNode() throws IOException  {
+        lft = newNode();
+        lft.buildTreeFromFile();
+        rgt = newNode();
+        rgt.buildTreeFromFile();
+    }
+    
+    private void handleLftPoint() throws IOException {
+        lft = parsePoint();
         rgt = newNode();
         rgt.buildTreeFromFile();
     }
     
     private void handleRgtPoint() throws IOException {
-        rgt = newNode();
-        double x, y;
-        iToken = st.nextToken(); // x-coordinat
-        x = Double.parseDouble(iToken);
-        iToken = st.nextToken(); // y-coordinat
-        y = Double.parseDouble(iToken);
-        rgt.info = new Point(x, y);
+        rgt = parsePoint();
         lft = newNode();
         lft.buildTreeFromFile();
     }
     
     private void handleNodePoint() {
-        lft = newNode();
-        double x, y;
-        iToken = st.nextToken(); // x-coordinat
-        x = Double.parseDouble(iToken);
-        iToken = st.nextToken(); // y-coordinat
-        y = Double.parseDouble(iToken);
-        lft.info = new Point(x, y);
-        rgt = newNode();
-        iToken = st.nextToken(); // x-coordinat
-        x = Double.parseDouble(iToken);
-        iToken = st.nextToken(); // y-coordinat
-        y = Double.parseDouble(iToken);
-        rgt.info = new Point(x, y);
+        lft = parsePoint();
+        rgt = parsePoint();
     }
     
     private void buildTreeFromFile() throws IOException {       
