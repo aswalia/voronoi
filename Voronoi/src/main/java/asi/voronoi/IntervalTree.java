@@ -180,8 +180,8 @@ public class IntervalTree implements java.io.Serializable, ModelObject {
     
     private void handleNode() throws IOException  {
         lft = newNode();
-        lft.buildTreeFromFile();
         rgt = newNode();
+        lft.buildTreeFromFile();
         rgt.buildTreeFromFile();
     }
     

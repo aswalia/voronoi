@@ -155,7 +155,7 @@ public class TestVoronoiTree {
     public void testBuildstructure_From_File() {
             try {
                 IntervalTree c = new VoronoiTree();
-                c.buildTree("\\C:\\Users\\asi\\Documents\\Development\\Voronoi\\src\\test\\resources\\test2_1.out");
+                c.buildTree("\\C:\\Users\\asi\\Documents\\Development\\Voronoi\\src\\test\\resources\\test1.it");
                 c.buildStructure();
                 System.out.println(c);
         } catch (IOException ex) {
