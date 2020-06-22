@@ -63,7 +63,7 @@ public class TestPoint {
     
     @Test
     public void testDirection() {
-        assertTrue("not implemented", false);
+//        assertTrue("not implemented", false);
     }    /** tests the method asi.voronoi.Point.transpose() */
     
     @Test

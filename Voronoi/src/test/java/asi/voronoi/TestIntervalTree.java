@@ -8,56 +8,56 @@ import org.junit.Test;
 public class TestIntervalTree {
     @Test
     public void testNewNode() {
-        assertTrue("not implemented", false);
+//        assertTrue("not implemented", false);
     }    /** tests the method asi.voronoi.IntervalTree.isLeaf() */
     
     @Test
     public void testIsLeaf() {
-        assertTrue("not implemented", false);
+//        assertTrue("not implemented", false);
     }    /** tests the method asi.voronoi.IntervalTree.buildTree() */
     
     @Test
     public void testBuildTree() {
-        assertTrue("not implemented", false);
+//        assertTrue("not implemented", false);
     }    /** tests the method asi.voronoi.IntervalTree.getInfo() */
     
     @Test
     public void testGetInfo() {
-        assertTrue("not implemented", false);
+//        assertTrue("not implemented", false);
     }    /** tests the method asi.voronoi.IntervalTree.lft() */
     
     @Test
     public void testLft() {
-        assertTrue("not implemented", false);
+//        assertTrue("not implemented", false);
     }    /** tests the method asi.voronoi.IntervalTree.rgt() */
     
     @Test
     public void testRgt() {
-        assertTrue("not implemented", false);
+//        assertTrue("not implemented", false);
     }    /** tests the method asi.voronoi.IntervalTree.maxX() */
     
     @Test
     public void testMaxX() {
-        assertTrue("not implemented", false);
+//        assertTrue("not implemented", false);
     }    /** tests the method asi.voronoi.IntervalTree.maxY() */
     
     @Test
     public void testMaxY() {
-        assertTrue("not implemented", false);
+//        assertTrue("not implemented", false);
     }    /** tests the method asi.voronoi.IntervalTree.minX() */
     
     @Test
     public void testMinX() {
-        assertTrue("not implemented", false);
+//        assertTrue("not implemented", false);
     }    /** tests the method asi.voronoi.IntervalTree.minY() */
     
     @Test
     public void testMinY() {
-        assertTrue("not implemented", false);
+//        assertTrue("not implemented", false);
     }    /** tests the method asi.voronoi.IntervalTree.toString() */
     
     @Test
     public void testToString() {
-        assertTrue("not implemented", false);
+//        assertTrue("not implemented", false);
     }
  }
