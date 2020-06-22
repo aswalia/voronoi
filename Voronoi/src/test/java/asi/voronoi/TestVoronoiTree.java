@@ -6,8 +6,9 @@
 package asi.voronoi;
 
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.Test;
@@ -151,13 +152,37 @@ public class TestVoronoiTree {
         assertTrue("Expected: "+expected+" actual: "+actual,actual.contains(new StringBuffer(expected)));
     }
     
+    private String readVoronoiFromFile(String filename) {
+        try {
+            return new String(Files.readAllBytes(Paths.get(filename)));
+        } catch (IOException ex) {
+            return null;
+        }
+    }
+    
     @Test
     public void testBuildstructure_From_File() {
-            try {
-                IntervalTree c = new VoronoiTree();
-                c.buildTree("\\C:\\Users\\asi\\Documents\\Development\\Voronoi\\src\\test\\resources\\test1.it");
-                c.buildStructure();
-                System.out.println(c);
+        try {
+            IntervalTree c = new VoronoiTree();
+            c.buildTree("src\\test\\resources\\test1.it");
+            c.buildStructure();
+            String expected = readVoronoiFromFile("src\\test\\resources\\test1.out");
+            assertEquals(expected,c.toString());
+            c = new VoronoiTree();
+            c.buildTree("src\\test\\resources\\test01.it");
+            c.buildStructure();
+            expected = readVoronoiFromFile("src\\test\\resources\\test01.out");
+            assertEquals(expected,c.toString());
+            c = new VoronoiTree();
+            c.buildTree("src\\test\\resources\\test2.it");
+            c.buildStructure();
+            expected = readVoronoiFromFile("src\\test\\resources\\test2.out");
+            assertEquals(expected,c.toString());
+            c = new VoronoiTree();
+            c.buildTree("src\\test\\resources\\test2_1.it");
+            c.buildStructure();
+            expected = readVoronoiFromFile("src\\test\\resources\\test2_1.out");
+            assertEquals(expected,c.toString());
         } catch (IOException ex) {
             fail("unexpected exception: "+ex.getMessage());
         }
