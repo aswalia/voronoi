@@ -57,23 +57,42 @@ public class DCEL implements Constant, java.io.Serializable {
         }
         return ret;
     }
-
-    public DCEL merge(Point p) throws Exception {
-        // build initial and final edge of DCEL
-        ConveksHull ch = vor2CH();
-        ch.merge(p);
+    
+    private void support(ConveksHull ch) throws Exception {
         PointPair pp = ch.getUpSupport();
         if (pp == null) {
-            throw new Exception("3 points on a line " + p + " " + node.f_l + " " + node.f_r);
+            throw new Exception("3 points on a line ");
         }
         upLft = pp.getLft(); upRgt = pp.getRgt();
         pp = ch.getDownSupport();
         downLft = pp.getLft(); downRgt = pp.getRgt();
+        if (upLft.equals(downLft) &&
+            upRgt.equals(downRgt)) {
+            throw new Exception("4 points on a line ");                    
+        }         
+    }
+    
+    private void setSupportPoints(Point p) throws Exception {
+        ConveksHull c = vor2CH();
+        c.merge(p);     
+        support(c);
+    }
+
+    private void setSupportPoints(DCEL subVor) throws Exception {
+        ConveksHull ch1 = vor2CH();
+        ConveksHull ch2 = subVor.vor2CH();
+        ch1.merge(ch2);
+        support(ch1);
+    }
+    
+    public DCEL merge(Point p) throws Exception {
+        // build initial and final edge of DCEL
+        setSupportPoints(p);                
         DCEL lftNext, rgtNext;
         DCEL current = new DCEL(upLft, upRgt);
         DCEL ret = current;
         DCEL next, tmp;
-        java.util.LinkedList mergeList = new java.util.LinkedList();
+        LinkedList mergeList = new LinkedList();
         DCELPair listElem;
         Point lftPoint = upLft, rgtPoint = upRgt;
         if (node.f_l.isLess(p)) // p is to the right of current vor diagram
@@ -109,19 +128,13 @@ public class DCEL implements Constant, java.io.Serializable {
 
     public DCEL merge(DCEL subVor) throws Exception {
         // build initial and final edge of DCEL
-        ConveksHull ch1 = vor2CH();
-        ConveksHull ch2 = subVor.vor2CH();
-        ch1.merge(ch2);
-        PointPair pp = ch1.getUpSupport();
-        upLft = pp.getLft(); upRgt = pp.getRgt();
-        pp = ch1.getDownSupport();
-        downLft = pp.getLft(); downRgt = pp.getRgt();
+        setSupportPoints(subVor);
         DCEL lftNext, rgtNext;
         Point lftPoint = upLft, rgtPoint = upRgt;
         DCEL next, tmp;
         DCEL current = new DCEL(upLft, upRgt);
         DCEL ret = current;
-        java.util.LinkedList mergeList = new java.util.LinkedList();
+        LinkedList mergeList = new LinkedList();
         DCELPair listElem;
         if (node.f_l.isLess(subVor.node.f_l)) // subVor to the right to current vor
         {
@@ -159,22 +172,6 @@ public class DCEL implements Constant, java.io.Serializable {
         return (DCEL) Serializer.fetch(filename);
     }
 
-    void setUpLft(Point p) {
-        upLft = p;
-    }
-
-    void setUpRgt(Point p) {
-        upRgt = p;
-    }
-
-    void setDownLft(Point p) {
-        downLft = p;
-    }
-
-    void setDownRgt(Point p) {
-        downRgt = p;
-    }
-    
     private Point otherPoint(Point p) {
         Point ret;
         if (node.f_l.equals(p)) {

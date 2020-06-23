@@ -135,25 +135,65 @@ public class ConveksHull implements Constant, java.io.Serializable, ModelObject 
     }
     
     public void merge(ConveksHull subCH) {
-        Point tmpLft, tmpRgt, upLft, upRgt, downLft, downRgt;
+        Point tmpUpLft, tmpDownLft, tmpUpRgt, tmpDownRgt, upLft, upRgt, downLft, downRgt;
         int index = 0;
         if (head.get(index).isLess(subCH.head.get(index))) // subCH is to the right of this CH
         {
-            tmpRgt = subCH.head.get(0);
-            tmpLft = head.get(0);
-            downLft = findDown(index, tmpRgt);
-            downRgt = subCH.findUp(index, tmpLft);
-            upLft = findUp(index, tmpRgt);
-            upRgt = subCH.findDown(index, tmpLft);
+            tmpUpRgt = tmpDownRgt = subCH.head.get(0);
+            tmpUpLft = tmpDownLft = head.get(0);
+            boolean done;
+            do {
+                downLft = findDown(tmpDownRgt);
+                downRgt = subCH.findUp(tmpDownLft);
+                upLft = findUp(tmpUpRgt);
+                upRgt = subCH.findDown(tmpUpLft);
+                done = true;
+                if (!tmpUpLft.equals(upLft)) {
+                    tmpUpLft = upLft;
+                    done = false;
+                }
+                if (!tmpUpRgt.equals(upRgt)) {
+                    tmpUpRgt = upRgt;
+                    done = false;
+                }
+                if (!tmpDownLft.equals(downLft)) {
+                    tmpDownLft = downLft;
+                    done = false;
+                }
+                if (!tmpDownRgt.equals(downRgt)) {
+                    tmpDownRgt = downRgt;
+                    done = false;
+                }
+            } while (!done);
                 
         } else // subCH is to the left of this
         {
-            tmpRgt = head.get(0);
-            tmpLft = subCH.head.get(0);
-            downLft = subCH.findDown(index, tmpRgt);
-            downRgt = findUp(index, tmpLft);
-            upLft = subCH.findUp(index, tmpRgt);
-            upRgt = findDown(index, tmpLft);
+            tmpUpLft = tmpDownLft = subCH.head.get(0);
+            tmpUpRgt = tmpDownRgt = head.get(0);
+            boolean done;
+            do {
+                downRgt = findUp(tmpDownLft);
+                downLft = subCH.findDown(tmpDownRgt);
+                upRgt = findDown(tmpUpLft);
+                upLft = subCH.findUp(tmpUpRgt);
+                done = true;
+                if (!tmpUpLft.equals(upLft)) {
+                    tmpUpLft = upLft;
+                    done = false;
+                }
+                if (!tmpUpRgt.equals(upRgt)) {
+                    tmpUpRgt = upRgt;
+                    done = false;
+                }
+                if (!tmpDownLft.equals(downLft)) {
+                    tmpDownLft = downLft;
+                    done = false;
+                }
+                if (!tmpDownRgt.equals(downRgt)) {
+                    tmpDownRgt = downRgt;
+                    done = false;
+                }
+            } while (!done);
         }
         setUpSupport(upLft, upRgt);
         setDownSupport(downLft, downRgt);
@@ -277,8 +317,8 @@ public class ConveksHull implements Constant, java.io.Serializable, ModelObject 
         return ret;
     }
 
-    private Point findUp(int index, Point p) {
-        int i = index;
+    private Point findUp(Point p) {
+        int i = 0;
         boolean done = false;
         do {
             switch (test(i,p)) {
@@ -309,8 +349,8 @@ public class ConveksHull implements Constant, java.io.Serializable, ModelObject 
         return head.get(i);
     }
 
-    private Point findDown(int index, Point p) {
-        int i = index;
+    private Point findDown(Point p) {
+        int i = 0;
         boolean done = false;
         do {
             switch (test(i,p)) {
