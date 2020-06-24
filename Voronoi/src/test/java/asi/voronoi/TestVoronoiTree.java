@@ -164,25 +164,40 @@ public class TestVoronoiTree {
     public void testBuildstructure_From_File() {
         try {
             IntervalTree c = new VoronoiTree();
-            c.buildTree("src\\test\\resources\\test1.it");
+            c.buildTree("src/test/resources/test1.it");
             c.buildStructure();
-            String expected = readVoronoiFromFile("src\\test\\resources\\test1.out");
-            assertEquals(expected,c.toString());
+            c.writeTree("src/test/resources/test1.act");
+            String expected = readVoronoiFromFile("src/test/resources/test1.out");
+            String actual = readVoronoiFromFile("src/test/resources/test1.act");
+            assertEquals(expected,actual);
             c = new VoronoiTree();
-            c.buildTree("src\\test\\resources\\test01.it");
+            c.buildTree("src/test/resources/test01.it");
             c.buildStructure();
-            expected = readVoronoiFromFile("src\\test\\resources\\test01.out");
-            assertEquals(expected,c.toString());
-            c = new VoronoiTree();
-            c.buildTree("src\\test\\resources\\test2.it");
+            c.writeTree("src/test/resources/test01.act");
+            expected = readVoronoiFromFile("src/test/resources/test01.out");
+            actual = readVoronoiFromFile("src/test/resources/test01.act");
+            assertEquals(expected,actual);
+/*            c = new VoronoiTree();
+            c.buildTree("src/test/resources/test2_1.it");
             c.buildStructure();
-            expected = readVoronoiFromFile("src\\test\\resources\\test2.out");
-            assertEquals(expected,c.toString());
-            c = new VoronoiTree();
-            c.buildTree("src\\test\\resources\\test2_1.it");
+            c.writeTree("src/test/resources/test2_1.act");
+            expected = readVoronoiFromFile("src/test/resources/test2_1.out");
+            actual = readVoronoiFromFile("src/test/resources/test2_1.act");
+            assertEquals(expected,actual);
+*/          c = new VoronoiTree();
+            c.buildTree("src/test/resources/test2_2.it");
             c.buildStructure();
-            expected = readVoronoiFromFile("src\\test\\resources\\test2_1.out");
-            assertEquals(expected,c.toString());
+            c.writeTree("src/test/resources/test2_2.act");
+            expected = readVoronoiFromFile("src/test/resources/test2_2.out");
+            actual = readVoronoiFromFile("src/test/resources/test2_2.act");
+            assertEquals(expected,actual);
+            c = new VoronoiTree();           
+            c.buildTree("src/test/resources/test2.it");
+            c.buildStructure();
+            c.writeTree("src/test/resources/test2.act");
+            expected = readVoronoiFromFile("src/test/resources/test2.out");            
+            actual = readVoronoiFromFile("src/test/resources/test2.act");
+            assertEquals(expected,actual);
         } catch (IOException ex) {
             fail("unexpected exception: "+ex.getMessage());
         }
