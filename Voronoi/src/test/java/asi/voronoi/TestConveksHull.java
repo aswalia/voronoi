@@ -130,6 +130,38 @@ public class TestConveksHull {
         expected = new Point(7,3);
         actual = t.getRgt();
         assertTrue("Expected: "+expected+" actual: "+actual,expected.equals(actual));
+        // Special case where point is on line wth some of the points of the CH
+        // but the CH is non-linear, i.e. one or more points are not in line
+        ConveksHull ch1 = new ConveksHull(new Point(22,9), new Point(22,17));
+        ch1.merge(new Point(26,32));
+        act = ch1.toString();
+        exp = "(22.0,9.0)(26.0,32.0)(22.0,17.0)";
+        assertTrue(act.contains(new StringBuffer(exp)));
+        // try to merge a point in line with 2 of the points
+        ch1.merge(new Point(22,45));
+        act = ch1.toString();
+        exp = "(22.0,9.0)(26.0,32.0)(22.0,45.0)(22.0,17.0)";
+        assertTrue(act.contains(new StringBuffer(exp)));
+        // one more case
+        ch1 = new ConveksHull(new Point(37,47), new Point(42,3));
+        ch1.merge(new Point(37,39));
+        act = ch1.toString();
+        exp = "(37.0,39.0)(42.0,3.0)(37.0,47.0)";
+        assertTrue(act.contains(new StringBuffer(exp)));
+        ch1.merge(new Point(37,11));
+        act = ch1.toString();
+        exp = "(37.0,11.0)(42.0,3.0)(37.0,47.0)(37.0,39.0)";
+        assertTrue(act.contains(new StringBuffer(exp)));
+        // one more case
+        ch1 = new ConveksHull(new Point(37,11), new Point(42,3));
+        ch1.merge(new Point(37,47));
+        act = ch1.toString();
+        exp = "(37.0,11.0)(42.0,3.0)(37.0,47.0)";
+        assertTrue(act.contains(new StringBuffer(exp)));
+        ch1.merge(new Point(37,39));
+        act = ch1.toString();
+        exp = "(37.0,11.0)(42.0,3.0)(37.0,47.0)(37.0,39.0)";
+        assertTrue(act.contains(new StringBuffer(exp)));        
     }
     
     @Test
@@ -230,6 +262,16 @@ public class TestConveksHull {
         act = c1.toString();
         assertTrue("Expected: "+exp+" actual: "+act,act.contains(new StringBuffer(exp)));
         assertEquals(c4.getHead(),null);
+        // problem with setHead in add (CirculrList) when head is not part of list after merge
+        ConveksHull ch = new ConveksHull(new Point(34,36), new Point(34,40));
+        ch.merge(new Point(35,13));
+        ch.merge(new Point(42,3));
+        ch.merge(new Point(37,47));
+        exp = "(34.0,36.0)(35.0,13.0)(42.0,3.0)(37.0,47.0)(34.0,40.0)";
+        ch.merge(new Point(31,30));
+        act = ch.toString();
+        exp = "(31.0,30.0)(35.0,13.0)(42.0,3.0)(37.0,47.0)(34.0,40.0)";        
+        assertTrue("Expected: "+exp+" actual: "+act,act.contains(new StringBuffer(exp)));
     }
 
     @Test

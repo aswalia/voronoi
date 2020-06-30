@@ -44,10 +44,41 @@ public class TestCircularLinkedList {
         t.add(0, -1, expected);
         actual = t.get(3);
         assertEquals(expected,actual);
+        String exp = "(-1.0,10.0)(0.0,5.0)(1.0,0.0)(2.0,5.0)";
+        assertEquals(exp,t.toString());
         expected = new Point(-2,5);
         t.add(2, 1, expected);
-        String exp = "(-2.0,5.0)(1.0,0.0)(2.0,5.0)(-1.0,10.0)(0.0,5.0)";
+        exp = "(-2.0,5.0)(1.0,0.0)(2.0,5.0)(-1.0,10.0)(0.0,5.0)";
         assertEquals(exp,t.toString());
+        // problem with setHead i add (CirculrList) when head is not part of list after merge
+        // (34.0,36.0)(35.0,13.0)(42.0,3.0)(37.0,47.0)(34.0,40.0)
+        CircularLinkedList c = new CircularLinkedList(new Point(34,36));
+        c.add(0, -1, new Point(35,13));
+        c.add(0, -1, new Point(42,3));
+        c.add(0, -1, new Point(37,47));
+        c.add(0, -1, new Point(34,40));
+        // verify that CH is as in failed test case
+        exp = "(34.0,36.0)(35.0,13.0)(42.0,3.0)(37.0,47.0)(34.0,40.0)";
+        assertEquals(exp,c.toString());       
+        // simulate failure as when merging (31,30) with CH
+        c.add(1, 4, new Point(31,30));
+        exp = "(31.0,30.0)(35.0,13.0)(42.0,3.0)(37.0,47.0)(34.0,40.0)";
+        assertEquals(exp,c.toString());
+        // test remove of several points when adding a new node
+        c = new CircularLinkedList(new Point(7,0));
+        c.add(0, -1, new Point(10,0));
+        c.add(0, -1, new Point(10,3));
+        c.add(0, -1, new Point(10,5));
+        c.add(0, -1, new Point(7,5));
+        c.add(0, -1, new Point(7,4));
+        c.add(0, -1, new Point(7,3));
+        c.add(0, -1, new Point(7,2));
+        c.add(0, -1, new Point(7,1));
+        exp = "(7.0,0.0)(10.0,0.0)(10.0,3.0)(10.0,5.0)(7.0,5.0)(7.0,4.0)(7.0,3.0)(7.0,2.0)(7.0,1.0)";
+        assertEquals(exp,c.toString());       
+        c.add(0, 4, new Point(0,3));
+        exp = "(0.0,3.0)(7.0,0.0)(10.0,0.0)(10.0,3.0)(10.0,5.0)(7.0,5.0)";
+        assertEquals(exp,c.toString());
     }
     
     @Test

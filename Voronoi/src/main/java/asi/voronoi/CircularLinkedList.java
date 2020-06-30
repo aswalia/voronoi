@@ -16,7 +16,6 @@ public class CircularLinkedList {
     }
     private Node head;
     
-
     private void connectBack(int index, Node other) {
         Node h = findNode(index);
         h.prev = other;
@@ -96,6 +95,10 @@ public class CircularLinkedList {
         tmp.p = p;
         Node hFront = findNode(addFront);
         Node hBack = findNode(addBack);
+        // remove all nodes between addBack and addFront
+        for (int i=addBack+1; !findNode(i).equals(hFront); ) {
+            remove(i);
+        }
         tmp.next = hFront;
         hBack.next = tmp;
         tmp.prev = hBack;
@@ -111,7 +114,7 @@ public class CircularLinkedList {
         p.next = n;
         n.prev = p;
         if (h.equals(head)) {
-            // if removing Node pointed bu head
+            // if removing Node pointed by head
             head = head.next;
         }
         h = null;

@@ -77,7 +77,7 @@ public class ConveksHull implements Constant, java.io.Serializable, ModelObject 
     
     public void merge(Point p) {
         int index=0;
-        if (Point.area(p, head.get(0), head.get(index-1)) == 0) {
+        if (Point.area(p, head.get(0), head.get(1)) == 0) {
             // if CH is a line and
             // new point also on same line
             if ((p.x() > lft.x()) &&
@@ -92,7 +92,7 @@ public class ConveksHull implements Constant, java.io.Serializable, ModelObject 
                     }
                     index++;
                 } while (!done);
-            } else {
+            }  else {
                 // new point either to the left of head or
                 // to the right of head.next.
                 if (p.x() < lft.x()) {
@@ -105,17 +105,22 @@ public class ConveksHull implements Constant, java.io.Serializable, ModelObject 
                 head.add(0, -1, p);
             }
         } else {
+            if (p.isLess(head.get(-1)) && head.get(0).isLess(p) && 
+                (Point.area(p, head.get(0), head.get(-1)) == 0)) {
+                // new point in between, add it between head and -1
+                head.add(0, -1, p);
+            } else {
             boolean doneFront, doneBack;
             doneFront = doneBack = false;
             int addFront, addBack;
             addFront = addBack = index;
             do {
                 if ((Point.area(p, head.get(index), head.get(index+1)) >= 0) &&
-                    (Point.area(p, head.get(index), head.get(index-1)) >= 0)) {
+                    (Point.area(p, head.get(index), head.get(index-1)) > 0)) {
                     addFront = index;
                     doneFront = true;
                 }
-                if ((Point.area(p, head.get(index), head.get(index+1)) <= 0) &&
+                if ((Point.area(p, head.get(index), head.get(index+1)) < 0) &&
                     (Point.area(p, head.get(index), head.get(index-1)) <= 0)) {
                     addBack = index;
                     doneBack = true;
@@ -130,8 +135,9 @@ public class ConveksHull implements Constant, java.io.Serializable, ModelObject 
                 setDownSupport(p, head.get(addFront));                
             }
             head.add(addFront, addBack, p);
-            setPerimeter(p);
         }
+        }
+        setPerimeter(p);
     }
     
     public void merge(ConveksHull subCH) {
@@ -232,62 +238,22 @@ public class ConveksHull implements Constant, java.io.Serializable, ModelObject 
 
     @Override
     public double maxX() {
-/*        double ret = head.element().x(), mx;
-        Point last = head.previous();
-        for (; !head.element().equals(last); head.front()) {
-            if ((mx = head.element().x()) > ret) {
-                ret = mx;
-            }
-        }
-        if ((mx = head.element().x()) > ret) {
-            ret = mx;
-        }
-*/        return rgt.x();
+        return rgt.x();
     }
 
     @Override
     public double minX() {
-/*        double ret = head.element().x(), mx;
-        Point last = head.previous();
-        for (; !head.element().equals(last); head.front()) {
-            if ((mx = head.element().x()) < ret) {
-                ret = mx;
-            }
-        }
-        if ((mx = head.element().x()) < ret) {
-            ret = mx;
-        }
-*/        return lft.x();
+        return lft.x();
     }
 
     @Override
     public double maxY() {
- /*       double ret = head.element().y(), mx;
-        Point last = head.previous();
-        for (; !head.element().equals(last); head.front()) {
-            if ((mx = head.element().y()) > ret) {
-                ret = mx;
-            }
-        }
-        if ((mx = head.element().y()) > ret) {
-            ret = mx;
-        }
-*/        return up.y();
+        return up.y();
     }
 
     @Override
     public double minY() {
-/*        double ret = head.element().y(), mx;
-        Point last = head.previous();
-        for (; !head.element().equals(last); head.front()) {
-            if ((mx = head.element().y()) < ret) {
-                ret = mx;
-            }
-        }
-        if ((mx = head.element().y()) < ret) {
-            ret = mx;
-        }
-*/        return down.y();
+        return down.y();
     }
 
     public CircularLinkedList getHead() {

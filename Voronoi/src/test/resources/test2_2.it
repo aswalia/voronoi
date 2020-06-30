@@ -1,0 +1,12 @@
+node
+node
+node-point:(13.0,31.0) (15.0,6.0)
+node-point:(15.0,13.0) (15.0,40.0)
+lft-point:(17.0,7.0)
+node
+node-point:(18.0,6.0) (21.0,12.0)
+lft-point:(21.0,29.0)
+node
+node-point:(22.0,9.0) (22.0,17.0)
+lft-point:(22.0,45.0)
+node-point:(25.0,27.0) (26.0,32.0)
