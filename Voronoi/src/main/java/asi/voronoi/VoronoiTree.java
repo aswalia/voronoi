@@ -73,12 +73,12 @@ public class VoronoiTree extends IntervalTree {
     static class Test {
         public static void main(String[] argv) throws Exception {
             VoronoiTree v = new VoronoiTree();
-            v.buildTree("src/test/resources/test2_3.it");
+            v.buildTree("src/test/resources/test5.it");
             long start = System.currentTimeMillis();
             v.buildStructure();
             long stop = System.currentTimeMillis();
             System.out.println("Time taken (msec): " + (stop - start));
-            v.writeTree("src/test/resources/test2_3.out");
+            v.writeTree("src/test/resources/test5.out");
         }
     }
 }

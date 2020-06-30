@@ -19,11 +19,15 @@ public class Main {
                 try {
                     int no = (int) (Math.random() * 5 * numberOfPoints);
 //	                Serializer.store("AVL"+no,t);
+                    IntervalTree i = new IntervalTree();
+                    i.buildTree(t);
+                    i.writeTree("src/test/resources/test10.it");
                     VoronoiTree v = new VoronoiTree();
                     v.buildTree(t);
                     System.out.println("# points: " + t.count());
                     startTime = System.currentTimeMillis();
                     v.buildStructure();
+                    v.writeTree("src/test/resources/test10.out");
                     success = true;
 //                    Serializer.store("vor"+no,v);
 //                    DrawBinaryTree dbt = new DrawBinaryTree(t);
