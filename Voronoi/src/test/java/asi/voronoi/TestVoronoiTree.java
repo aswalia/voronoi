@@ -5,6 +5,7 @@
  */
 package asi.voronoi;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -160,60 +161,45 @@ public class TestVoronoiTree {
         }
     }
     
+    private boolean compareFile(String expFile, String actFile) {
+        boolean ret = false;
+        String expected = readVoronoiFromFile(expFile);
+        String actual = readVoronoiFromFile(actFile);
+        ret = actual.equals(expected);
+        return ret;
+    }
+    
     @Test
     public void testBuildstructure_From_File() {
         try {
+            String folderName = "src/test/resources/";
+            final File folder = new File(folderName);            
+            String expFile, actFile, outFile;
+            boolean result = false;
             IntervalTree c = new VoronoiTree();
-            c.buildTree("src/test/resources/test1.it");
-            c.buildStructure();
-            c.writeTree("src/test/resources/test1.act");
-            String expected = readVoronoiFromFile("src/test/resources/test1.out");
-            String actual = readVoronoiFromFile("src/test/resources/test1.act");
-            assertEquals(expected,actual);
-            c = new VoronoiTree();
-            c.buildTree("src/test/resources/test01.it");
-            c.buildStructure();
-            c.writeTree("src/test/resources/test01.act");
-            expected = readVoronoiFromFile("src/test/resources/test01.out");
-            actual = readVoronoiFromFile("src/test/resources/test01.act");
-            assertEquals(expected,actual);
-            // Compare fails eventhough there is no diff ?!
-            c = new VoronoiTree();
-            c.buildTree("src/test/resources/test2_1.it");
-            c.buildStructure();
-            c.writeTree("src/test/resources/test2_1.act");
-            expected = readVoronoiFromFile("src/test/resources/test2_1.out");
-            actual = readVoronoiFromFile("src/test/resources/test2_1.act");
-//            assertEquals(expected,actual);
-            c = new VoronoiTree();
-            c.buildTree("src/test/resources/test2_2.it");
-            c.buildStructure();
-            c.writeTree("src/test/resources/test2_2.act");
-            expected = readVoronoiFromFile("src/test/resources/test2_2.out");
-            actual = readVoronoiFromFile("src/test/resources/test2_2.act");
-            assertEquals(expected,actual);
-            c = new VoronoiTree();
-            c.buildTree("src/test/resources/test2_3.it");
-            c.buildStructure();
-            c.writeTree("src/test/resources/test2_3.act");
-            expected = readVoronoiFromFile("src/test/resources/test2_3.out");
-            actual = readVoronoiFromFile("src/test/resources/test2_3.act");
-            assertEquals(expected,actual);
-            // Compare fails eventhough there is no diff ?!
-            c = new VoronoiTree();           
-            c.buildTree("src/test/resources/test2.it");
-            c.buildStructure();
-            c.writeTree("src/test/resources/test2.act");
-            expected = readVoronoiFromFile("src/test/resources/test2.out");            
-            actual = readVoronoiFromFile("src/test/resources/test2.act");
-//            assertEquals(expected,actual);
-            c = new VoronoiTree();
-            c.buildTree("src/test/resources/test5.it");
-            c.buildStructure();
-            c.writeTree("src/test/resources/test5.act");
-            expected = readVoronoiFromFile("src/test/resources/test5.out");
-            actual = readVoronoiFromFile("src/test/resources/test5.act");
-            assertEquals(expected,actual);
+            for (final File fileEntry : folder.listFiles()) {
+            // build and write actual result files
+                String fileName = fileEntry.getName();
+                if (fileName.endsWith("it")) {
+                    c.buildTree(folderName+fileName);
+                    c.buildStructure();
+                    outFile = fileName.replace("it", "act");
+                    c.writeTree(folderName + outFile);
+                }
+            }
+            for (final File fileEntry : folder.listFiles()) {
+            // identify, read and compare actual and expected result files
+                String fileName = fileEntry.getName();
+                expFile = actFile = null;
+                if (fileName.endsWith("act")) {
+                    actFile = folderName + fileName;
+                    expFile = folderName + fileName.replace("out", "act");
+                }
+                if (actFile != null) {
+                    result = compareFile(expFile, actFile);
+                    assertTrue("expFile: " + expFile + "not equal actFile",result);
+                }
+            }            
         } catch (IOException ex) {
             fail("unexpected exception: "+ex.getMessage());
         }
