@@ -96,7 +96,8 @@ public class CircularLinkedList {
         Node hFront = findNode(addFront);
         Node hBack = findNode(addBack);
         // remove all nodes between addBack and addFront
-        for (int i=addBack+1; !findNode(i).equals(hFront); ) {
+        while (!hBack.next.p.equals(hFront.p)) {
+            int i = moveTo(hBack.next.p);
             remove(i);
         }
         tmp.next = hFront;
