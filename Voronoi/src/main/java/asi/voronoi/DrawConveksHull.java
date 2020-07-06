@@ -21,12 +21,9 @@ public class DrawConveksHull extends DrawObject {
     }
 
     private void drawConveksHull(GraphicData g) {
-        Point start = li.get(0);
-        for (int i=0; !li.get(i+1).equals(start); i++) {
+        for (int i=0; i < li.length(); i++) {
             Line l = new Line(li.get(i),li.get(i+1));
             drawLine(g,l);
         }
-        Line l = new Line(li.get(0),start);
-        drawLine(g,l);
     }
 }
