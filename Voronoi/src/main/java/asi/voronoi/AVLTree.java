@@ -12,10 +12,106 @@ public class AVLTree extends BinaryTree {
     public BinaryTree newNode(Point p) {
         return new AVLTree(p);
     }
+    
+    private void adjustLevel(Point t) {
+        if (!p.equals(t)) {
+            int lc, rc;
+            lc = rc = 0;
+            if (lft != null) {
+                lc = lft.count();
+            }
+            if (rgt != null) {
+                rc = rgt.count();
+            }
+            bf = (short)Math.abs(lc - rc);
+            if (p.isLess(t)) {
+                ((AVLTree)rgt).adjustLevel(t);
+            } else {
+                ((AVLTree)lft).adjustLevel(t);            
+            }
+        }
+    }
+    
+    private AVLTree leftLeft() {
+        AVLTree self, gp, p, me, tmp;
+        gp = p = me = this;
+        tmp = (AVLTree)p.rgt;
+        self = p;
+        p.rgt = gp;
+        gp.rgt = tmp;
+        gp.bf = p.bf = me.bf = 0;
+        return self;
+    }
+    
+    private AVLTree leftRight() {
+        AVLTree self, gp, p, me, tmp;
+        self = gp = p = me = this;
+        me.lft = p;
+        p.rgt = null;
+        gp.lft = me;
+        self = leftLeft();
+        return self;
+    }
+    
+    private AVLTree rightRight() {
+        AVLTree self, gp, p, me, tmp;
+        gp = p = me = this;
+        tmp = (AVLTree)p.lft;
+        self = p;
+        p.lft = gp;
+        gp.lft = tmp;
+        gp.bf = p.bf = me.bf = 0;
+        return self;
+    }
+    
+    private AVLTree rightLeft() {
+        AVLTree self, gp, p, me, tmp;
+        self = gp = p = me = this;
+        me.rgt = p;
+        p.lft = null;
+        gp.rgt = me;
+        self = rightRight();
+        return self;
+    }
+    
+    private AVLTree checkAndBalance(Point t) {
+        AVLTree self = this;
+        AVLTree grandparent, parent, me;
+        grandparent = parent = me = this;
+        if (p.equals(t)) {
+            if (bf > 1) {
+                if (grandparent.lft.equals(parent)) {
+                    // left
+                    if (parent.lft.equals(me)) {
+                        // left
+                        self = grandparent.leftLeft();
+                    } else {
+                        // right
+                        self = grandparent.leftRight();
+                    }
+                } else {
+                    if (parent.lft.equals(me)) {
+                        // left
+                        self = grandparent.rightLeft();
+                    } else {
+                        // right
+                        self = grandparent.rightRight();
+                    }
+                }
+            }
+        }
+        return self;
+    }
 
     @Override
     public BinaryTree insertNode(Point t) {
+        super.insertNode(t);
+        // adjust level
+        adjustLevel(t);
+        //check and rebalance if needed
         AVLTree self = this;
+        self = checkAndBalance(t);
+/*        AVLTree self = this;
         if (!inTree(t)) {
             AVLTree a, b, c, p1, q;
             BinaryTree f, y;
@@ -110,6 +206,6 @@ public class AVLTree extends BinaryTree {
                 }
             }
         }
-        return self;
+*/        return self;
     }
 }
