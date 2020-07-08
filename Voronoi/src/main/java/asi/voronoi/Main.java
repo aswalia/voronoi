@@ -12,7 +12,8 @@ public class Main {
                 AVLTree t = new AVLTree(new Point((int) (Math.random() * 5 * numberOfPoints),
                         (int) (Math.random() * 5 * numberOfPoints)));
                 for (int i = 0; i < (numberOfPoints - 1); i++) {
-                    t = (AVLTree) t.insertNode(new Point((int) (Math.random() * 5 * numberOfPoints),
+                    t = (AVLTree) t.insertNode(new Point(
+                            (int) (Math.random() * 5 * numberOfPoints),
                             (int) (Math.random() * 5 * numberOfPoints)));
                 }
 
