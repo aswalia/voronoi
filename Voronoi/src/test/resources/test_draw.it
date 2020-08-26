@@ -1,0 +1,7 @@
+node
+node
+node-point: (0,5) (1,2)
+lft-point: (3,4)
+node-point: (4,0) (4,7)
+lft-point: (6,2)
+node-point: (8,6) (10,3)

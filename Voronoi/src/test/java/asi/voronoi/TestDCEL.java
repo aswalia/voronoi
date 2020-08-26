@@ -215,6 +215,30 @@ public class TestDCEL {
     }
 
     @Test
+    public void testMerge_DCEL_failure() throws Exception {
+        // DCEL of 4 co-cirlular points
+        DCEL dc1 = new DCEL(new Point(0,0), new Point(0,2));
+        DCEL dc2 = new DCEL(new Point(2,0), new Point(2,2));
+        try {
+            dc1.merge(dc2);
+            fail("exception expected");
+        } catch(Exception re) {
+            assertTrue(re.getMessage(),re.getMessage().contains("Left and Right meet with current"));
+        }
+        // DCEL of 4 co-cirlular points
+        dc1 = new DCEL(new Point(0,0), new Point(0,2));
+        try {
+            dc1.merge(new Point(2,0));
+            dc1.merge(new Point(2,2));
+            fail("exception expected");
+        } catch(Exception re) {
+            assertTrue(re.getMessage(),re.getMessage().contains("4 points co-circular"));
+        }
+        
+        
+    }
+    
+    @Test
     public void testFetch() throws Exception {
     }
     
