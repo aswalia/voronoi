@@ -74,8 +74,10 @@ public class Point implements java.io.Serializable {
         return ret;
     }
 
-    public boolean equals(Point t) {
-        return ((this.x == t.x) && (this.y == t.y));
+    @Override
+    public boolean equals(Object t) {
+        Point s = (Point)t;
+        return ((this.x == s.x) && (this.y == s.y));
     }
 
     public boolean isLess(Point t) {

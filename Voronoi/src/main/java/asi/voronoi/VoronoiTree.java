@@ -23,7 +23,7 @@ public class VoronoiTree extends IntervalTree {
         } else if (lft.isLeaf()) {
             try {
                 rgt.buildStructure();
-                info = (DCEL) rgt.info;
+                info = rgt.info;
                 info = ((DCEL) info).merge((Point) lft.info);
             } catch (Exception e) {
                 throw new RuntimeException(e.getMessage());
@@ -31,7 +31,7 @@ public class VoronoiTree extends IntervalTree {
         } else if (rgt.isLeaf()) {
             try {
                 lft.buildStructure();
-                info = (DCEL) lft.info;
+                info = lft.info;
                 info = ((DCEL) info).merge((Point) rgt.info);
             } catch (Exception e) {
                 throw new RuntimeException(e.getMessage());
@@ -40,7 +40,7 @@ public class VoronoiTree extends IntervalTree {
             try {
                 lft.buildStructure();
                 rgt.buildStructure();
-                info = (DCEL) lft.info;
+                info = lft.info;
                 info = ((DCEL) info).merge((DCEL) rgt.info);
             } catch (Exception e) {
                 throw new RuntimeException(e.getMessage());

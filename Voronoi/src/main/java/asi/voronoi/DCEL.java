@@ -407,15 +407,24 @@ public class DCEL implements Constant, java.io.Serializable {
             }
         } else if (lftEdge != null) {
             lftCut = testCut(lftEdge);
+            if (lftCut == PARALLEL) {
+                throw new Exception("3 or 4 points on a line " + node.f_l + " " + node.f_r);
+            }
+            if (lftCut == FOURPOINTS) {
+                throw new Exception("4 points co-circular " + node.f_l + " " + node.f_r);
+            }
             ret = lftEdge;
         } else if (rgtEdge != null) {
             rgtCut = testCut(rgtEdge);
+            if (rgtCut == PARALLEL) {
+                throw new Exception("3 or 4 points on a line " + node.f_l + " " + node.f_r);
+            }
+            if (rgtCut == FOURPOINTS) {
+                throw new Exception("4 points co-circular " + node.f_l + " " + node.f_r);
+            }
             ret = rgtEdge;
         } else {
             throw new Exception("Both sets are null " + node.f_l + " " + node.f_r);
-        }
-        if (((lftCut == PARALLEL) && (rgtCut != YES)) || ((rgtCut == PARALLEL) && (lftCut != YES))) {
-            throw new Exception("3 or 4 points on a line " + node.f_l + " " + node.f_r);
         }
         return ret;
     }

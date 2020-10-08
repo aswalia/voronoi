@@ -109,8 +109,10 @@ class DCELNode implements Constant, java.io.Serializable {
         return ret;
     }
 
-    public boolean equals(DCELNode n) {
-        return f_l.equals(n.f_l) && f_r.equals(n.f_r);
+    @Override
+    public boolean equals(Object n) {
+        DCELNode m = (DCELNode)n;
+        return f_l.equals(m.f_l) && f_r.equals(m.f_r);
     }
 
     String printDCEL() {

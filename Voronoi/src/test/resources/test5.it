@@ -1,8 +1,0 @@
-lft-point: (0,2)
-node
-lft-point: (5,0)
-node
-node-point: (5,4) (6,1)
-node-point: (6,3) (6.5,2)
-lft-point: (7.5,2)
-node-point: (8,0) (8,4)
