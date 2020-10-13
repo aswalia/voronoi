@@ -2,6 +2,7 @@
 
 package asi.voronoi;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
@@ -205,5 +206,20 @@ public class TestAVLTree {
         assertTrue("insert 3", b.count()==4);
         b = b.insertNode(new Point(5,4));
         assertTrue("insert 4", b.count()==5);
+    }
+    @Test
+    public void testBalancing() {
+        BinaryTree b = new AVLTree(new Point(5,1));
+        assertEquals("[(5.0,1.0)]\n", b.toString());
+        b = b.insertNode(new Point(2,5));
+        assertEquals("(5.0,1.0)\n[(2.0,5.0)] N\n", b.toString());
+        b = b.insertNode(new Point(10,3));
+        assertEquals("(5.0,1.0)\n[(2.0,5.0)] [(10.0,3.0)]\n", b.toString());
+        b = b.insertNode(new Point(7,2));
+        assertEquals("(5.0,1.0)\n[(2.0,5.0)] (10.0,3.0)\n[(7.0,2.0)] N\n", b.toString());
+        b = b.insertNode(new Point(15,3));
+        assertEquals("(5.0,1.0)\n[(2.0,5.0)] (10.0,3.0)\n[(7.0,2.0)] [(15.0,3.0)]\n", b.toString());
+        b = b.insertNode(new Point(6,4));
+        assertEquals("(6.0,4.0)\n(5.0,1.0) (10.0,3.0)\n[(2.0,5.0)] N [(7.0,2.0)] [(15.0,3.0)]\n", b.toString());
     }
 }

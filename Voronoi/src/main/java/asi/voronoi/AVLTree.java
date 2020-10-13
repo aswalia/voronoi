@@ -12,11 +12,22 @@ public class AVLTree extends BinaryTree {
     public BinaryTree newNode(Point p) {
         return new AVLTree(p);
     }
+
+    private int hight() {
+        if (this == null) {
+            return 0;
+        }
+        else if (isLeaf()) {
+            return 1;
+        } else {
+            return Math.max(lft == null ? 0 : ((AVLTree)lft).hight(),rgt == null ? 0 : ((AVLTree)rgt).hight()) + 1;
+        }
+    }
     
     private void adjustLevel(Point t) {
         if (!p.equals(t)) {
-            int lc = (lft == null) ? 0 : lft.count();
-            int rc = (rgt == null) ? 0 : rgt.count();
+            int lc = (lft == null) ? 0 : ((AVLTree)lft).hight();
+            int rc = (rgt == null) ? 0 : ((AVLTree)rgt).hight();
             bf = (short)Math.abs(lc - rc);
             if (p.isLess(t)) {
                 ((AVLTree)rgt).adjustLevel(t);
