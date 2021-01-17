@@ -189,7 +189,7 @@ public class DCEL implements Constant, java.io.Serializable {
         if (node.edgeType() == CLOSED) {
             do {
                 ret = ret.node.p_b;
-            } while (ret.node.edgeType() == SEMI);
+            } while (ret.node.edgeType() != SEMI);
         }
         return ret;
     }

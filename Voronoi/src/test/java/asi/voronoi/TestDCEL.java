@@ -234,6 +234,23 @@ public class TestDCEL {
         } catch(Exception re) {
             assertTrue(re.getMessage(),re.getMessage().contains("4 points co-circular"));
         }
+        // DCEL of 3 parallel point
+        dc1 = new DCEL(new Point(0,0), new Point(0,2));
+        try {
+            dc1.merge(new Point(0,4));
+            fail("exception expected");
+        } catch(Exception re) {
+            assertTrue(re.getMessage(),re.getMessage().contains("3 points on a line"));
+        }
+        // DCEL of 4 parallel point
+        dc1 = new DCEL(new Point(0,0), new Point(0,2));
+        dc2 = new DCEL(new Point(0,4), new Point(0,6));
+        try {
+            dc1.merge(dc2);
+            fail("exception expected");
+        } catch(Exception re) {
+            assertTrue(re.getMessage(),re.getMessage().contains("4 points on a line"));
+        }
         
         
     }

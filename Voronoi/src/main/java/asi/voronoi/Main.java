@@ -1,51 +1,58 @@
 package asi.voronoi;
 
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class Main {
     public static void main(String argv[]) {
-        if (argv.length != 1) {
-            System.out.println("Usage: java -jar voronoi.jar n\n n: number of points");
+        Main m = new Main();
+        if (true) {
+            m.drawFromFile(argv[0]);
         } else {
-            long startTime, endTime;
-            int numberOfPoints = Integer.parseInt(argv[0]);
-            boolean success = false;
-            for (int j = 0; (j < 10) && (!success); j++) {
-                AVLTree t = new AVLTree(new Point((int) (Math.random() * 5 * numberOfPoints),
-                        (int) (Math.random() * 5 * numberOfPoints)));
-                for (int i = 0; i < (numberOfPoints - 1); i++) {
-                    t = (AVLTree) t.insertNode(new Point((int) (Math.random() * 5 * numberOfPoints),
-                            (int) (Math.random() * 5 * numberOfPoints)));
-                }
-
-                try {
-                    int no = (int) (Math.random() * 5 * numberOfPoints);
-//	                Serializer.store("AVL"+no,t);
-                    VoronoiTree v = new VoronoiTree();
-                    v.buildTree(t);
-                    System.out.println("# points: " + t.count());
-                    startTime = System.currentTimeMillis();
-                    v.buildStructure();
-                    success = true;
-//                    Serializer.store("vor"+no,v);
-//                    DrawBinaryTree dbt = new DrawBinaryTree(t);
-//                    DrawVoronoi dvt = new DrawVoronoi(v);
-//                    DrawConveksHull dch = new DrawConveksHull(((DCEL)v.getInfo()).vor2CH());
-//                    new DrawingBoard(dbt);
-//                    new DrawingBoard(dvt);
-//                    new DrawingBoard(dch);
-//                    v.toFile();
-                    DrawObject da = new DrawVoronoi(v);
-                    DrawingBoard drawingBoard = new DrawingBoard(da);
-//					v = (VoronoiTree)Serializer.fetch("vor"+no);
-                    endTime = System.currentTimeMillis();
-//					System.out.println(v);
-//                    System.out.println();
-//                    AVLTree a = (AVLTree)Serializer.fetch("AVL"+no);
-//					System.out.println(a);
-                    System.out.println("Used time (millisec): "+(endTime - startTime));
-                } catch (Exception e) {
-                    System.out.println("Failed: " + e);
-                }
-            }
+            m.drawRandom(Integer.parseInt(argv[0]));
         }
     }
+
+    public void drawRandom(int noOfPoints) {
+        boolean success = false;
+        for (int j = 0; (j < 10) && (!success); j++) {
+            AVLTree t = new AVLTree(new Point((int) (Math.random() * 5 * noOfPoints),
+            (int) (Math.random() * 5 * noOfPoints)));
+            for (int i = 0; i < (noOfPoints - 1); i++) {
+                t = (AVLTree) t.insertNode(new Point((int) (Math.random() * 5 * noOfPoints),
+                (int) (Math.random() * 5 * noOfPoints)));
+            }
+            try {
+                int no = (int) (Math.random() * 5 * noOfPoints);
+                //	                Serializer.store("AVL"+no,t);
+                VoronoiTree v = new VoronoiTree();
+                v.buildTree(t);
+                System.out.println("# points: " + t.count());
+                v.buildStructure();
+                success = true;
+                DrawObject da = new DrawVoronoi(v);
+                DrawingBoard drawingBoard = new DrawingBoard(da);
+            } catch (Exception e) {
+                System.out.println("Failed: " + e);
+            }  
+        }
+    }
+    
+    public void drawFromFile(String filename) {
+        String folderName = "src/test/resources/";
+        VoronoiTree c = new VoronoiTree();
+        try {
+            // build and write actual result files
+            c.buildTree(folderName+filename);
+            c.buildStructure();
+            DrawObject da = new DrawVoronoi(c);
+            DrawingBoard drawingBoard = new DrawingBoard(da);
+        }
+        catch (IOException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
+
 }
