@@ -7,10 +7,10 @@ import java.util.logging.Logger;
 public class Main {
     public static void main(String argv[]) {
         Main m = new Main();
-        if (true) {
-            m.drawFromFile(argv[0]);
+        if (Boolean.parseBoolean(argv[0])) {
+            m.drawFromFile(argv[1]);
         } else {
-            m.drawRandom(Integer.parseInt(argv[0]));
+            m.drawRandom(Integer.parseInt(argv[1]));
         }
     }
 
