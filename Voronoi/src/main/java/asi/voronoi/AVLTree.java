@@ -1,7 +1,12 @@
 package asi.voronoi;
 
 public class AVLTree extends BinaryTree {
-    private short bf;
+    private enum RotationType {
+        LL, LRa, LRbc, RLa, RLbc, RR, NA;
+    }
+    
+    
+    private int bf;
 
     public AVLTree(Point p) {
         super(p);
@@ -12,104 +17,210 @@ public class AVLTree extends BinaryTree {
     public BinaryTree newNode(Point p) {
         return new AVLTree(p);
     }
-
-    @Override
-    public BinaryTree insertNode(Point t) {
-        AVLTree self = this;
-        if (!inTree(t)) {
-            AVLTree a, b, c, p1, q;
-            BinaryTree f, y;
-            short d;
-            a = p1 = this;
-            f = q = null;
-            do {
-                if (p1.bf != 0) {
-                    a = p1;
-                    f = q;
-                }
-                q = p1;
-                p1 = p1.p.isLess(t) ? (AVLTree) p1.rgt : (AVLTree) p1.lft;
-            } while (p1 != null);
-            y = newNode(t);
-            if (q.p.isLess(t)) {
-                q.rgt = y;
+    
+    private int height(BinaryTree b) {
+        if (b == null) {
+            return 0;
+        } else {
+            return Math.max(height(b.lft),height(b.rgt))+1;
+        }
+    }
+    
+    private int balanceFactor(BinaryTree t) {
+        if (t == null || t.isLeaf()) {
+            return 0;
+        } else {
+            return height(t.lft) - height(t.rgt);
+        }
+    }
+    
+    private void adjustLevel(Point t) {
+        if (!p.equals(t)) {
+            bf = balanceFactor(this);
+            if (p.isLess(t)) {
+                ((AVLTree)rgt).adjustLevel(t);
             } else {
-                q.lft = y;
-            }
-            p1 = a.p.isLess(t) ? (AVLTree) a.rgt : (AVLTree) a.lft;
-            d = a.p.isLess(t) ? (short) -1 : (short) 1;
-            b = p1;
-            while (p1 != y) {
-                p1.bf = p1.p.isLess(t) ? (short) -1 : (short) 1;
-                p1 = p1.p.isLess(t) ? (AVLTree) p1.rgt : (AVLTree) p1.lft;
-            }
-            if (a.bf == 0) {
-                a.bf = d;
-            } else if ((a.bf + d) == 0) {
-                a.bf = 0;
-            } else {
-                if (d == 1) {
-                    if (b.bf == 1) {
-                        a.lft = b.rgt;
-                        b.rgt = a;
-                        a.bf = b.bf = 0;
-                    } else {
-                        c = (AVLTree) b.rgt;
-                        b.rgt = c.lft;
-                        a.lft = c.rgt;
-                        c.lft = b;
-                        c.rgt = a;
-                        switch (c.bf) {
-                            case 1:
-                                a.bf = -1;
-                                b.bf = 0;
-                                break;
-                            case - 1:
-                                a.bf = 0;
-                                b.bf = 1;
-                                break;
-                            case 0:
-                                a.bf = b.bf = 0;
-                                break;
-                        }
-                        c.bf = 0;
-                        b = c;
-                    }
-                } else if (b.bf == -1) {
-                    a.rgt = b.lft;
-                    b.lft = a;
-                    a.bf = b.bf = 0;
-                } else {
-                    c = (AVLTree) b.lft;
-                    b.lft = c.rgt;
-                    a.rgt = c.lft;
-                    c.lft = a;
-                    c.rgt = b;
-                    switch (c.bf) {
-                        case 1:
-                            a.bf = 0;
-                            b.bf = -1;
-                            break;
-                        case - 1:
-                            a.bf = 1;
-                            b.bf = 0;
-                            break;
-                        case 0:
-                            a.bf = b.bf = 0;
-                            break;
-                    }
-                    c.bf = 0;
-                    b = c;
-                }
-                if (f == null) {
-                    self = b;
-                } else if (f.lft == a) {
-                    f.lft = b;
-                } else if (f.rgt == a) {
-                    f.rgt = b;
-                }
+                ((AVLTree)lft).adjustLevel(t);            
             }
         }
+    }
+    
+    private RotationType findRotation() {
+        RotationType ret = RotationType.NA;
+        if ((this.bf == 2) && (((AVLTree)this.lft)).bf == 1) {
+            ret = RotationType.LL;
+        } else if ((this.bf == 2) && 
+                   ((((AVLTree)this.lft)).bf == -1) && 
+                   ((((AVLTree)this.lft.rgt)).bf == 0)) {
+            ret = RotationType.LRa;
+        } else if ((this.bf == 2) && 
+                   ((((AVLTree)this.lft)).bf == -1)) {
+            ret = RotationType.LRbc;
+        }
+        if ((this.bf == 2) && (((AVLTree)this.lft)).bf == 1) {
+            ret = RotationType.LL;
+        } else if ((this.bf == -2) && 
+                   ((((AVLTree)this.rgt)).bf == 1) && 
+                   ((((AVLTree)this.rgt.lft)).bf == 0)) {
+            ret = RotationType.RLa;
+        } else if ((this.bf == -2) && 
+                   ((((AVLTree)this.rgt)).bf == 1)) {            
+            ret = RotationType.RLbc;
+        } else if ((this.bf == -2) && (((AVLTree)this.rgt).bf == -1)) {
+            ret = RotationType.RR;
+        }
+        return ret;
+    }
+    
+    private AVLTree trace(Point cp) {
+        if (!p.equals(cp)) {
+            if (p.isLess(cp)) {
+                if (rgt.p.equals(cp)) {
+                    return this;
+                }
+                return ((AVLTree)rgt).trace(cp);
+            } else {
+                if (lft.p.equals(cp)) {
+                    return this;
+                }
+                return ((AVLTree)lft).trace(cp);                
+            }
+        } else {
+            return this; 
+        }
+    }
+    
+    private AVLTree checkAndBalance(Point t) {
+        AVLTree self = this;
+        AVLTree gp, parent, a, c;
+        if (!p.equals(t)) {
+            parent = trace(t);
+            gp = trace(parent.p);
+            a = gp;
+            while ((a != self) && ((Math.abs(balanceFactor(a)) <= 1) &&
+                                   (Math.abs(balanceFactor(a)) <= 1))) {
+                // go up one level
+                a = trace(a.p);
+            }
+            if (Math.abs(a.bf) > 1) {
+                parent = trace(a.p);
+                // we have a unbalanced subtree 
+                c = rebalance(a);
+                // fix the parent of previous root 
+                // of subtree to new root of subtree
+                if (self == a) {
+                    // root needs change
+                    self = c;                    
+                } else if (parent.lft.p.equals(a.p)) {
+                    parent.lft = c;
+                } else if (parent.rgt.p.equals(a.p)){
+                    parent.rgt = c;
+                }
+            }        
+        }
         return self;
+    }
+
+    private AVLTree rebalance(AVLTree a) {
+        AVLTree c = null;
+        AVLTree ar, b, bl, br, cl, cr, al;
+        switch (a.findRotation()) {
+            case LL: // init var for LL
+                b = (AVLTree)a.lft;
+                br = (AVLTree)b.rgt;
+                // do transform
+                b.rgt = a;
+                a.lft = br;
+                a.bf = balanceFactor(a);
+                b.bf = balanceFactor(b);
+                // set c to new root of subtree
+                c = b;
+                break;
+            case LRa: // init var LRa
+                b = (AVLTree)a.lft;
+                c = (AVLTree)b.rgt;
+                // do transform
+                c.lft = b;
+                c.rgt = a;
+                b.rgt = null;
+                a.lft = null;
+                b.bf = a.bf = c.bf = 0;
+                break;
+            case LRbc: // init var for LRbc
+                b = (AVLTree)a.lft;
+                c = (AVLTree)b.rgt;
+                cl = (AVLTree)c.lft;
+                cr = (AVLTree)c.rgt;
+                // do transform
+                c.lft = b;
+                c.rgt = a;
+                b.rgt = cl;
+                a.lft = cr;
+                b.bf = balanceFactor(b);
+                a.bf = balanceFactor(a);
+                c.bf = balanceFactor(c);
+                break;
+            case RR: // init var for RR
+                b = (AVLTree)a.rgt;
+                bl = (AVLTree)b.lft;
+                // do transform
+                b.lft = a;
+                a.rgt = bl;
+                a.bf = balanceFactor(a);
+                b.bf = balanceFactor(b);
+                // set c to new root of subtree
+                c = b;
+                break;
+            case RLa: // init var RLa
+                b = (AVLTree)a.rgt;
+                c = (AVLTree)b.lft;
+                // do transform
+                c.lft = a;
+                c.rgt = b;
+                b.lft = null;
+                a.rgt = null;
+                a.bf = b.bf = c.bf = 0;
+                break;
+            case RLbc: // init var for RLbc
+                b = (AVLTree)a.rgt;
+                c = (AVLTree)b.lft;
+                cl = (AVLTree)c.lft;
+                cr = (AVLTree)c.rgt;
+                // do transform
+                c.lft = a;
+                c.rgt = b;
+                a.rgt = cl;
+                b.lft = cr;
+                a.bf = balanceFactor(a);
+                b.bf = balanceFactor(b);
+                c.bf = balanceFactor(c);
+                break;
+        }
+        return c;
+    }
+    
+    @Override
+    protected void addNode(Point t, BinaryTree tmp) {
+        BinaryTree t1 = newNode(t);
+        AVLTree parent = trace(tmp.p);
+        if (tmp.p.isLess(t)) {
+            tmp.rgt = t1;
+            ((AVLTree)tmp).bf = ((AVLTree)tmp).bf - 1;
+        } else {
+            tmp.lft = t1;
+            ((AVLTree)tmp).bf = ((AVLTree)tmp).bf + 1;
+        }
+        parent.bf = balanceFactor(parent);
+    }
+    
+    @Override
+    public BinaryTree insertNode(Point t) {
+        BinaryTree ret;
+        super.insertNode(t);
+        // adjust level
+        adjustLevel(t);
+        //check and rebalance if needed
+        ret = checkAndBalance(t);
+        return ret;
     }
 }

@@ -30,28 +30,50 @@ public class BinaryTree implements java.io.Serializable, ModelObject {
     public BinaryTree rgt() {
         return rgt;
     }
-
-    public boolean inTree(Point t) {
-        boolean ret;
+    
+    public BinaryTree findNode(Point t) {
+        BinaryTree ret = this;
         if (p.equals(t)) {
-            ret = true;
+            return ret;
         } else if (p.isLess(t)) {
-            ret = (rgt == null) ? false : rgt.inTree(t);
+            ret = (rgt == null) ? null : rgt.findNode(t);
         } else {
-            ret = (lft == null) ? false : lft.inTree(t);
+            ret = (lft == null) ? null : lft.findNode(t);
         }
         return ret;
     }
 
-    public BinaryTree insertNode(Point p) {
-        if (!this.p.equals(p)) {
-            if (this.p.isLess(p)) {
-                rgt = (rgt == null) ? newNode(p) : rgt.insertNode(p);
-            } else {
-                lft = (lft == null) ? newNode(p) : lft.insertNode(p);
-            }
+    public boolean inTree(Point t) {
+        return (findNode(t) != null);
+    }
+
+    public BinaryTree insertNode(Point t) {
+        // non recursive insert
+         if (inTree(t)) {
+            // already in tree
+            return this;
         }
-        return this;
+        BinaryTree tmp = this;
+        while (((tmp.lft != null) && t.isLess(tmp.p)) ||
+               ((tmp.rgt != null) && tmp.p.isLess(t))) {
+            if (tmp.p.isLess(t)) {
+                tmp = tmp.rgt;
+            } else {
+                tmp = tmp.lft;
+            }
+        }    
+        // insert the new node and adjust subtree
+        addNode(t, tmp);
+        return tmp;
+    }
+
+    protected void addNode(Point t, BinaryTree tmp) {
+        BinaryTree t1 = newNode(t);
+        if (tmp.p.isLess(t)) {
+            tmp.rgt = t1;
+        } else {
+            tmp.lft = t1;
+        }
     }
 
     public Point max() {
