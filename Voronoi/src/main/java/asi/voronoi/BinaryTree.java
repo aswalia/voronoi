@@ -76,6 +76,16 @@ public class BinaryTree implements java.io.Serializable, ModelObject {
         }
     }
 
+    protected int height(BinaryTree b) {
+        if (b == null) {
+            return 0;
+        } else {
+            return Math.max(height(b.lft),height(b.rgt))+1;
+        }
+    }
+    
+
+
     public Point max() {
         Point ret;
         if (rgt == null) {
@@ -203,7 +213,7 @@ public class BinaryTree implements java.io.Serializable, ModelObject {
         }
         return ret;
     }
-
+    
     public static BinaryTree fetch(String filename) throws java.io.IOException, ClassNotFoundException {
         return (BinaryTree) Serializer.fetch(filename);
     }

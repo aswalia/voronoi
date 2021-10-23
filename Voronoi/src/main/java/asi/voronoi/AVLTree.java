@@ -18,14 +18,6 @@ public class AVLTree extends BinaryTree {
         return new AVLTree(p);
     }
     
-    private int height(BinaryTree b) {
-        if (b == null) {
-            return 0;
-        } else {
-            return Math.max(height(b.lft),height(b.rgt))+1;
-        }
-    }
-    
     private int balanceFactor(BinaryTree t) {
         if (t == null || t.isLeaf()) {
             return 0;
@@ -72,18 +64,18 @@ public class AVLTree extends BinaryTree {
         return ret;
     }
     
-    private AVLTree trace(Point cp) {
+    private AVLTree parent(Point cp) {
         if (!p.equals(cp)) {
             if (p.isLess(cp)) {
                 if (rgt.p.equals(cp)) {
                     return this;
                 }
-                return ((AVLTree)rgt).trace(cp);
+                return ((AVLTree)rgt).parent(cp);
             } else {
                 if (lft.p.equals(cp)) {
                     return this;
                 }
-                return ((AVLTree)lft).trace(cp);                
+                return ((AVLTree)lft).parent(cp);                
             }
         } else {
             return this; 
@@ -94,16 +86,16 @@ public class AVLTree extends BinaryTree {
         AVLTree self = this;
         AVLTree gp, parent, a, c;
         if (!p.equals(t)) {
-            parent = trace(t);
-            gp = trace(parent.p);
+            parent = parent(t);
+            gp = parent(parent.p);
             a = gp;
             while ((a != self) && ((Math.abs(balanceFactor(a)) <= 1) &&
                                    (Math.abs(balanceFactor(a)) <= 1))) {
                 // go up one level
-                a = trace(a.p);
+                a = parent(a.p);
             }
             if (Math.abs(a.bf) > 1) {
-                parent = trace(a.p);
+                parent = parent(a.p);
                 // we have a unbalanced subtree 
                 c = rebalance(a);
                 // fix the parent of previous root 
@@ -202,7 +194,7 @@ public class AVLTree extends BinaryTree {
     @Override
     protected void addNode(Point t, BinaryTree tmp) {
         BinaryTree t1 = newNode(t);
-        AVLTree parent = trace(tmp.p);
+        AVLTree parent = parent(tmp.p);
         if (tmp.p.isLess(t)) {
             tmp.rgt = t1;
             ((AVLTree)tmp).bf = ((AVLTree)tmp).bf - 1;
