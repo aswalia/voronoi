@@ -3,8 +3,7 @@ package asi.voronoi;
 public class AVLTree extends BinaryTree {
     private enum RotationType {
         LL, LRa, LRbc, RLa, RLbc, RR, NA;
-    }
-    
+    }  
     
     private int bf;
 
@@ -39,26 +38,26 @@ public class AVLTree extends BinaryTree {
     
     private RotationType findRotation() {
         RotationType ret = RotationType.NA;
-        if ((this.bf == 2) && (((AVLTree)this.lft)).bf == 1) {
+        if ((bf == 2) && ((AVLTree)lft).bf == 1) {
             ret = RotationType.LL;
-        } else if ((this.bf == 2) && 
-                   ((((AVLTree)this.lft)).bf == -1) && 
-                   ((((AVLTree)this.lft.rgt)).bf == 0)) {
+        } else if ((bf == 2) && 
+                   (((AVLTree)lft).bf == -1) && 
+                   (((AVLTree)lft.rgt).bf == 0)) {
             ret = RotationType.LRa;
-        } else if ((this.bf == 2) && 
-                   ((((AVLTree)this.lft)).bf == -1)) {
+        } else if ((bf == 2) && 
+                   (((AVLTree)lft).bf == -1)) {
             ret = RotationType.LRbc;
         }
-        if ((this.bf == 2) && (((AVLTree)this.lft)).bf == 1) {
+        if ((bf == 2) && ((AVLTree)lft).bf == 1) {
             ret = RotationType.LL;
-        } else if ((this.bf == -2) && 
-                   ((((AVLTree)this.rgt)).bf == 1) && 
-                   ((((AVLTree)this.rgt.lft)).bf == 0)) {
+        } else if ((bf == -2) && 
+                   (((AVLTree)rgt).bf == 1) && 
+                   (((AVLTree)rgt.lft).bf == 0)) {
             ret = RotationType.RLa;
-        } else if ((this.bf == -2) && 
-                   ((((AVLTree)this.rgt)).bf == 1)) {            
+        } else if ((bf == -2) && 
+                   (((AVLTree)rgt).bf == 1)) {            
             ret = RotationType.RLbc;
-        } else if ((this.bf == -2) && (((AVLTree)this.rgt).bf == -1)) {
+        } else if ((bf == -2) && ((AVLTree)rgt).bf == -1) {
             ret = RotationType.RR;
         }
         return ret;
@@ -114,8 +113,7 @@ public class AVLTree extends BinaryTree {
     }
 
     private AVLTree rebalance(AVLTree a) {
-        AVLTree c = null;
-        AVLTree ar, b, bl, br, cl, cr, al;
+        AVLTree b, bl, br, cl, cr, c = null;
         switch (a.findRotation()) {
             case LL: // init var for LL
                 b = (AVLTree)a.lft;
@@ -183,9 +181,6 @@ public class AVLTree extends BinaryTree {
                 c.rgt = b;
                 a.rgt = cl;
                 b.lft = cr;
-                a.bf = balanceFactor(a);
-                b.bf = balanceFactor(b);
-                c.bf = balanceFactor(c);
                 break;
         }
         return c;
