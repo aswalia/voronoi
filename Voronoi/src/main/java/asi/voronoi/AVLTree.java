@@ -88,8 +88,7 @@ public class AVLTree extends BinaryTree {
             parent = parent(t);
             gp = parent(parent.p);
             a = gp;
-            while ((a != self) && ((Math.abs(balanceFactor(a)) <= 1) &&
-                                   (Math.abs(balanceFactor(a)) <= 1))) {
+            while ((a != self) && (Math.abs(balanceFactor(a)) <= 1)) {
                 // go up one level
                 a = parent(a.p);
             }
