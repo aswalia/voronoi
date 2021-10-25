@@ -121,8 +121,6 @@ public class AVLTree extends BinaryTree {
                 // do transform
                 b.rgt = a;
                 a.lft = br;
-                a.bf = balanceFactor(a);
-                b.bf = balanceFactor(b);
                 // set c to new root of subtree
                 c = b;
                 break;
@@ -134,7 +132,6 @@ public class AVLTree extends BinaryTree {
                 c.rgt = a;
                 b.rgt = null;
                 a.lft = null;
-                b.bf = a.bf = c.bf = 0;
                 break;
             case LRbc: // init var for LRbc
                 b = (AVLTree)a.lft;
@@ -146,9 +143,6 @@ public class AVLTree extends BinaryTree {
                 c.rgt = a;
                 b.rgt = cl;
                 a.lft = cr;
-                b.bf = balanceFactor(b);
-                a.bf = balanceFactor(a);
-                c.bf = balanceFactor(c);
                 break;
             case RR: // init var for RR
                 b = (AVLTree)a.rgt;
@@ -156,8 +150,6 @@ public class AVLTree extends BinaryTree {
                 // do transform
                 b.lft = a;
                 a.rgt = bl;
-                a.bf = balanceFactor(a);
-                b.bf = balanceFactor(b);
                 // set c to new root of subtree
                 c = b;
                 break;
@@ -169,7 +161,6 @@ public class AVLTree extends BinaryTree {
                 c.rgt = b;
                 b.lft = null;
                 a.rgt = null;
-                a.bf = b.bf = c.bf = 0;
                 break;
             case RLbc: // init var for RLbc
                 b = (AVLTree)a.rgt;
