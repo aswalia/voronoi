@@ -15,7 +15,7 @@ class DCELNode implements Constant, java.io.Serializable {
 
     private static void initFile() throws java.io.IOException {
         String dateString = (new SimpleDateFormat("MMddhhmm")).format(new Date());
-        String fileName = "/c:/Development/java/output/v" + dateString + ".txt";
+        String fileName = "/home/arvinder/Development/Java/Voronoi/output/v" + dateString + ".txt";
         System.out.println("FileName: " + fileName);
         fw = new FileWriter(fileName);
         bw = new BufferedWriter(fw);
