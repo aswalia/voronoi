@@ -41,13 +41,36 @@ public class TestDCEL {
     @Test
     public void testVor2CH() throws Exception {
         ConveksHull ch1 = d1.vor2CH();
+        String exp = "(0.0,5.0)(1.0,0.0)";
+        String actual = ch1.toString();
+        assertTrue(exp + " : " + actual,actual.contains(new StringBuffer(exp)));        
         ConveksHull ch2 = d2.vor2CH();
-        d2.merge(d1);
+        exp = "(2.0,4.0)(2.0,7.0)";
+        actual = ch2.toString();
+        assertTrue(exp + " : " + actual,actual.contains(new StringBuffer(exp)));        
+        d2.merge(d1); 
         ConveksHull ch12 = d2.vor2CH();
+        exp = "(0.0,5.0)(1.0,0.0)(2.0,4.0)(2.0,7.0)";
+        actual = ch12.toString();
+        assertTrue(exp + " : " + actual,actual.contains(new StringBuffer(exp)));        
         ConveksHull ch3 = d3.vor2CH();
+        exp = "(5.0,0.0)(5.0,4.0)";
+        actual = ch3.toString();
+        assertTrue(exp + " : " + actual,actual.contains(new StringBuffer(exp)));        
         ConveksHull ch4 = d4.vor2CH();
+        exp = "(6.0,7.0)(7.0,4.0)";
+        actual = ch4.toString();
+        assertTrue(exp + " : " + actual,actual.contains(new StringBuffer(exp)));        
         d3.merge(d4);
         ConveksHull ch34 = d3.vor2CH();
+        exp = "(5.0,0.0)(7.0,4.0)(6.0,7.0)(5.0,4.0)";
+        actual = ch34.toString();
+        assertTrue(exp + " : " + actual,actual.contains(new StringBuffer(exp)));
+        d2.merge(d3);
+        ConveksHull ch23 = d2.vor2CH();
+        exp = "(0.0,5.0)(1.0,0.0)(5.0,0.0)(7.0,4.0)(6.0,7.0)(2.0,7.0)";
+        actual = ch23.toString();
+        assertTrue(exp + " : " + actual,actual.contains(new StringBuffer(exp)));
     }
 
     @Test
