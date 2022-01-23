@@ -1,46 +1,59 @@
 package asi.voronoi.javafx;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Application;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.ReadOnlyDoubleProperty;
-import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
 import javafx.scene.Scene;
-import javafx.scene.layout.Pane;
+import javafx.scene.control.Button;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 public class FXMain extends Application {
 
-  public static void main(String[] args) {
-    launch(args);
-  }
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+        String path = "/media/public/Shared Pictures/pics/";
+        StringBuffer sb = new StringBuffer(path);
 
-  @Override
-  public void start(Stage primaryStage) {
+        primaryStage.setTitle("ImageView Experiment");
 
-    Pane pane = new Pane();
+        ScrollPane scrollPane = new ScrollPane();
 
-    ReadOnlyDoubleProperty widthProperty = pane.widthProperty();
-    widthProperty.addListener((ObservableValue<? extends Number> observableValue, Number oldVal, Number newVal) -> {
-        System.out.println("widthProperty changed from "
-                + oldVal.doubleValue() + " to " + newVal.doubleValue());
-    });
+        Button button = new Button("Select File");
+        button.setOnAction((ActionEvent e) -> {
+            try {
+                FileChooser fileChooser = new FileChooser();
+                fileChooser.setInitialDirectory(new File(sb.toString()));
+                File selectedFile = fileChooser.showOpenDialog(primaryStage);
+                sb.delete(0, sb.length());
+                sb.append(selectedFile.getParent());
+                FileInputStream input = new FileInputStream(selectedFile);
+                Image image = new Image(input);
+                ImageView imageView = new ImageView(image);
+                scrollPane.setContent(imageView);
+                scrollPane.pannableProperty().set(true);
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(FXMain.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
 
+        HBox hbox = new HBox(button, scrollPane);
 
-    DoubleProperty prefWidthProperty = pane.prefWidthProperty();
-    prefWidthProperty.addListener(
-      (ObservableValue<? extends Number> prop,
-        Number oldVal, Number newVal) -> {
+        Scene scene = new Scene(hbox, 1000, 700);
+        primaryStage.setScene(scene);
+        primaryStage.show();
 
-        System.out.println("prefWidthProperty changed from "
-          + oldVal.doubleValue() + " to " + newVal.doubleValue());
-    });
+    }
 
-    prefWidthProperty.set(123);
-
-    Scene scene = new Scene(pane, 1024, 800, true);
-    primaryStage.setScene(scene);
-    primaryStage.setTitle("2D Example");
-
-    primaryStage.show();
-  }
+    public static void main(String[] args) {
+        Application.launch(args);
+    }
 }
