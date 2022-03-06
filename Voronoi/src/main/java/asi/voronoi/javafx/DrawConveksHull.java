@@ -1,4 +1,8 @@
-package asi.voronoi;
+package asi.voronoi.javafx;
+
+import asi.voronoi.CircularLinkedList;
+import asi.voronoi.ConveksHull;
+import asi.voronoi.Line;
 
 public class DrawConveksHull extends DrawObject {
 

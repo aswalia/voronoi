@@ -5,7 +5,7 @@ import java.io.FileWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-class DCELNode implements Constant, java.io.Serializable {
+public class DCELNode implements Constant, java.io.Serializable {
     private static FileWriter fw;
     private static BufferedWriter bw;
     double a_b, a_e;
@@ -45,6 +45,30 @@ class DCELNode implements Constant, java.io.Serializable {
         ret = top + " " + bottom + "\n";
         ret += "lft and rgt: " + f_l + " " + f_r + "\n";
         return ret;
+    }
+    
+    public boolean isUsed() {
+        return used;
+    }
+    
+    public void used() {
+        used = true;
+    }
+    
+    public DCEL getP_b() {
+        return p_b;
+    }
+
+    public DCEL getP_e() {
+        return p_e;
+    }
+    
+    public Point getF_l() {
+        return f_l;
+    }
+
+    public Point getF_r() {
+        return f_r;
     }
 
     public DCELNode() {
@@ -115,7 +139,7 @@ class DCELNode implements Constant, java.io.Serializable {
         return f_l.equals(m.f_l) && f_r.equals(m.f_r);
     }
 
-    String printDCEL() {
+    public String printDCEL() {
         String ret = "";
         if (!used) {
             used = true;
@@ -130,7 +154,7 @@ class DCELNode implements Constant, java.io.Serializable {
         return ret;
     }
 
-    DCELNode copyDCEL() {
+    public DCELNode copyDCEL() {
         DCELNode ret = this;
         if (!used) {
             used = true;
@@ -145,7 +169,7 @@ class DCELNode implements Constant, java.io.Serializable {
         return ret;
     }
 
-    void resetMark() {
+    public void resetMark() {
         if (used) {
             used = false;
             if (p_b != null) {
@@ -157,7 +181,7 @@ class DCELNode implements Constant, java.io.Serializable {
         }
     }
 
-    DCELNode copy() {
+    public DCELNode copy() {
         DCELNode ret = copyDCEL();
         resetMark();
         return ret;

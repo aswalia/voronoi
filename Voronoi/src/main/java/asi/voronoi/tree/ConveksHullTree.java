@@ -1,4 +1,8 @@
-package asi.voronoi;
+package asi.voronoi.tree;
+
+import asi.voronoi.ConveksHull;
+import asi.voronoi.Point;
+import asi.voronoi.tree.IntervalTree;
 
 public class ConveksHullTree extends IntervalTree {
     @Override

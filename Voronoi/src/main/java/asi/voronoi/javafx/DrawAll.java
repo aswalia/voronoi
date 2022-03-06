@@ -1,4 +1,7 @@
-package asi.voronoi;
+package asi.voronoi.javafx;
+
+import asi.voronoi.DCEL;
+import asi.voronoi.tree.VoronoiTree;
 
 public class DrawAll extends DrawObject {
     private DrawObject dv, dch, dit;

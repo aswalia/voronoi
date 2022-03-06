@@ -1,5 +1,7 @@
-package asi.voronoi;
+package asi.voronoi.javafx;
 
+import asi.voronoi.tree.IntervalTree;
+import asi.voronoi.Point;
 import java.util.LinkedList;
 
 public class DrawIntervalTree extends DrawObject {

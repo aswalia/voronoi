@@ -1,4 +1,6 @@
-package asi.voronoi;
+package asi.voronoi.javafx;
+
+import asi.voronoi.tree.BinaryTree;
 
 public class DrawBinaryTree extends DrawObject {
     private java.util.LinkedList<BinaryTree> ll;

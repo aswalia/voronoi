@@ -18,8 +18,12 @@ public class DCEL implements Constant, java.io.Serializable {
         node = new DCELNode(lft, rgt);
     }
 
-    DCEL(DCELNode d) {
+    public DCEL(DCELNode d) {
         node = d;
+    }
+    
+    public DCELNode getNode() {
+        return node;
     }
 
     @Override
@@ -122,7 +126,7 @@ public class DCEL implements Constant, java.io.Serializable {
         do {
             listElem = (DCELPair) mergeList.removeFirst();
             listElem.nextElem.adjustSigmaChain(listElem.currentElem, listElem.cutBy);
-        } while (mergeList.size() > 0);
+        } while (!mergeList.isEmpty());
         return ret;
     }
 
@@ -164,7 +168,7 @@ public class DCEL implements Constant, java.io.Serializable {
         do {
             listElem = (DCELPair) mergeList.removeFirst();
             listElem.nextElem.adjustSigmaChain(listElem.currentElem, listElem.cutBy);
-        } while (mergeList.size() > 0);
+        } while (!mergeList.isEmpty());
         return ret;
     }
 
