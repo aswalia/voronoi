@@ -3,8 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package asi.voronoi;
+package asi.voronoi.tree;
 
+import asi.voronoi.Point;
+import asi.voronoi.tree.ConveksHullTree;
+import asi.voronoi.tree.IntervalTree;
+import asi.voronoi.tree.BinaryTree;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 

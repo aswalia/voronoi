@@ -1,17 +1,23 @@
 package asi.voronoi;
 
-import java.io.IOException;
+import asi.voronoi.tree.AVLTree;
+import asi.voronoi.tree.VoronoiTree;
+import asi.voronoi.javafx.DrawingBoard;
+import asi.voronoi.javafx.DrawObject;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Main {
-    private static int FACTOR = 50;
-    private VoronoiTree v;
+    private static final int FACTOR = 50;
+    private static VoronoiTree v;
+    private static AVLTree t;
+    private static DrawingBoard d;
+    private static DrawObject dobj;
     
-    private void generateVoronoi(int noOfPoints) {
+    private static void generateVoronoi(int noOfPoints) {
         boolean success = false;
         for (int j = 0; (j < 10) && (!success); j++) {
-            AVLTree t = new AVLTree(new Point((int) (Math.random() * FACTOR * noOfPoints),
+            t = new AVLTree(new Point((int) (Math.random() * FACTOR * noOfPoints),
             (int) (Math.random() * FACTOR * noOfPoints)));
             for (int i = 0; i < (noOfPoints - 1); i++) {
                 t = (AVLTree) t.insertNode(new Point((int) (Math.random() * FACTOR * noOfPoints),
@@ -36,7 +42,7 @@ public class Main {
         Main m = new Main();
         
         if (argv.length == 1) {
-            m.generateVoronoi(Integer.parseInt(argv[0]));
+            generateVoronoi(Integer.parseInt(argv[0]));
             try {
                 ((DCEL)m.v.getInfo()).toFile();
             } catch (Exception ex) {
@@ -44,33 +50,38 @@ public class Main {
             }
         } else {
             if (Boolean.parseBoolean(argv[0])) {
-                m.drawFromFile(argv[1]);
+                drawFromFile(argv);
             } else {
-                m.drawRandom(Integer.parseInt(argv[1]));
+                drawRandom(argv);
             }
+            d.main(argv);
         }
     }
 
-    public void drawRandom(int noOfPoints) {
+    public static void drawRandom(String[] argv) {
+/*        int noOfPoints = Integer.parseInt(argv[1]);
         generateVoronoi(noOfPoints);
-        DrawObject da = new DrawVoronoi(v);
-        DrawingBoard drawingBoard = new DrawingBoard(da);
+        dobj = new DrawVoronoi(v);
+        d = new DrawingBoard();
+        d.setDrawObject(dobj);
+*/
     }
     
-    public void drawFromFile(String filename) {
-        String folderName = "src/test/resources/";
+    public static void drawFromFile(String[] argv) {
+/*        String folderName = "src/test/resources/";
         VoronoiTree c = new VoronoiTree();
         try {
             // build and write actual result files
-            c.buildTree(folderName+filename);
+            c.buildTree(folderName+argv[1]);
             c.buildStructure();
-            DrawObject da = new DrawVoronoi(c);
-            DrawingBoard drawingBoard = new DrawingBoard(da);
+            dobj = new DrawVoronoi(c);
+            DrawingBoard d = new DrawingBoard();
+            d.setDrawObject(dobj);
         }
         catch (IOException ex) {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
-
+*/
     }
 
 }

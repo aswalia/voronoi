@@ -1,13 +1,17 @@
-package asi.voronoi;
+package asi.voronoi.javafx;
+
+import asi.voronoi.DCEL;
+import asi.voronoi.DCELNode;
+import asi.voronoi.tree.VoronoiTree;
 
 public class DrawVoronoi extends DrawObject {
-    private java.util.LinkedList<DCELNode> ll;
+    private final java.util.LinkedList<DCELNode> ll;
 
     public DrawVoronoi(VoronoiTree v) {
         mo = v;
         ll = new java.util.LinkedList();
-        drawVoronoi(((DCEL) v.getInfo()).node);
-        ((DCEL) v.getInfo()).node.resetMark();
+        drawVoronoi(((DCEL) v.getInfo()).getNode());
+        ((DCEL) v.getInfo()).getNode().resetMark();
     }
 
     @Override
@@ -22,21 +26,21 @@ public class DrawVoronoi extends DrawObject {
     }
 
     private void drawVoronoi(DCELNode dn) {
-        ll.add(dn);
-        if (!dn.used) {
-            dn.used = true;
-            if (dn.p_b != null) {
-                drawVoronoi(dn.p_b.node);
+        if (!dn.isUsed()) {
+            ll.add(dn);
+            dn.used();
+            if (dn.getP_b() != null) {
+                drawVoronoi(dn.getP_b().getNode());
             }
-            if (dn.p_e != null) {
-                drawVoronoi(dn.p_e.node);
+            if (dn.getP_e() != null) {
+                drawVoronoi(dn.getP_e().getNode());
             }
         }
     }
 
     private void drawEdge(GraphicData g) {
         for (DCELNode dn : ll) {
-            drawPoint(g,dn.f_l);
+            drawPoint(g,dn.getF_l());
             drawLine(g,dn.drawEdge());
         }
     }

@@ -1,5 +1,8 @@
-package asi.voronoi;
+package asi.voronoi.tree;
 
+import asi.voronoi.ModelObject;
+import asi.voronoi.Point;
+import asi.voronoi.Serializer;
 import java.io.*;
 import java.util.StringTokenizer;
 

@@ -3,8 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package asi.voronoi;
+package asi.voronoi.tree;
 
+import asi.voronoi.Point;
+import asi.voronoi.tree.VoronoiTree;
+import asi.voronoi.tree.BinaryTree;
+import asi.voronoi.tree.IntervalTree;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;

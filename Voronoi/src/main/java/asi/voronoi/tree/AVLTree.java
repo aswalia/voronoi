@@ -1,4 +1,6 @@
-package asi.voronoi;
+package asi.voronoi.tree;
+
+import asi.voronoi.Point;
 
 public class AVLTree extends BinaryTree {
     private enum RotationType {

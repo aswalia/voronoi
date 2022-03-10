@@ -1,4 +1,7 @@
-package asi.voronoi;
+package asi.voronoi.tree;
+
+import asi.voronoi.DCEL;
+import asi.voronoi.Point;
 
 public class VoronoiTree extends IntervalTree {
 
