@@ -4,8 +4,11 @@ import asi.voronoi.ModelObject;
 import asi.voronoi.Point;
 import asi.voronoi.Serializer;
 import java.util.LinkedList;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class BinaryTree implements java.io.Serializable, ModelObject {
+   private static final Logger LOG = LogManager.getLogger(BinaryTree.class);
     protected BinaryTree lft, rgt;
     protected Point p;
 
@@ -189,9 +192,11 @@ public class BinaryTree implements java.io.Serializable, ModelObject {
             String eol = (pe.level == level()) ? " " : "\n";
             level = pe.level;
             if (pe.b == null) {
+                LOG.debug("Null");
                 ret += "N";
             } else if (!pe.b.isLeaf()) {
                 level++;
+                LOG.debug("Leaf: "+level);
                 ret += pe.b.p.toString();
                 pList.add(new PointElem(pe.b.lft, level));
                 pList.add(new PointElem(pe.b.rgt, level));
@@ -199,6 +204,7 @@ public class BinaryTree implements java.io.Serializable, ModelObject {
                 ret += "[" + pe.b.p + "]";
             }
             ret += eol;
+            LOG.debug(ret);
         } while (!pList.isEmpty());
         return ret;
     }
