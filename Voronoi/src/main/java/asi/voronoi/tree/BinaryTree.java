@@ -15,6 +15,7 @@ public class BinaryTree implements java.io.Serializable, ModelObject {
     public BinaryTree(Point p) {
         this.p = p;
         lft = rgt = null;
+        LOG.debug("Construct: "+p);
     }
 
     public BinaryTree newNode(Point p) {
@@ -56,6 +57,7 @@ public class BinaryTree implements java.io.Serializable, ModelObject {
     public BinaryTree insertNode(Point t) {
         // non recursive insert
          if (inTree(t)) {
+             LOG.debug("Already exists"+p);
             // already in tree
             return this;
         }
@@ -80,6 +82,7 @@ public class BinaryTree implements java.io.Serializable, ModelObject {
         } else {
             tmp.lft = t1;
         }
+        LOG.debug("Parent: "+tmp+" "+t);
     }
 
     protected int height(BinaryTree b) {
