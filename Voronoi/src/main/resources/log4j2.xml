@@ -6,7 +6,7 @@
     </Console>
   </Appenders>
   <Loggers>
-    <Logger name="asi.voronoi" level="debug" additivity="false">
+    <Logger name="asi.voronoi" level="info" additivity="false">
       <AppenderRef ref="Console"/>
     </Logger>
     <Root level="error">

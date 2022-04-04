@@ -9,6 +9,10 @@ public class AVLTree extends BinaryTree {
     
     private int bf;
 
+    public AVLTree() {
+        
+    }
+
     public AVLTree(Point p) {
         super(p);
         bf = 0;

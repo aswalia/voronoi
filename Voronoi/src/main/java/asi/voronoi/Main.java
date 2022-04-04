@@ -1,16 +1,19 @@
 package asi.voronoi;
 
 import asi.voronoi.tree.AVLTree;
-import asi.voronoi.tree.VoronoiTree;
 import asi.voronoi.javafx.DrawingBoard;
 import asi.voronoi.javafx.DrawObject;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import asi.voronoi.tree.BinaryTree;
+import asi.voronoi.tree.VTree;
+import java.io.IOException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class Main {
-    private static final int FACTOR = 50;
-    private static VoronoiTree v;
-    private static AVLTree t;
+    private static final Logger LOG = LogManager.getLogger(Main.class);
+    private static final int FACTOR = 1;
+    private static VTree v;
+    private static BinaryTree t;
     private static DrawingBoard d;
     private static DrawObject dobj;
     
@@ -20,19 +23,18 @@ public class Main {
             t = new AVLTree(new Point((int) (Math.random() * FACTOR * noOfPoints),
             (int) (Math.random() * FACTOR * noOfPoints)));
             for (int i = 0; i < (noOfPoints - 1); i++) {
-                t = (AVLTree) t.insertNode(new Point((int) (Math.random() * FACTOR * noOfPoints),
+                t = t.insertNode(new Point((int) (Math.random() * FACTOR * noOfPoints),
                 (int) (Math.random() * FACTOR * noOfPoints)));
             }
             try {
                 int no = (int) (Math.random() * FACTOR * noOfPoints);
                 //	                Serializer.store("AVL"+no,t);
-                v = new VoronoiTree();
-                v.buildTree(t);
-                System.out.println("# points: " + t.count());
-                v.buildStructure();
+                v = new VTree();
+                LOG.debug("# points: " + t.count());
+                v.buildStructure(t);
                 success = true;
             } catch (Exception e) {
-                System.out.println("Failed: " + e);
+                LOG.error(e);
             }  
         }
         
@@ -46,7 +48,7 @@ public class Main {
             try {
                 ((DCEL)m.v.getInfo()).toFile();
             } catch (Exception ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                LOG.error(ex);
             }
         } else {
             if (Boolean.parseBoolean(argv[0])) {
@@ -54,7 +56,7 @@ public class Main {
             } else {
                 drawRandom(argv);
             }
-            d.main(argv);
+//            d.main(argv);
         }
     }
 
@@ -68,20 +70,18 @@ public class Main {
     }
     
     public static void drawFromFile(String[] argv) {
-/*        String folderName = "src/test/resources/";
-        VoronoiTree c = new VoronoiTree();
+        String folderName = "src/test/resources/";
+        VTree c = new VTree();
         try {
             // build and write actual result files
-            c.buildTree(folderName+argv[1]);
-            c.buildStructure();
-            dobj = new DrawVoronoi(c);
-            DrawingBoard d = new DrawingBoard();
-            d.setDrawObject(dobj);
+            BinaryTree b = new AVLTree();
+            b = b.buildBinaryTree(folderName+argv[1]);
+            c.buildStructure(b);
+            LOG.info(c.getInfo().toString());
         }
         catch (IOException ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                LOG.error(ex);
         }
-*/
     }
 
 }

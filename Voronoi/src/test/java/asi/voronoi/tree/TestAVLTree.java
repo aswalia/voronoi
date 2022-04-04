@@ -3,7 +3,10 @@
 package asi.voronoi.tree;
 
 import asi.voronoi.Point;
+import java.io.IOException;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import org.junit.Test;
 
 public class TestAVLTree {
@@ -14,6 +17,20 @@ public class TestAVLTree {
         assertTrue(c.getP().equals(new Point(2,1)) && (c.lft() == null) && (c.rgt() == null));
         
     }    /** tests the method asi.voronoi.BinaryTree.isLeaf() */
+    @Test
+    public void testBuildBinaryTree() {
+        try {
+            BinaryTree b = new AVLTree();
+            b = b.buildBinaryTree("src/test/resources/test_10.bt");
+            String expected = "(3.0,7.0)\n" +
+                              "(0.0,9.0) (6.0,1.0)\n" +
+                              "[(0.0,2.0)] [(1.0,6.0)] (5.0,9.0) (8.0,1.0)\n" +
+                              "[(4.0,2.0)] [(6.0,0.0)] N [(9.0,4.0)]\n";
+            assertEquals(expected, b.toString());
+        } catch (IOException ex) {
+            fail("unexpected exception");
+        }
+    }
     @Test
     public void testIsLeaf() {
         BinaryTree b = new AVLTree(new Point(2,3));

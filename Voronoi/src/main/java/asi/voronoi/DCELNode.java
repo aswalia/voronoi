@@ -15,7 +15,7 @@ public class DCELNode implements Constant, java.io.Serializable {
 
     private static void initFile() throws java.io.IOException {
         String dateString = (new SimpleDateFormat("MMddhhmm")).format(new Date());
-        String fileName = "/home/arvinder/Development/Java/Voronoi/output/v" + dateString + ".txt";
+        String fileName = "src/main/resources/output/v" + dateString + ".txt";
         System.out.println("FileName: " + fileName);
         fw = new FileWriter(fileName);
         bw = new BufferedWriter(fw);
@@ -88,6 +88,16 @@ public class DCELNode implements Constant, java.io.Serializable {
         p_e = p_b = null;
     }
 
+    public DCELNode(Point p) {
+        a_e = a_b = 0.0;
+        f_l = new Point(p);
+        f_r = new Point(p);
+        this.p = new Point(0,0);
+        d = new Point(0,0);
+        used = false;
+        p_e = p_b = null;
+    }
+
     public DCELNode(Point lft, Point rgt) {
         a_e = a_b = 0.0;
         f_l = new Point(lft);
@@ -106,6 +116,19 @@ public class DCELNode implements Constant, java.io.Serializable {
         } catch (java.io.IOException ioe) {
             System.out.println("Failed: " + ioe);
         }
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof DCELNode)) {
+            return false;
+        } else if (!(f_l.equals(((DCELNode)o).f_l)) || !(f_r.equals(((DCELNode)o).f_r))) {
+            return false;
+        } else if (!(p.equals(((DCELNode)o).p)) || !(d.equals(((DCELNode)o).d))) {
+            return false;
+        } else {
+            return !((a_e != ((DCELNode)o).a_e) || (a_b != ((DCELNode)o).a_b));
+        }        
     }
 
     public Line drawEdge() {
@@ -131,12 +154,6 @@ public class DCELNode implements Constant, java.io.Serializable {
         }
         ret = new Line(bottom, top);
         return ret;
-    }
-
-    @Override
-    public boolean equals(Object n) {
-        DCELNode m = (DCELNode)n;
-        return f_l.equals(m.f_l) && f_r.equals(m.f_r);
     }
 
     public String printDCEL() {

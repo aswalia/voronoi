@@ -1,9 +1,9 @@
-lft-point:(31.0,30.0)
 node
-lft-point:(34.0,36.0)
-lft-point:(34.0,40.0)
-node-point:(35.0,13.0) (35.0,32.0)
-lft-point:(37.0,11.0)
+node
+node-point:(31.0,30.0) (34.0,36.0)
+node-point:(34.0,40.0) (35.0,13.0) 
+node
+node-point:(35.0,32.0) (37.0,11.0) 
 lft-point:(37.0,39.0)
 node-point:(37.0,47.0) (42.0,3.0)
 

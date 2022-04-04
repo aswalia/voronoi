@@ -9,6 +9,10 @@ public class DCEL implements Constant, java.io.Serializable {
     public DCEL() {
         node = null;
     }
+    
+    public DCEL(Point p) {
+        node = new DCELNode(p);        
+    }
 
     public DCEL(DCEL subVor) {
         node = subVor.node.copy();
@@ -28,9 +32,13 @@ public class DCEL implements Constant, java.io.Serializable {
 
     @Override
     public String toString() {
-        String ret = "Vor:\n" + node.printDCEL();
-        node.resetMark();
-        return ret;
+        if (node == null) {
+            return "";
+        } else {
+            String ret = "Vor:\n" + node.printDCEL();
+            node.resetMark();
+            return ret;
+        }
     }
 
     public void toFile() throws Exception {
@@ -89,87 +97,108 @@ public class DCEL implements Constant, java.io.Serializable {
         support(ch1);
     }
     
+    private boolean sizeIsOne() {
+        return node.f_l.equals(node.f_r);
+    }
+    
     public DCEL merge(Point p) throws Exception {
-        // build initial and final edge of DCEL
-        setSupportPoints(p);                
-        DCEL lftNext, rgtNext;
-        DCEL current = new DCEL(upLft, upRgt);
-        DCEL ret = current;
-        DCEL next, tmp;
-        LinkedList mergeList = new LinkedList();
-        DCELPair listElem;
-        Point lftPoint = upLft, rgtPoint = upRgt;
-        if (node.f_l.isLess(p)) // p is to the right of current vor diagram
-        {
-            lftNext = initCell(upLft);
+        // check if DCEL consists of one point
+        if (sizeIsOne()) {
+            if (node.f_l.isLess(p)) {
+                return new DCEL(node.f_l,p);
+            } else {
+                return new DCEL(p, node.f_l);
+            }
+        } else {
+            // build initial and final edge of DCEL
+            setSupportPoints(p);                
+            DCEL lftNext, rgtNext;
+            DCEL current = new DCEL(upLft, upRgt);
+            DCEL ret = current;
+            DCEL next, tmp;
+            LinkedList mergeList = new LinkedList();
+            DCELPair listElem;
+            Point lftPoint = upLft, rgtPoint = upRgt;
+            if (node.f_l.isLess(p)) // p is to the right of current vor diagram
+            {
+                lftNext = initCell(upLft);
+                do {
+                    lftNext = lftNext.initEdge(lftPoint, true);
+                    lftNext = lftNext.trackSet(current, true);
+                    next = current.findNextEdge(lftNext, null);
+                    lftPoint = next.otherPoint(lftPoint);
+                    tmp = current;
+                    current = (new DCEL(lftPoint, rgtPoint)).createSigmaChain(current, next);
+                    mergeList.addLast(new DCELPair(tmp, next, current));
+                } while (!lftPoint.equals(downLft));
+            } else { // p is to the left of current vor diagram
+                rgtNext = initCell(upRgt);
+                do {
+                    rgtNext = rgtNext.initEdge(rgtPoint, false);
+                    rgtNext = rgtNext.trackSet(current, false);
+                    next = current.findNextEdge(null, rgtNext);
+                    rgtPoint = next.otherPoint(rgtPoint);
+                    tmp = current;
+                    current = (new DCEL(lftPoint, rgtPoint)).createSigmaChain(current, next);
+                    mergeList.addLast(new DCELPair(tmp, next, current));
+                } while (!rgtPoint.equals(downRgt));
+            }
             do {
-                lftNext = lftNext.initEdge(lftPoint, true);
-                lftNext = lftNext.trackSet(current, true);
-                next = current.findNextEdge(lftNext, null);
-                lftPoint = next.otherPoint(lftPoint);
-                tmp = current;
-                current = (new DCEL(lftPoint, rgtPoint)).createSigmaChain(current, next);
-                mergeList.addLast(new DCELPair(tmp, next, current));
-            } while (!lftPoint.equals(downLft));
-        } else { // p is to the left of current vor diagram
-            rgtNext = initCell(upRgt);
-            do {
-                rgtNext = rgtNext.initEdge(rgtPoint, false);
-                rgtNext = rgtNext.trackSet(current, false);
-                next = current.findNextEdge(null, rgtNext);
-                rgtPoint = next.otherPoint(rgtPoint);
-                tmp = current;
-                current = (new DCEL(lftPoint, rgtPoint)).createSigmaChain(current, next);
-                mergeList.addLast(new DCELPair(tmp, next, current));
-            } while (!rgtPoint.equals(downRgt));
+                listElem = (DCELPair) mergeList.removeFirst();
+                listElem.nextElem.adjustSigmaChain(listElem.currentElem, listElem.cutBy);
+            } while (!mergeList.isEmpty());
+            return ret;
         }
-        do {
-            listElem = (DCELPair) mergeList.removeFirst();
-            listElem.nextElem.adjustSigmaChain(listElem.currentElem, listElem.cutBy);
-        } while (!mergeList.isEmpty());
-        return ret;
     }
 
     public DCEL merge(DCEL subVor) throws Exception {
-        // build initial and final edge of DCEL
-        setSupportPoints(subVor);
-        DCEL lftNext, rgtNext;
-        Point lftPoint = upLft, rgtPoint = upRgt;
-        DCEL next, tmp;
-        DCEL current = new DCEL(upLft, upRgt);
-        DCEL ret = current;
-        LinkedList mergeList = new LinkedList();
-        DCELPair listElem;
-        if (node.f_l.isLess(subVor.node.f_l)) // subVor to the right to current vor
-        {
-            lftNext = initCell(upLft);
-            rgtNext = subVor.initCell(upRgt);
+        if (sizeIsOne()) {
+        // DCEL consists of one point
+            return subVor.merge(node.f_l);
+        } else if (subVor.sizeIsOne()) {
+        // subVor-DCEL consists of one point
+            return merge(subVor.node.f_l);
         } else {
-            lftNext = subVor.initCell(upLft);
-            rgtNext = initCell(upRgt);
-        }
-        lftNext = lftNext.initEdge(lftPoint, true);
-        rgtNext = rgtNext.initEdge(rgtPoint, false);
-        do {
-            lftNext = lftNext.trackSet(current, true);
-            rgtNext = rgtNext.trackSet(current, false);
-            next = current.findNextEdge(lftNext, rgtNext);
-            if (next == lftNext) {
-                lftPoint = next.otherPoint(lftPoint);
-                lftNext = lftNext.initEdge(lftPoint, true);
+            // build initial and final edge of DCEL
+            setSupportPoints(subVor);
+            DCEL lftNext, rgtNext;
+            Point lftPoint = upLft, rgtPoint = upRgt;
+            DCEL next, tmp;
+            DCEL current = new DCEL(upLft, upRgt);
+            DCEL ret = current;
+            LinkedList mergeList = new LinkedList();
+            DCELPair listElem;
+            if (node.f_l.isLess(subVor.node.f_l)) // subVor to the right to current vor
+            {
+                lftNext = initCell(upLft);
+                rgtNext = subVor.initCell(upRgt);
             } else {
-                rgtPoint = next.otherPoint(rgtPoint);
-                rgtNext = rgtNext.initEdge(rgtPoint, false);
+                lftNext = subVor.initCell(upLft);
+                rgtNext = initCell(upRgt);
             }
-            tmp = current;
-            current = (new DCEL(lftPoint, rgtPoint)).createSigmaChain(current, next);
-            mergeList.addLast(new DCELPair(tmp, next, current));
-        } while (!lftPoint.equals(downLft) || !rgtPoint.equals(downRgt));
-        do {
-            listElem = (DCELPair) mergeList.removeFirst();
-            listElem.nextElem.adjustSigmaChain(listElem.currentElem, listElem.cutBy);
-        } while (!mergeList.isEmpty());
-        return ret;
+            lftNext = lftNext.initEdge(lftPoint, true);
+            rgtNext = rgtNext.initEdge(rgtPoint, false);
+            do {
+                lftNext = lftNext.trackSet(current, true);
+                rgtNext = rgtNext.trackSet(current, false);
+                next = current.findNextEdge(lftNext, rgtNext);
+                if (next == lftNext) {
+                    lftPoint = next.otherPoint(lftPoint);
+                    lftNext = lftNext.initEdge(lftPoint, true);
+                } else {
+                    rgtPoint = next.otherPoint(rgtPoint);
+                    rgtNext = rgtNext.initEdge(rgtPoint, false);
+                }
+                tmp = current;
+                current = (new DCEL(lftPoint, rgtPoint)).createSigmaChain(current, next);
+                mergeList.addLast(new DCELPair(tmp, next, current));
+            } while (!lftPoint.equals(downLft) || !rgtPoint.equals(downRgt));
+            do {
+                listElem = (DCELPair) mergeList.removeFirst();
+                listElem.nextElem.adjustSigmaChain(listElem.currentElem, listElem.cutBy);
+            } while (!mergeList.isEmpty());
+            return ret;
+        }
     }
 
     public static DCEL fetch(String filename) throws java.io.IOException, ClassNotFoundException {
