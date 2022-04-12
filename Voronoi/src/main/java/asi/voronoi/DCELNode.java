@@ -5,7 +5,7 @@ import java.io.FileWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-class DCELNode implements Constant, java.io.Serializable {
+public class DCELNode implements Constant, java.io.Serializable {
     private static FileWriter fw;
     private static BufferedWriter bw;
     double a_b, a_e;
@@ -15,7 +15,7 @@ class DCELNode implements Constant, java.io.Serializable {
 
     private static void initFile() throws java.io.IOException {
         String dateString = (new SimpleDateFormat("MMddhhmm")).format(new Date());
-        String fileName = "/home/arvinder/Development/Java/Voronoi/output/v" + dateString + ".txt";
+        String fileName = "src/main/resources/output/v" + dateString + ".txt";
         System.out.println("FileName: " + fileName);
         fw = new FileWriter(fileName);
         bw = new BufferedWriter(fw);
@@ -23,7 +23,7 @@ class DCELNode implements Constant, java.io.Serializable {
 
     @Override
     public String toString() {
-        String ret;
+/*        String ret;
         Point top = null, bottom = null;
         double t = Math.sqrt((Math.pow(f_l.x() - p.x(), 2) + Math.pow(f_l.y() - p.y(), 2)) / (Math.pow(d.x(), 2) + Math.pow(d.y(), 2)));
         if ((p_b != null) && (p_e != null)) {
@@ -44,7 +44,32 @@ class DCELNode implements Constant, java.io.Serializable {
         }
         ret = top + " " + bottom + "\n";
         ret += "lft and rgt: " + f_l + " " + f_r + "\n";
-        return ret;
+*/
+        return "lft and rgt: " + f_l + " " + f_r + "\n";
+    }
+    
+    public boolean isUsed() {
+        return used;
+    }
+    
+    public void used() {
+        used = true;
+    }
+    
+    public DCEL getP_b() {
+        return p_b;
+    }
+
+    public DCEL getP_e() {
+        return p_e;
+    }
+    
+    public Point getF_l() {
+        return f_l;
+    }
+
+    public Point getF_r() {
+        return f_r;
     }
 
     public DCELNode() {
@@ -61,6 +86,16 @@ class DCELNode implements Constant, java.io.Serializable {
         f_r = c.f_r;
         p = c.p;
         d = c.d;
+        p_e = p_b = null;
+    }
+
+    public DCELNode(Point p) {
+        a_e = a_b = 0.0;
+        f_l = new Point(p);
+        f_r = new Point(p);
+        this.p = new Point(0,0);
+        d = new Point(0,0);
+        used = false;
         p_e = p_b = null;
     }
 
@@ -82,6 +117,19 @@ class DCELNode implements Constant, java.io.Serializable {
         } catch (java.io.IOException ioe) {
             System.out.println("Failed: " + ioe);
         }
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof DCELNode)) {
+            return false;
+        } else if (!(f_l.equals(((DCELNode)o).f_l)) || !(f_r.equals(((DCELNode)o).f_r))) {
+            return false;
+        } else if (!(p.equals(((DCELNode)o).p)) || !(d.equals(((DCELNode)o).d))) {
+            return false;
+        } else {
+            return !((a_e != ((DCELNode)o).a_e) || (a_b != ((DCELNode)o).a_b));
+        }        
     }
 
     public Line drawEdge() {
@@ -109,13 +157,7 @@ class DCELNode implements Constant, java.io.Serializable {
         return ret;
     }
 
-    @Override
-    public boolean equals(Object n) {
-        DCELNode m = (DCELNode)n;
-        return f_l.equals(m.f_l) && f_r.equals(m.f_r);
-    }
-
-    String printDCEL() {
+    public String printDCEL() {
         String ret = "";
         if (!used) {
             used = true;
@@ -130,7 +172,7 @@ class DCELNode implements Constant, java.io.Serializable {
         return ret;
     }
 
-    DCELNode copyDCEL() {
+    public DCELNode copyDCEL() {
         DCELNode ret = this;
         if (!used) {
             used = true;
@@ -145,7 +187,7 @@ class DCELNode implements Constant, java.io.Serializable {
         return ret;
     }
 
-    void resetMark() {
+    public void resetMark() {
         if (used) {
             used = false;
             if (p_b != null) {
@@ -157,7 +199,7 @@ class DCELNode implements Constant, java.io.Serializable {
         }
     }
 
-    DCELNode copy() {
+    public DCELNode copy() {
         DCELNode ret = copyDCEL();
         resetMark();
         return ret;

@@ -1,13 +1,16 @@
-package asi.voronoi;
+package asi.voronoi.javafx;
+
+import asi.voronoi.DCEL;
+import asi.voronoi.tree.VTree;
 
 public class DrawAll extends DrawObject {
     private DrawObject dv, dch, dit;
 
-    public DrawAll(VoronoiTree v) {
-        mo = v;
+    public DrawAll(VTree v) {
+//        mo = v;
         dv = new DrawVoronoi(v);
         dch = new DrawConveksHull(((DCEL) v.getInfo()).vor2CH());
-        dit = new DrawIntervalTree(v);
+//        dit = new DrawIntervalTree(v);
     }
 
     @Override

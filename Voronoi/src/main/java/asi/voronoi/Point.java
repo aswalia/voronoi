@@ -54,6 +54,10 @@ public class Point implements java.io.Serializable {
         ret.y /= 2;
         return ret;
     }
+    
+    public static double areaDouble(Point a, Point b, Point c) {
+        return a.x*(b.y-c.y) + b.x*(c.y-a.y) + c.x*(a.y-b.y);
+    }
 
     public static short area(Point a, Point b, Point c) {
         double temp = (c.y - b.y) * (b.x - a.x) - (b.y - a.y) * (c.x - b.x);
@@ -62,7 +66,7 @@ public class Point implements java.io.Serializable {
     }
 
     public static short direction(Point a, Point b, Point c) {
-        double temp = (b.y - a.y) * (c.y - a.y) + (b.x - a.x) * (c.x - a.x);
+        double temp = (b.y - a.y) * (c.y - b.y) + (b.x - a.x) * (c.x - b.x);
         short ret = ((temp - Double.MIN_VALUE) > 0) ? (short) 1 : (((temp + Double.MIN_VALUE) < 0) ? (short) - 1 : (short) 0);
         return ret;
     }

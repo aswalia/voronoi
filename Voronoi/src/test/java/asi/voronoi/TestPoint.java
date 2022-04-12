@@ -76,6 +76,25 @@ public class TestPoint {
     }
     
     @Test
+    public void testAreaDouble() {
+        Point p1 = new Point(0,5);
+        Point p2 = new Point(2,2.5);
+        Point p3 = new Point(4,0);
+        double a = Point.areaDouble(p1, p2, p3);
+        assertTrue(""+a, a == 0);
+        p1 = new Point(0,5);
+        p2 = new Point(1,3.75);
+        p3 = new Point(2,2.5);
+        a = Point.areaDouble(p1, p2, p3);
+        assertTrue(""+a, a == 0);
+        p1 = new Point(1,3.75);
+        p2 = new Point(2,2.5);
+        p3 = new Point(3,1.25);
+        a = Point.areaDouble(p1, p2, p3);
+        assertTrue(""+a, a == 0);
+    }
+    
+    @Test
     public void testTranspose() {
         Point p1 = new Point(0,0);
         Point p2 = new Point(1,0);

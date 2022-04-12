@@ -1,8 +1,9 @@
-package asi.voronoi;
+package asi.voronoi.javafx;
 
-import java.awt.Graphics2D;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Line2D;
+import asi.voronoi.Line;
+import asi.voronoi.ModelObject;
+import asi.voronoi.Point;
+import javafx.scene.canvas.GraphicsContext;
 
 abstract public class DrawObject {
     protected double s = 1, tX = 0, tY = 0, ox = 0, oy = 0;
@@ -12,15 +13,15 @@ abstract public class DrawObject {
     public abstract String objectTitle();
 
     public void drawRepresentation(GraphicData g) {
-        java.awt.Graphics2D g2 = (java.awt.Graphics2D) g.g;
-        g2.drawString("Not implemented", 100, 100);
+//        GraphicsContext g2 = g.c.getGraphicsContext2D();
+        g.c.fillText("Not implemented", 100, 100);
     }
 
     public void drawGeometry(GraphicData g) {
-        fx = g.d.width / (mo.maxX() - mo.minX()) / 2;
-        fy = g.d.height / (mo.maxY() - mo.minY()) / 2;
-        ox = g.d.width / 4;
-        oy = g.d.height / 2;
+        fx = g.b.getWidth() / (mo.maxX() - mo.minX()) / 2;
+        fy = g.b.getHeight() / (mo.maxY() - mo.minY()) / 2;
+        ox = g.b.getWidth() / 4;
+        oy = g.b.getHeight() / 2;
         
     }
 
@@ -31,16 +32,17 @@ abstract public class DrawObject {
     }
 
     public void drawPoint(GraphicData g, Point pp) {
-        Graphics2D g2 = (Graphics2D) g.g;
+//        GraphicsContext g2 = g.c.getGraphicsContext2D();
         Point p = transformPoint(pp);
-        g2.draw(new Ellipse2D.Double(p.x(), p.y(), 2.0, 2.0));
+        g.c.fillOval(p.x(), p.y(), 2.0, 2.0);
     }
 
     public void drawLine(GraphicData g, Line l) {
-        Graphics2D g2 = (Graphics2D) g.g;
+//        GraphicsContext g2 = g.c.getGraphicsContext2D();
         Point p1 = transformPoint(l.getP1());
         Point p2 = transformPoint(l.getP2());
-        g2.draw(new Line2D.Double(p1.x(), p1.y(), p2.x(), p2.y()));
+        g.c.moveTo(p1.x(), p1.y());
+        g.c.lineTo(p2.x(), p2.y());
     }
 
     public void setScale(double ps) {
