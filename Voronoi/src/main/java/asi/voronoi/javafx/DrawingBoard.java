@@ -3,7 +3,7 @@ package asi.voronoi.javafx;
 
 import asi.voronoi.Point;
 import asi.voronoi.tree.AVLTree;
-import asi.voronoi.tree.VoronoiTree;
+import asi.voronoi.tree.VTree;
 import java.awt.Graphics;
 import javafx.application.Application;
 import javafx.geometry.BoundingBox;
@@ -19,7 +19,7 @@ public class DrawingBoard extends Application {
     private static final Color bg = Color.WHITE;
     private static final Color fg = Color.BLUE;
     private static final int FACTOR = 50;
-    private static VoronoiTree v;
+    private static VTree v;
     private static AVLTree t;
     private static DrawObject dObj;
 
@@ -41,10 +41,9 @@ public class DrawingBoard extends Application {
             try {
                 int no = (int) (Math.random() * FACTOR * noOfPoints);
                 //	                Serializer.store("AVL"+no,t);
-                v = new VoronoiTree();
-                v.buildTree(t);
+                v = new VTree();
                 System.out.println("# points: " + t.count());
-                v.buildStructure();
+                v.buildStructure(t);
                 success = true;
             } catch (Exception e) {
                 System.out.println("Failed: " + e);

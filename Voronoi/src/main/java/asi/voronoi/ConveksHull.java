@@ -1,5 +1,8 @@
 package asi.voronoi;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class ConveksHull implements Constant, java.io.Serializable, ModelObject {
     private CircularLinkedList head;
     private Point lft, up, rgt, down;
@@ -55,8 +58,7 @@ public class ConveksHull implements Constant, java.io.Serializable, ModelObject 
             up = p;
         } else if (p.y() < down.y()) {
             down = p;
-        }
-        
+        }        
     }
 
     public void setUpSupport(Point lft, Point rgt) {
@@ -75,149 +77,184 @@ public class ConveksHull implements Constant, java.io.Serializable, ModelObject 
         return downSupport;
     }
     
-    public void merge(Point p) {
-        int index=0;
-        if (Point.area(p, head.get(0), head.get(1)) == 0) {
-            // if CH is a line and
-            // new point also on same line
-            if ((p.x() > lft.x()) &&
-                (p.x() < rgt.x())) {
-                // new point between the two edges
-                boolean done = false;
-                do {
-                    if ((p.x() < head.get(index).x()) &&
-                        (p.x() > head.get(index+1).x())) {
-                        head.add(index, index-1, p); 
-                        done = true;
-                    }
-                    index++;
-                } while (!done);
-            }  else {
-                // new point either to the left of head or
-                // to the right of head.next.
-                if (p.x() < lft.x()) {
-                    lft = up = p;
-                    rgt = down = head.get(-1);
-                }  else {
-                    lft = up = head.get(0);
-                    rgt = down = p;
-                }
-                head.add(0, -1, p);
+    public ConveksHull merge(Point p) {
+        ConveksHull ret = this;
+        if (size() == 1) {
+            Point o = head.get(0);
+            if (head.get(0).isLess(p)) {
+                setUpSupport(o, p);
+                setDownSupport(p, o);
+                ret = new ConveksHull(head.get(0), p);
+            } else {
+                setUpSupport(p, o);
+                setDownSupport(o, p);
+                ret = new ConveksHull(p, head.get(0));
             }
         } else {
-            if (p.isLess(head.get(-1)) && head.get(0).isLess(p) && 
-                (Point.area(p, head.get(0), head.get(-1)) == 0)) {
-                // new point in between, add it between head and -1
-                head.add(0, -1, p);
-            } else {
-            boolean doneFront, doneBack;
-            doneFront = doneBack = false;
-            int addFront, addBack;
-            addFront = addBack = index;
-            do {
-                if ((Point.area(p, head.get(index), head.get(index+1)) >= 0) &&
-                    (Point.area(p, head.get(index), head.get(index-1)) > 0)) {
-                    addFront = index;
-                    doneFront = true;
+            // check if point makes a line with head and head-1 and head+1        
+            if ((Point.area(p, head.get(0), head.get(-1)) == 0) &&
+                (Point.area(p, head.get(0), head.get(1)) == 0)) {
+                int i = 0;
+                // if CH is a line and
+                // new point also on same line
+                if ((p.x() > lft.x()) &&
+                    (p.x() < rgt.x())) {
+                    // new point between the two edges
+                    boolean done = false;
+                    do {
+                        if ((p.x() < head.get(i).x()) &&
+                            (p.x() > head.get(i+1).x())) {
+                            head.add(i, i-1, p); 
+                            done = true;
+                        }
+                        i++;
+                    } while (!done);
+                }  else {
+                    // new point either to the left of head or
+                    // to the right of head.next.
+                    if (p.x() < lft.x()) {
+                        lft = up = p;
+                        rgt = down = head.get(-1);
+                    }  else {
+                        lft = up = head.get(0);
+                        rgt = down = p;
+                    }
+                    head.add(0, -1, p);
                 }
-                if ((Point.area(p, head.get(index), head.get(index+1)) < 0) &&
-                    (Point.area(p, head.get(index), head.get(index-1)) <= 0)) {
-                    addBack = index;
-                    doneBack = true;
-                }
-                index++;
-            } while(!doneFront || !doneBack);
-            if (rgt.isLess(p)) { // p to the rgt of CH
-                setUpSupport(head.get(addFront), p);
-                setDownSupport(head.get(addBack), p);
             } else {
-                setUpSupport(p, head.get(addBack));
-                setDownSupport(p, head.get(addFront));                
+                // find potential line segments where p would fit in
+                int i = 0;
+                Point start = head.get(i);
+                Set<Integer> candidateIndex = new HashSet();
+                double a;
+                do {
+                    a = Point.areaDouble(head.get(i), p, head.get(i+1));
+                    // any head, p and head+1 line-segments in "positive" 
+                    // direction is a candidate
+                    if ((a > 0) || 
+                        ((a == 0) && 
+                         (Point.direction(head.get(i), p, head.get(i+1)) > 0))) {
+                        candidateIndex.add(i);
+                    }
+                    i++;
+                } while (!head.get(i).equals(start));
+                // true line-segment is the one where head-1, head and p
+                // make a conveks bend (positive or 0 area)
+                for (Integer index: candidateIndex) {
+                    if (Point.area(head.get(index-1), head.get(index), p) >= 0) {
+                        i = index;
+                    }
+                }
+                // find if p is to be part of the merged CH
+                int j = i;
+                if (Point.area(head.get(i), p, head.get(i+1)) >= 0) {
+                    i++;
+                    // find which point of current CH is to be next point in merges CH
+                    while (Point.area(p, head.get(i), head.get(i+1)) < 0) {
+                        // current next point is not part of merged CH
+                        i++;
+                    }
+                } 
+                if (rgt.isLess(p)) { // p to the rgt of CH
+                    setUpSupport(head.get(i), p);
+                    setDownSupport(head.get(j), p);
+                } else {
+                    setUpSupport(p, head.get(j));
+                    setDownSupport(p, head.get(i));                
+                }
+                head.add(i, j, p);
             }
-            head.add(addFront, addBack, p);
-        }
         }
         setPerimeter(p);
+        return ret;
     }
     
-    public void merge(ConveksHull subCH) {
-        Point tmpUpLft, tmpDownLft, tmpUpRgt, tmpDownRgt, upLft, upRgt, downLft, downRgt;
-        int index = 0;
-        if (head.get(index).isLess(subCH.head.get(index))) // subCH is to the right of this CH
-        {
-            tmpUpRgt = tmpDownRgt = subCH.head.get(0);
-            tmpUpLft = tmpDownLft = head.get(0);
-            boolean done;
-            do {
-                downLft = findDown(tmpDownRgt);
-                downRgt = subCH.findUp(tmpDownLft);
-                upLft = findUp(tmpUpRgt);
-                upRgt = subCH.findDown(tmpUpLft);
-                done = true;
-                if (!tmpUpLft.equals(upLft)) {
-                    tmpUpLft = upLft;
-                    done = false;
-                }
-                if (!tmpUpRgt.equals(upRgt)) {
-                    tmpUpRgt = upRgt;
-                    done = false;
-                }
-                if (!tmpDownLft.equals(downLft)) {
-                    tmpDownLft = downLft;
-                    done = false;
-                }
-                if (!tmpDownRgt.equals(downRgt)) {
-                    tmpDownRgt = downRgt;
-                    done = false;
-                }
-            } while (!done);
-                
-        } else // subCH is to the left of this
-        {
-            tmpUpLft = tmpDownLft = subCH.head.get(0);
-            tmpUpRgt = tmpDownRgt = head.get(0);
-            boolean done;
-            do {
-                downRgt = findUp(tmpDownLft);
-                downLft = subCH.findDown(tmpDownRgt);
-                upRgt = findDown(tmpUpLft);
-                upLft = subCH.findUp(tmpUpRgt);
-                done = true;
-                if (!tmpUpLft.equals(upLft)) {
-                    tmpUpLft = upLft;
-                    done = false;
-                }
-                if (!tmpUpRgt.equals(upRgt)) {
-                    tmpUpRgt = upRgt;
-                    done = false;
-                }
-                if (!tmpDownLft.equals(downLft)) {
-                    tmpDownLft = downLft;
-                    done = false;
-                }
-                if (!tmpDownRgt.equals(downRgt)) {
-                    tmpDownRgt = downRgt;
-                    done = false;
-                }
-            } while (!done);
-        }
-        setUpSupport(upLft, upRgt);
-        setDownSupport(downLft, downRgt);
-        if (upLft.equals(downLft) && upRgt.equals(downRgt)) {
-            // CH and subCH on a line
-            if (head.get(0).isLess(subCH.head.get(0))) {
-                head.mergeLinearCH(true, subCH.head);
-            } else {
-                head.mergeLinearCH(false, subCH.head);                
-            }
+    public ConveksHull merge(ConveksHull subCH) {
+        ConveksHull ret = this;
+        if (size() == 1) {
+            return subCH.merge(head.get(0));
+        } else if (subCH.size() == 1) {
+            return merge(subCH.head.get(0));
         } else {
-            head.mergeList(upLft, upRgt, downLft, downRgt, subCH.head);            
+            Point tmpUpLft, tmpDownLft, tmpUpRgt, tmpDownRgt, upLft, upRgt, downLft, downRgt;
+            int index = 0;
+            if (head.get(index).isLess(subCH.head.get(index))) // subCH is to the right of this CH
+            {
+                tmpUpRgt = tmpDownRgt = subCH.head.get(0);
+                tmpUpLft = tmpDownLft = head.get(0);
+                boolean done;
+                do {
+                    downLft = findDown(tmpDownRgt);
+                    downRgt = subCH.findUp(tmpDownLft);
+                    upLft = findUp(tmpUpRgt);
+                    upRgt = subCH.findDown(tmpUpLft);
+                    done = true;
+                    if (!tmpUpLft.equals(upLft)) {
+                        tmpUpLft = upLft;
+                        done = false;
+                    }
+                    if (!tmpUpRgt.equals(upRgt)) {
+                        tmpUpRgt = upRgt;
+                        done = false;
+                    }
+                    if (!tmpDownLft.equals(downLft)) {
+                        tmpDownLft = downLft;
+                        done = false;
+                    }
+                    if (!tmpDownRgt.equals(downRgt)) {
+                        tmpDownRgt = downRgt;
+                        done = false;
+                    }
+                } while (!done);
+
+            } else // subCH is to the left of this
+            {
+                tmpUpLft = tmpDownLft = subCH.head.get(0);
+                tmpUpRgt = tmpDownRgt = head.get(0);
+                boolean done;
+                do {
+                    downRgt = findUp(tmpDownLft);
+                    downLft = subCH.findDown(tmpDownRgt);
+                    upRgt = findDown(tmpUpLft);
+                    upLft = subCH.findUp(tmpUpRgt);
+                    done = true;
+                    if (!tmpUpLft.equals(upLft)) {
+                        tmpUpLft = upLft;
+                        done = false;
+                    }
+                    if (!tmpUpRgt.equals(upRgt)) {
+                        tmpUpRgt = upRgt;
+                        done = false;
+                    }
+                    if (!tmpDownLft.equals(downLft)) {
+                        tmpDownLft = downLft;
+                        done = false;
+                    }
+                    if (!tmpDownRgt.equals(downRgt)) {
+                        tmpDownRgt = downRgt;
+                        done = false;
+                    }
+                } while (!done);
+            }
+            setUpSupport(upLft, upRgt);
+            setDownSupport(downLft, downRgt);
+            if (upLft.equals(downLft) && upRgt.equals(downRgt)) {
+                // CH and subCH on a line
+                if (head.get(0).isLess(subCH.head.get(0))) {
+                    head.mergeLinearCH(true, subCH.head);
+                } else {
+                    head.mergeLinearCH(false, subCH.head);                
+                }
+            } else {
+                head.mergeList(upLft, upRgt, downLft, downRgt, subCH.head);            
+            }
+            setPerimeter(subCH.lft);
+            setPerimeter(subCH.rgt);
+            setPerimeter(subCH.up);
+            setPerimeter(subCH.down);
+            subCH.head = null;
         }
-        setPerimeter(subCH.lft);
-        setPerimeter(subCH.rgt);
-        setPerimeter(subCH.up);
-        setPerimeter(subCH.down);
-        subCH.head = null;
+        return ret;
     }
 
     public Point getLft() {
@@ -260,15 +297,16 @@ public class ConveksHull implements Constant, java.io.Serializable, ModelObject 
         return head;
     }
 
-    public void add(Point p) {
+    public ConveksHull add(Point p) {
         // build a CH by adding 1 Point at a time
         // only the first adding of the first two points 
         // is interesting as the rest can bedone with merge
         if (head == null) {
-            head = new CircularLinkedList(p);
-            lft = rgt = up = down = p;
+//            head = new CircularLinkedList(p);
+//            lft = rgt = up = down = p;
+            return new ConveksHull(p);
         } else {
-            merge(p);
+            return merge(p);
         }
     }
 

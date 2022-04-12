@@ -62,7 +62,7 @@ public class DCEL implements Constant, java.io.Serializable {
             Point next = start;
             ret = new ConveksHull();
             do {
-                ret.add(next);
+                ret = ret.add(next);
                 d = d.findNextCHPoint(next);
                 next = d.otherPoint(next);
             } while (!next.equals(start));

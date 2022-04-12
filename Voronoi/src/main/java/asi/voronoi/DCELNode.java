@@ -23,7 +23,7 @@ public class DCELNode implements Constant, java.io.Serializable {
 
     @Override
     public String toString() {
-        String ret;
+/*        String ret;
         Point top = null, bottom = null;
         double t = Math.sqrt((Math.pow(f_l.x() - p.x(), 2) + Math.pow(f_l.y() - p.y(), 2)) / (Math.pow(d.x(), 2) + Math.pow(d.y(), 2)));
         if ((p_b != null) && (p_e != null)) {
@@ -44,7 +44,8 @@ public class DCELNode implements Constant, java.io.Serializable {
         }
         ret = top + " " + bottom + "\n";
         ret += "lft and rgt: " + f_l + " " + f_r + "\n";
-        return ret;
+*/
+        return "lft and rgt: " + f_l + " " + f_r + "\n";
     }
     
     public boolean isUsed() {

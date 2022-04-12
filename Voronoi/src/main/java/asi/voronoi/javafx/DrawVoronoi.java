@@ -2,13 +2,13 @@ package asi.voronoi.javafx;
 
 import asi.voronoi.DCEL;
 import asi.voronoi.DCELNode;
-import asi.voronoi.tree.VoronoiTree;
+import asi.voronoi.tree.VTree;
 
 public class DrawVoronoi extends DrawObject {
     private final java.util.LinkedList<DCELNode> ll;
 
-    public DrawVoronoi(VoronoiTree v) {
-        mo = v;
+    public DrawVoronoi(VTree v) {
+//        mo = v;
         ll = new java.util.LinkedList();
         drawVoronoi(((DCEL) v.getInfo()).getNode());
         ((DCEL) v.getInfo()).getNode().resetMark();
