@@ -338,6 +338,13 @@ public class TestConveksHull {
         act = test.toString();
         assertTrue(act,act.contains(exp));
         assertTrue(checkBoundry(test, new Point(0,5), new Point(6,8), new Point(6,8), new Point(4,0)));
+        // Scenario 6a
+        test = new ConveksHull(ch2);
+        test.merge(new Point(2,1.5));
+        exp = "(0.0,5.0)(2.0,1.5)(4.0,0.0)(6.0,8.0)";
+        act = test.toString();
+        assertTrue(act,act.contains(exp));
+        assertTrue(checkBoundry(test, new Point(0,5), new Point(6,8), new Point(6,8), new Point(4,0)));
         // Scenario 7
         test = new ConveksHull(ch);
         test.merge(new Point(-2,7.5));

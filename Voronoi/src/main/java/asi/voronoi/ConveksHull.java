@@ -145,16 +145,13 @@ public class ConveksHull implements Constant, java.io.Serializable, ModelObject 
                         i = index;
                     }
                 }
-                // find if p is to be part of the merged CH
                 int j = i;
-                if (Point.area(head.get(i), p, head.get(i+1)) >= 0) {
+                i++;
+                // find which point of current CH is to be next point in merges CH
+                while (Point.area(p, head.get(i), head.get(i+1)) < 0) {
+                    // current next point is not part of merged CH
                     i++;
-                    // find which point of current CH is to be next point in merges CH
-                    while (Point.area(p, head.get(i), head.get(i+1)) < 0) {
-                        // current next point is not part of merged CH
-                        i++;
-                    }
-                } 
+                }
                 if (rgt.isLess(p)) { // p to the rgt of CH
                     setUpSupport(head.get(i), p);
                     setDownSupport(head.get(j), p);
@@ -302,8 +299,6 @@ public class ConveksHull implements Constant, java.io.Serializable, ModelObject 
         // only the first adding of the first two points 
         // is interesting as the rest can bedone with merge
         if (head == null) {
-//            head = new CircularLinkedList(p);
-//            lft = rgt = up = down = p;
             return new ConveksHull(p);
         } else {
             return merge(p);
