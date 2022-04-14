@@ -1,5 +1,4 @@
 package asi.voronoi;
-
 import java.util.LinkedList;
 
 public class DCEL implements Constant, java.io.Serializable {
@@ -71,16 +70,22 @@ public class DCEL implements Constant, java.io.Serializable {
     }
     
     private void support(ConveksHull ch) throws Exception {
+        String methodName = getClass().getName() + " : " + 
+                            new Exception().getStackTrace()[0].getMethodName() + 
+                            " : ";
+        String msg;
         PointPair pp = ch.getUpSupport();
         if (pp == null) {
-            throw new Exception("3 points on a line ");
+            msg = "3 points on a line";
+            throw new Exception(methodName + msg);        
         }
         upLft = pp.getLft(); upRgt = pp.getRgt();
         pp = ch.getDownSupport();
         downLft = pp.getLft(); downRgt = pp.getRgt();
         if (upLft.equals(downLft) &&
             upRgt.equals(downRgt)) {
-            throw new Exception("4 points on a line ");                    
+            msg = "4 points on a line ";
+            throw new Exception(methodName + msg + upLft + " " + upRgt);        
         }         
     }
     
@@ -404,13 +409,20 @@ public class DCEL implements Constant, java.io.Serializable {
         }
         return ret;
     }
-
+    
     private DCEL findNextEdge(DCEL lftEdge, DCEL rgtEdge) throws Exception {
         short lftCut = NO, rgtCut = NO;
         double lftCutPoint, rgtCutPoint;
         Point l, r;
+        Point ll, rr;
         DCEL ret = this;
+        String methodName = getClass().getName() + " : " + 
+                            new Exception().getStackTrace()[0].getMethodName() + 
+                            " : ";
+        String msg;
         if ((lftEdge != null) && (rgtEdge != null)) {
+            ll = lftEdge.node.f_l.equals(node.f_l) ? lftEdge.node.f_r : lftEdge.node.f_l;
+            rr = rgtEdge.node.f_l.equals(node.f_r) ? rgtEdge.node.f_r : rgtEdge.node.f_l;
             lftCut = testCut(lftEdge);
             rgtCut = testCut(rgtEdge);
             l = lftEdge.node.cutPoint(node);
@@ -421,7 +433,9 @@ public class DCEL implements Constant, java.io.Serializable {
                     || ((rgtCut == FOURPOINTS) && (lftCut == YES) && (rgtCutPoint >= lftCutPoint))
                     || ((lftCut == FOURPOINTS) && (rgtCut != YES))
                     || ((rgtCut == FOURPOINTS) && (lftCut != YES))) {
-                throw new Exception("4 points co-circular " + node.f_l + " " + node.f_r);
+                msg = "4 points co-circular ";                
+                throw new Exception(methodName + msg + 
+                                    node.f_l + " " + node.f_r + " " + ll + " " + rr);        
             }
             if ((lftCut == YES) && (rgtCut == YES)) {
                 if (lftCutPoint > rgtCutPoint) {
@@ -429,35 +443,51 @@ public class DCEL implements Constant, java.io.Serializable {
                 } else if (rgtCutPoint > lftCutPoint) {
                     ret = rgtEdge;
                 } else {
-                    throw new Exception("Left and Right meet with current " + node.f_l + " " + node.f_r);
+                msg = "Left and Right meet with current ";                
+                throw new Exception(methodName + msg + 
+                                    node.f_l + " " + node.f_r + " " + ll + " " + rr);        
                 }
             } else if (lftCut == YES) {
                 ret = lftEdge;
             } else if (rgtCut == YES) {
                 ret = rgtEdge;
             } else {
-                throw new Exception("No next edge " + node.f_l + " " + node.f_r);
+                msg = "No next edge ";                
+                throw new Exception(methodName + msg + 
+                                    node.f_l + " " + node.f_r + " " + ll + " " + rr);        
             }
         } else if (lftEdge != null) {
+                ll = lftEdge.node.f_l.equals(node.f_l) ? lftEdge.node.f_r : lftEdge.node.f_l;
             lftCut = testCut(lftEdge);
             if (lftCut == PARALLEL) {
-                throw new Exception("3 or 4 points on a line " + node.f_l + " " + node.f_r);
+                msg = "3 or 4 points on a line ";                
+                throw new Exception(methodName + msg + 
+                                    node.f_l + " " + node.f_r + " " + ll);        
             }
             if (lftCut == FOURPOINTS) {
-                throw new Exception("4 points co-circular " + node.f_l + " " + node.f_r);
+                msg = "4 points co-circular ";                
+                throw new Exception(methodName + msg + 
+                                    node.f_l + " " + node.f_r + " " + ll);        
             }
             ret = lftEdge;
         } else if (rgtEdge != null) {
+                rr = rgtEdge.node.f_l.equals(node.f_r) ? rgtEdge.node.f_r : rgtEdge.node.f_l;
             rgtCut = testCut(rgtEdge);
             if (rgtCut == PARALLEL) {
-                throw new Exception("3 or 4 points on a line " + node.f_l + " " + node.f_r);
+                msg = "3 or 4 points on a line ";                
+                throw new Exception(methodName + msg + 
+                                    node.f_l + " " + node.f_r + " " + rr);        
             }
             if (rgtCut == FOURPOINTS) {
-                throw new Exception("4 points co-circular " + node.f_l + " " + node.f_r);
+                msg = "4 points co-circular ";                
+                throw new Exception(methodName + msg + 
+                                    node.f_l + " " + node.f_r + " " + rr);        
             }
             ret = rgtEdge;
         } else {
-            throw new Exception("Both sets are null " + node.f_l + " " + node.f_r);
+                msg = "Both sets are null ";                
+                throw new Exception(methodName + msg + 
+                                    node.f_l + " " + node.f_r);        
         }
         return ret;
     }

@@ -29,12 +29,18 @@ public class Main {
             try {
                 int no = (int) (Math.random() * FACTOR * noOfPoints);
                 //	                Serializer.store("AVL"+no,t);
+                LOG.info("\n" + t.toString());
                 v = new VTree();
                 LOG.debug("# points: " + t.count());
                 v.buildStructure(t);
+                LOG.info(v.toString());
                 success = true;
             } catch (Exception e) {
-                LOG.error(e);
+                LOG.error(e.getMessage());
+                StackTraceElement[] st = e.getStackTrace();
+                for (StackTraceElement ste : st) {
+                    LOG.error(ste.getClassName() + " : " + ste.getMethodName() + " : " + ste.getLineNumber());                    
+                }
             }  
         }
         
@@ -61,12 +67,11 @@ public class Main {
     }
 
     public static void drawRandom(String[] argv) {
-/*        int noOfPoints = Integer.parseInt(argv[1]);
+        int noOfPoints = Integer.parseInt(argv[1]);
         generateVoronoi(noOfPoints);
-        dobj = new DrawVoronoi(v);
-        d = new DrawingBoard();
-        d.setDrawObject(dobj);
-*/
+//        dobj = new DrawVoronoi(v);
+//        d = new DrawingBoard();
+//        d.setDrawObject(dobj);
     }
     
     public static void drawFromFile(String[] argv) {
