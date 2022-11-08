@@ -45,34 +45,34 @@ public class TestDCEL {
         ConveksHull ch1 = d1.vor2CH();
         String exp = "(0.0,5.0)(1.0,0.0)";
         String actual = ch1.toString();
-        assertTrue(exp + " : " + actual, actual.contains(exp));
+        assertTrue(actual, actual.contains(exp));
         ConveksHull ch2 = d2.vor2CH();
         exp = "(2.0,4.0)(2.0,7.0)";
         actual = ch2.toString();
-        assertTrue(exp + " : " + actual, actual.contains(exp));
+        assertTrue(actual, actual.contains(exp));
         d2.merge(d1);
         ConveksHull ch12 = d2.vor2CH();
         exp = "(0.0,5.0)(1.0,0.0)(2.0,4.0)(2.0,7.0)";
         actual = ch12.toString();
-        assertTrue(exp + " : " + actual, actual.contains(exp));
+        assertTrue(actual, actual.contains(exp));
         ConveksHull ch3 = d3.vor2CH();
         exp = "(5.0,0.0)(5.0,4.0)";
         actual = ch3.toString();
-        assertTrue(exp + " : " + actual, actual.contains(exp));
+        assertTrue(actual, actual.contains(exp));
         ConveksHull ch4 = d4.vor2CH();
         exp = "(6.0,7.0)(7.0,4.0)";
         actual = ch4.toString();
-        assertTrue(exp + " : " + actual, actual.contains(exp));
+        assertTrue(actual, actual.contains(exp));
         d3.merge(d4);
         ConveksHull ch34 = d3.vor2CH();
         exp = "(5.0,0.0)(7.0,4.0)(6.0,7.0)(5.0,4.0)";
         actual = ch34.toString();
-        assertTrue(exp + " : " + actual, actual.contains(exp));
+        assertTrue(actual, actual.contains(exp));
         d2.merge(d3);
         ConveksHull ch23 = d2.vor2CH();
         exp = "(0.0,5.0)(1.0,0.0)(5.0,0.0)(7.0,4.0)(6.0,7.0)(2.0,7.0)";
         actual = ch23.toString();
-        assertTrue(exp + " : " + actual, actual.contains(exp));
+        assertTrue(actual, actual.contains(exp));
     }
 
     @Test
@@ -83,40 +83,40 @@ public class TestDCEL {
         String exp2 = "lft and rgt: (-3.0,3.0) (0.0,5.0)";
         String exp3 = "lft and rgt: (-3.0,3.0) (1.0,0.0)";
         String actual = d1.toString();
-        assertTrue("contains (0.0,5.0) (1.0,0.0)", actual.contains(exp1));
-        assertTrue("contains (-3.0,3.0) (0.0,5.0)", actual.contains(exp2));
-        assertTrue("contains (-3.0,3.0) (1.0,0.0)", actual.contains(exp3));
+        assertTrue(actual, actual.contains(exp1));
+        assertTrue(actual, actual.contains(exp2));
+        assertTrue(actual, actual.contains(exp3));
         Point exp = new Point(-3, 3);
         Point act = d1.upLft;
-        assertTrue("Expected: " + exp + " actual: " + act, exp.equals(act));
+        assertTrue(act.toString(), exp.equals(act));
         act = d1.downLft;
-        assertTrue("Expected: " + exp + " actual: " + act, exp.equals(act));
+        assertTrue(act.toString(), exp.equals(act));
         exp = new Point(0, 5);
         act = d1.upRgt;
-        assertTrue("Expected: " + exp + " actual: " + act, exp.equals(act));
+        assertTrue(act.toString(), exp.equals(act));
         exp = new Point(1, 0);
         act = d1.downRgt;
-        assertTrue("Expected: " + exp + " actual: " + act, exp.equals(act));
+        assertTrue(act.toString(), exp.equals(act));
         // point to the right
         d2.merge(new Point(5, 10));
         exp1 = "lft and rgt: (2.0,7.0) (5.0,10.0)";
         exp2 = "lft and rgt: (2.0,4.0) (2.0,7.0)";
         exp3 = "lft and rgt: (2.0,4.0) (5.0,10.0)";
         actual = d2.toString();
-        assertTrue("contains (2.0,7.0) (5.0,10.0)", actual.contains(exp1));
-        assertTrue("contains (2.0,4.0) (2.0,7.0)", actual.contains(exp2));
-        assertTrue("contains (2.0,4.0) (5.0,10.0)", actual.contains(exp3));
+        assertTrue(actual, actual.contains(exp1));
+        assertTrue(actual, actual.contains(exp2));
+        assertTrue(actual, actual.contains(exp3));
         exp = new Point(2, 7);
         act = d2.upLft;
-        assertTrue("Expected: " + exp + " actual: " + act, exp.equals(act));
+        assertTrue(act.toString(), exp.equals(act));
         exp = new Point(2, 4);
         act = d2.downLft;
-        assertTrue("Expected: " + exp + " actual: " + act, exp.equals(act));
+        assertTrue(act.toString(), exp.equals(act));
         exp = new Point(5, 10);
         act = d2.upRgt;
-        assertTrue("Expected: " + exp + " actual: " + act, exp.equals(act));
+        assertTrue(act.toString(), exp.equals(act));
         act = d2.downRgt;
-        assertTrue("Expected: " + exp + " actual: " + act, exp.equals(act));
+        assertTrue(act.toString(), exp.equals(act));
     }
 
     @Test
@@ -126,16 +126,16 @@ public class TestDCEL {
             d1.merge(new Point(-1, 10));
             fail("Exception expected");
         } catch (Exception e) {
-            String expected = "3 points on a line ";
-            assertTrue("Contains " + expected, e.getMessage().contains(expected));
+            String expected = "3 points on a line";
+            assertTrue(e.getMessage(), e.getMessage().contains(expected));
         }
         // point to the right
         try {
             d4.merge(new Point(9, -2));
             fail("Exception expected");
         } catch (Exception e) {
-            String expected = "3 points on a line ";
-            assertTrue("Contains " + expected, e.getMessage().contains(expected));
+            String expected = "3 points on a line";
+            assertTrue(e.getMessage(), e.getMessage().contains(expected));
         }
     }
 
@@ -149,23 +149,23 @@ public class TestDCEL {
         String exp2 = "lft and rgt: (0.0,5.0) (1.0,0.0)";
         String exp3 = "lft and rgt: (1.0,0.0) (2.0,4.0)";
         String actual = d2.toString();
-        assertTrue("contains (0.0,5.0) (2.0,7.0)", actual.contains(exp1));
-        assertTrue("contains (2.0,4.0) (2.0,7.0)", actual.contains(exp4));
-        assertTrue("contains (0.0,5.0) (2.0,4.0)", actual.contains(exp5));
-        assertTrue("contains (0.0,5.0) (1.0,0.0)", actual.contains(exp2));
-        assertTrue("contains (1.0,0.0) (2.0,4.0)", actual.contains(exp3));
+        assertTrue(actual, actual.contains(exp1));
+        assertTrue(actual, actual.contains(exp4));
+        assertTrue(actual, actual.contains(exp5));
+        assertTrue(actual, actual.contains(exp2));
+        assertTrue(actual, actual.contains(exp3));
         Point exp = new Point(0, 5);
         Point act = d2.upLft;
-        assertTrue("Expected: " + exp + " actual: " + act, exp.equals(act));
+        assertTrue(act.toString(), exp.equals(act));
         exp = new Point(1, 0);
         act = d2.downLft;
-        assertTrue("Expected: " + exp + " actual: " + act, exp.equals(act));
+        assertTrue(act.toString(), exp.equals(act));
         exp = new Point(2, 7);
         act = d2.upRgt;
-        assertTrue("Expected: " + exp + " actual: " + act, exp.equals(act));
+        assertTrue(act.toString(), exp.equals(act));
         exp = new Point(2, 4);
         act = d2.downRgt;
-        assertTrue("Expected: " + exp + " actual: " + act, exp.equals(act));
+        assertTrue(act.toString(), exp.equals(act));
         // subVor to the right
         d3.merge(d4);
         exp1 = "lft and rgt: (5.0,4.0) (6.0,7.0)";
@@ -174,23 +174,23 @@ public class TestDCEL {
         exp2 = "lft and rgt: (5.0,0.0) (5.0,4.0)";
         exp3 = "lft and rgt: (5.0,0.0) (7.0,4.0)";
         actual = d3.toString();
-        assertTrue("contains (5.0,4.0) (6.0,7.0)", actual.contains(exp1));
-        assertTrue("contains (6.0,7.0) (7.0,4.0)", actual.contains(exp4));
-        assertTrue("contains (5.0,4.0) (7.0,4.0)", actual.contains(exp5));
-        assertTrue("contains (5.0,0.0) (5.0,4.0)", actual.contains(exp2));
-        assertTrue("contains (5.0,0.0) (7.0,4.0)", actual.contains(exp3));
+        assertTrue(actual, actual.contains(exp1));
+        assertTrue(actual, actual.contains(exp4));
+        assertTrue(actual, actual.contains(exp5));
+        assertTrue(actual, actual.contains(exp2));
+        assertTrue(actual, actual.contains(exp3));
         exp = new Point(5, 4);
         act = d3.upLft;
-        assertTrue("Expected: " + exp + " actual: " + act, exp.equals(act));
+        assertTrue(act.toString(), exp.equals(act));
         exp = new Point(5, 0);
         act = d3.downLft;
-        assertTrue("Expected: " + exp + " actual: " + act, exp.equals(act));
+        assertTrue(act.toString(), exp.equals(act));
         exp = new Point(6, 7);
         act = d3.upRgt;
-        assertTrue("Expected: " + exp + " actual: " + act, exp.equals(act));
+        assertTrue(act.toString(), exp.equals(act));
         exp = new Point(7, 4);
         act = d3.downRgt;
-        assertTrue("Expected: " + exp + " actual: " + act, exp.equals(act));
+        assertTrue(act.toString(), exp.equals(act));
         // mega merge - i.e. make a set from the above merges
         d2.merge(d3);
         exp1 = "lft and rgt: (0.0,5.0) (2.0,7.0)";
@@ -209,33 +209,33 @@ public class TestDCEL {
         String exp14 = "lft and rgt: (2.0,4.0) (5.0,0.0)";
         String exp15 = "lft and rgt: (1.0,0.0) (5.0,0.0)";
         actual = d2.toString();
-        assertTrue("contains (0.0,5.0) (2.0,7.0)", actual.contains(exp1));
-        assertTrue("contains (2.0,4.0) (2.0,7.0)", actual.contains(exp4));
-        assertTrue("contains (0.0,5.0) (2.0,4.0)", actual.contains(exp5));
-        assertTrue("contains (0.0,5.0) (1.0,0.0)", actual.contains(exp2));
-        assertTrue("contains (1.0,0.0) (2.0,4.0)", actual.contains(exp3));
-        assertTrue("contains (5.0,4.0) (6.0,7.0)", actual.contains(exp6));
-        assertTrue("contains (6.0,7.0) (7.0,4.0)", actual.contains(exp7));
-        assertTrue("contains (5.0,4.0) (7.0,4.0)", actual.contains(exp8));
-        assertTrue("contains (5.0,0.0) (5.0,4.0)", actual.contains(exp9));
-        assertTrue("contains (5.0,0.0) (7.0,4.0)", actual.contains(exp10));
-        assertTrue("contains (2.0,7.0) (6.0,7.0)", actual.contains(exp11));
-        assertTrue("contains (2.0,7.0) (5.0,4.0)", actual.contains(exp12));
-        assertTrue("contains (2.0,4.0) (5.0,4.0)", actual.contains(exp13));
-        assertTrue("contains (2.0,4.0) (5.0,0.0)", actual.contains(exp14));
-        assertTrue("contains (1.0,0.0) (5.0,0.0)", actual.contains(exp15));
+        assertTrue(actual, actual.contains(exp1));
+        assertTrue(actual, actual.contains(exp4));
+        assertTrue(actual, actual.contains(exp5));
+        assertTrue(actual, actual.contains(exp2));
+        assertTrue(actual, actual.contains(exp3));
+        assertTrue(actual, actual.contains(exp6));
+        assertTrue(actual, actual.contains(exp7));
+        assertTrue(actual, actual.contains(exp8));
+        assertTrue(actual, actual.contains(exp9));
+        assertTrue(actual, actual.contains(exp10));
+        assertTrue(actual, actual.contains(exp11));
+        assertTrue(actual, actual.contains(exp12));
+        assertTrue(actual, actual.contains(exp13));
+        assertTrue(actual, actual.contains(exp14));
+        assertTrue(actual, actual.contains(exp15));
         exp = new Point(2, 7);
         act = d2.upLft;
-        assertTrue("Expected: " + exp + " actual: " + act, exp.equals(act));
+        assertTrue(act.toString(), exp.equals(act));
         exp = new Point(1, 0);
         act = d2.downLft;
-        assertTrue("Expected: " + exp + " actual: " + act, exp.equals(act));
+        assertTrue(act.toString(), exp.equals(act));
         exp = new Point(6, 7);
         act = d2.upRgt;
-        assertTrue("Expected: " + exp + " actual: " + act, exp.equals(act));
+        assertTrue(act.toString(), exp.equals(act));
         exp = new Point(5, 0);
         act = d2.downRgt;
-        assertTrue("Expected: " + exp + " actual: " + act, exp.equals(act));
+        assertTrue(act.toString(), exp.equals(act));
 
     }
 
@@ -282,5 +282,4 @@ public class TestDCEL {
     @Test
     public void testFetch() throws Exception {
     }
-
 }

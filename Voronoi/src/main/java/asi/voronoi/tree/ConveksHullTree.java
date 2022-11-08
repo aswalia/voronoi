@@ -37,5 +37,7 @@ public class ConveksHullTree {
         }
     }
     
-
+    public ConveksHull getInfo() {
+        return info;
+    }
 }

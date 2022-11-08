@@ -1,5 +1,6 @@
 package asi.voronoi.tree;
 
+import asi.voronoi.DatabaseHandler;
 import asi.voronoi.ModelObject;
 import asi.voronoi.Point;
 import asi.voronoi.Serializer;
@@ -7,6 +8,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.StringTokenizer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -46,10 +48,18 @@ public class BinaryTree implements java.io.Serializable, ModelObject {
         return p;
     }
 
+    public void setLft(BinaryTree l) {
+        lft = l;
+    }
+    
     public BinaryTree lft() {
         return lft;
     }
 
+    public void setRgt(BinaryTree r) {
+        rgt = r;
+    }
+    
     public BinaryTree rgt() {
         return rgt;
     }
@@ -181,11 +191,11 @@ public class BinaryTree implements java.io.Serializable, ModelObject {
     }
     private static LinkedList<PointElem> pList;
 
-    private static class PointElem {
-        BinaryTree b;
+    private static class PointElem<T> {
+        T b;
         int level;
 
-        PointElem(BinaryTree b, int level) {
+        PointElem(T b, int level) {
             this.b = b;
             this.level = level;
         }
@@ -205,7 +215,7 @@ public class BinaryTree implements java.io.Serializable, ModelObject {
         String ret = "";
         int level = 1;
         pList = new LinkedList();
-        PointElem pe = new PointElem(this, level);
+        PointElem<BinaryTree> pe = new PointElem<>(this, level);
         pList.add(pe);
         do {
             pe = pList.removeFirst();
@@ -216,11 +226,12 @@ public class BinaryTree implements java.io.Serializable, ModelObject {
                 ret += "N";
             } else if (!pe.b.isLeaf()) {
                 level++;
-                LOG.debug("Leaf: "+level);
+                LOG.debug("Node: "+level);
                 ret += pe.b.p.toString();
                 pList.add(new PointElem(pe.b.lft, level));
                 pList.add(new PointElem(pe.b.rgt, level));
             } else {
+                LOG.debug("Leaf: "+level);
                 ret += "[" + pe.b.p + "]";
             }
             ret += eol;
@@ -245,6 +256,37 @@ public class BinaryTree implements java.io.Serializable, ModelObject {
     
     public static BinaryTree fetch(String filename) throws java.io.IOException, ClassNotFoundException {
         return (BinaryTree) Serializer.fetch(filename);
+    }
+    
+    public void store(int grp, List<String> rows) {
+        // save BinaryTree as a list of strings
+        // each item representing a row in the
+        // database
+        int index = DatabaseHandler.getIndexFromPoint(p, grp);
+        String point = "" + index;
+        String group = "" + grp;
+        String left = null;
+        String right = null;
+        if (lft != null) {
+            index = DatabaseHandler.getIndexFromPoint(lft.p, grp);
+            left = "" + index;            
+        }
+        if (rgt != null) {
+            index = DatabaseHandler.getIndexFromPoint(rgt.p, grp);
+            right = "" + index;                        
+        }
+        String row = point + " , " + group + " , " + left + " , " + right;
+        rows.add(row);
+        if (lft != null) {
+            lft.store(grp, rows);
+        }
+        if (rgt != null) {
+            rgt.store(grp, rows);
+        }
+    }
+    
+    public BinaryTree buildTreeFromDatabase(int grp) {
+        return DatabaseHandler.getBinaryTreeByGroup(grp);
     }
 
     private Point parsePoint(String s) {

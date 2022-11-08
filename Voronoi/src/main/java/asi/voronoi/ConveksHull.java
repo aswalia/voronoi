@@ -1,6 +1,9 @@
 package asi.voronoi;
 
+import java.sql.SQLException;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 
 public class ConveksHull implements Constant, java.io.Serializable, ModelObject {
@@ -34,6 +37,10 @@ public class ConveksHull implements Constant, java.io.Serializable, ModelObject 
             up = rgt;
             down = lft;
         }
+    }
+    
+    public void connect(ConveksHull prv, ConveksHull cur) {
+        cur.head.connect(prv.head);
     }
     
     public int size() {
@@ -307,6 +314,90 @@ public class ConveksHull implements Constant, java.io.Serializable, ModelObject 
 
     public static ConveksHull fetch(String filename) throws java.io.IOException, ClassNotFoundException {
         return (ConveksHull) Serializer.fetch(filename);
+    }
+    
+    public void store(int grp, List<String> r) {
+        // save ConveksHull as a list of strings
+        // each item representing a row in the
+        // database on ConveksHulls table
+        Point start = head.get(0);
+        Point prv = start;
+        Point cur = head.get(1);
+        Point nxt = head.get(2);
+        // one point CH
+        if (prv.equals(cur) && cur.equals(nxt)) {
+            int index = DatabaseHandler.getIndexFromPoint(cur, grp);
+            r.add("" + index + " , " + grp + " ," + index + " , " + index);
+        } else if (prv.equals(nxt) && !prv.equals(cur)) {
+        // two points CH
+            int index = DatabaseHandler.getIndexFromPoint(cur, grp);
+            int im1 = DatabaseHandler.getIndexFromPoint(prv, grp);
+            r.add("" + im1 + " , " + grp + " ," + index + " , " + index);
+            r.add("" + index + " , " + grp + " ," + im1 + " , " + im1);
+        } else {
+        // 3 or more points
+            for (int i=1; i<=size(); i++) {
+                int index = DatabaseHandler.getIndexFromPoint(cur, grp);
+                int im1 = DatabaseHandler.getIndexFromPoint(prv, grp);
+                int ip1 = DatabaseHandler.getIndexFromPoint(nxt, grp);
+                r.add("" + index + " , " + grp + " ," + ip1 + " , " + im1);
+                prv = cur;
+                cur = nxt;
+                nxt = head.get(i+2);
+            }
+        }
+    }
+
+    public void storeAsLinesegments(int grp, List<Properties> r) throws SQLException {
+        // save ConveksHull as a list of strings
+        // each item representing a row in the
+        // database on ConveksHullsAsLinesegments table
+        Point start = head.get(0);
+        Point prv = start;
+        Point cur = head.get(1);
+        Point nxt = head.get(2);
+        // one point CH        
+        Properties rp = new Properties();
+        if (prv.equals(cur) && cur.equals(nxt)) {
+            int index = DatabaseHandler.insertConveksHullLinesegment(grp);
+            if (index > 0) {
+                int indexpoint = DatabaseHandler.getIndexFromPoint(cur, grp);
+                rp.put("COLUMN:beginpoint", ""+indexpoint);
+                rp.put("COLUMN:endpoint", ""+indexpoint);
+                rp.put("PRIMARY:id", ""+index);
+                rp.put("PRIMARY:grp", ""+grp);
+                r.add(rp);
+            }
+        } else if (prv.equals(nxt) && !prv.equals(cur)) {
+        // two points CH
+            int index = DatabaseHandler.insertConveksHullLinesegment(grp);
+            if (index > 0) {
+                int ic = DatabaseHandler.getIndexFromPoint(cur, grp);
+                int im1 = DatabaseHandler.getIndexFromPoint(prv, grp);
+                rp.put("COLUMN:beginpoint", ""+im1);
+                rp.put("COLUMN:endpoint", ""+ic);
+                rp.put("PRIMARY:id", ""+index);
+                rp.put("PRIMARY:grp", ""+grp);
+                r.add(rp);
+            }
+        } else {
+        // 3 or more points
+            for (int i=1; i<=size(); i++) {
+                int index = DatabaseHandler.insertConveksHullLinesegment(grp);
+                if (index > 0) {
+                    int ic =  DatabaseHandler.getIndexFromPoint(cur, grp);
+                    int ip1 = DatabaseHandler.getIndexFromPoint(nxt, grp);
+                    rp.put("COLUMN:beginpoint", ""+ic);
+                    rp.put("COLUMN:endpoint", ""+ip1);
+                    rp.put("PRIMARY:id", ""+index);
+                    rp.put("PRIMARY:grp", ""+grp);
+                    r.add(rp);
+                    cur = nxt;
+                    nxt = head.get(i+2);
+                    rp = new Properties();
+                }
+            }
+        }
     }
 
     private short test(int index, Point p) {

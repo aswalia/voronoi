@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.StringTokenizer;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -39,7 +40,7 @@ public class TestVTree {
     
     @Test
     public void testBuildStructure_OnePoint() {
-        //VTree for two points is a single DCEL with lft equals rgt
+        //VTree for one points is a single DCEL with lft equals rgt
         BinaryTree b = new BinaryTree(new Point(0,0));
         VTree v = new VTree();
         v.buildStructure(b);
@@ -156,6 +157,27 @@ public class TestVTree {
             return null;
         }
     }
+    
+    private boolean compareLines(String expected, String actual) {
+        String[] expSt = expected.split("\n");
+        String[] actSt = actual.split("\n");
+        if (expSt.length != actSt.length) {
+            return false;
+        }
+        for (String expSt1 : expSt) {
+            int count = 0;
+            for (String actSt1 : actSt) {
+                if (expSt1.equals(actSt1)) {
+                    count++;
+                }
+            }
+            if (count != 1) {
+                // exact match accepted
+                return false;
+            }
+        }
+        return true;
+    }
 
     private boolean compareFile(String expFile, String actFile) {
         boolean ret = false;
@@ -165,9 +187,7 @@ public class TestVTree {
             // skip test when no expected file
             ret = true;
         } else {
-            ret = (actual != null)
-                    && actual.trim().replaceAll("\\s+", " ").
-                            equals(expected.trim().replaceAll("\\s+", " "));
+            ret = (actual != null) && compareLines(expected,actual);
         }
         return ret;
     }
