@@ -24,10 +24,14 @@ WHERE (conveksHullsAsLinesegments.linesegment = linesegments.id)
   
 SELECT dcels.edge, dcels.f_l, dcels.f_r, linesegments.beginpoint, linesegments.endpoint
 FROM dcels, linesegments
-WHERE (((linesegments.beginpoint NOTNULL) AND (linesegments.endpoint NOTNULL) AND linesegments.id = dcels.edge) AND (linesegments.grp = dcels.grp));
+WHERE (((linesegments.beginpoint NOTNULL) AND (linesegments.endpoint NOTNULL) AND linesegments.id = dcels.edge) AND (linesegments.grp = dcels.grp));
 
 SELECT dcels.edge, dcels.f_l, dcels.f_r, linesegments.beginpoint, linesegments.endpoint
 FROM dcels, linesegments
+WHERE ((((linesegments.beginpoint ISNULL) OR (linesegments.endpoint ISNULL)) AND linesegments.id = dcels.edge) AND (linesegments.grp = dcels.grp));
+
+SELECT dcels.edge, dcels.f_l, dcels.f_r, linesegments.beginpoint, linesegments.endpoint
+FROM dcels, linesegments
 WHERE (( linesegments.id = dcels.edge) AND (linesegments.grp = dcels.grp));     
 
 </sql><current_tab id="0"/></tab_sql></sqlb_project>

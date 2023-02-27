@@ -160,7 +160,8 @@ public class DCELNode implements Constant, java.io.Serializable {
             top = Point.coordinat(d, p, a_e);
             bottom = Point.coordinat(d, p, a_e + t);
         }
-        ret = new Line(bottom, top);
+        ret = new Line();
+        ret.setStartToEnd(bottom, top);
         return ret;
     }
 
@@ -192,46 +193,42 @@ public class DCELNode implements Constant, java.io.Serializable {
         return ret;
     }
     
-    class LineSegment {
-        Point beginP, endP, midP, dir;
-    }
-    
-    private LineSegment getLineSegment(DCELNode n) {
-        LineSegment ls = new LineSegment();
-        ls.midP = n.p;
-        ls.dir = n.d;
+    private Line getLineSegment(DCELNode n) {
+        Line ls = new Line();
+        ls.setMidP(n.p);
+        ls.setDir(n.d);
         if ((n.p_b != null) && (n.p_e != null)) {
             // edge with a start and end point
-            ls.endP = Point.coordinat(n.d, n.p, n.a_e);
-            ls.beginP = Point.coordinat(n.d, n.p, n.a_b);
+            ls.setEndP(Point.coordinat(n.d, n.p, n.a_e));
+            ls.setBeginP(Point.coordinat(n.d, n.p, n.a_b));
         } else if (n.p_b != null) {
             // edge with only a start point
-            ls.beginP = Point.coordinat(n.d, n.p, n.a_b);
+            ls.setBeginP(Point.coordinat(n.d, n.p, n.a_b));
         } else if (n.p_e != null) {
             // edge with only an end point
-            ls.endP = Point.coordinat(n.d, n.p, n.a_e);                
+            ls.setEndP(Point.coordinat(n.d, n.p, n.a_e));                
         } // else an edge with no ends, should only occur one time in the whole diagram
         return ls;
     }
     
-    private Properties addEdgePoints(int id, int grp, LineSegment ls) throws SQLException {
+    private Properties addEdgePoints(int id, int grp, Line ls) throws SQLException {
         Properties rp = new Properties();
         List<String> listOfPoints = new LinkedList<>();
         int pId = DatabaseHandler.getLargestPointId(grp);
-        if (ls.beginP != null) {
+        if (ls.getBeginP() != null) {
             rp.put("COLUMN:beginpoint", ""+pId);
-            listOfPoints.add("" + pId + ", " + grp + ", " + ls.beginP.x() +", " + ls.beginP.y());
+            listOfPoints.add("" + pId + ", " + grp + ", " + ls.getBeginP().x() +", " + ls.getBeginP().y());
             pId++;
         }
-        if (ls.endP != null) {
+        if (ls.getEndP() != null) {
             rp.put("COLUMN:endpoint", ""+pId);
-            listOfPoints.add("" + pId + ", " + grp + ", " + ls.endP.x() +", " + ls.endP.y());
+            listOfPoints.add("" + pId + ", " + grp + ", " + ls.getEndP().x() +", " + ls.getEndP().y());
             pId++;
         }
-        listOfPoints.add("" + pId + ", " + grp + ", " + ls.midP.x() +", " + ls.midP.y());
+        listOfPoints.add("" + pId + ", " + grp + ", " + ls.getMidP().x() +", " + ls.getMidP().y());
         rp.put("COLUMN:midpoint", ""+pId);
         pId++;
-        listOfPoints.add("" + pId + ", " + grp + ", " + ls.dir.x() +", " + ls.dir.y());
+        listOfPoints.add("" + pId + ", " + grp + ", " + ls.getDir().x() +", " + ls.getDir().y());
         DatabaseHandler.insertContent("points", listOfPoints);
         rp.put("COLUMN:direction", ""+pId);
         rp.put("PRIMARY:id", ""+id);
@@ -245,7 +242,7 @@ public class DCELNode implements Constant, java.io.Serializable {
         // database on DCELs table
         List<DCELNode> ldn = getVoronoiEdgeList();
         for (DCELNode n:ldn) {
-            LineSegment ls = getLineSegment(n);
+            Line ls = getLineSegment(n);
             Properties rp;
             int ifl = DatabaseHandler.getIndexFromPoint(n.f_l, grp);
             int ifr = DatabaseHandler.getIndexFromPoint(n.f_r, grp);

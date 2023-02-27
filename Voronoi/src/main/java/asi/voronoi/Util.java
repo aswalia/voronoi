@@ -20,7 +20,7 @@ import org.apache.logging.log4j.Logger;
 public class Util {
 
     private static final Logger LOG = LogManager.getLogger(Util.class);
-    private static final int FACTOR = 5;
+    private static final int FACTOR = 10;
     private static VTree v;
     private static BinaryTree t;
     private static DrawingBoard d;
@@ -88,7 +88,7 @@ public class Util {
         String fileName = "src/main/resources/VD.db";
         try {
             Util.createDatabase(fileName);
-            Util.prepareDatabaseWithPoints(100);
+            Util.prepareDatabaseWithPoints(1000);
         } catch(SQLException se) {
             LOG.error("Failed to prepare database: " + se.getSQLState());
         }

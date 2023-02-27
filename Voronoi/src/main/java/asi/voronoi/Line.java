@@ -1,18 +1,50 @@
 package asi.voronoi;
 
 public class Line {
-    public Line(Point p1, Point p2) {
-        this.p1 = p1;
-        this.p2 = p2;
+    public void setStartToEnd(Point s, Point e) {
+        beginP = s;
+        endP = e;
+    }
+    
+    public void setMidAndDir(Point m, Point d) {
+        midP = m;
+        dir = d;
+    }
+    
+    public void setBeginP(Point p) {
+        beginP = p;
     }
 
-    public Point getP1() {
-        return p1;
+    public void setEndP(Point p) {
+        endP = p;
     }
 
-    public Point getP2() {
-        return p2;
+    public void setMidP(Point p) {
+        midP = p;
     }
-    private Point p2;
-    private Point p1;
+
+    public void setDir(Point p) {
+        dir = p;
+    }
+
+    public Point getBeginP() {
+        return beginP;
+    }
+
+    public Point getEndP() {
+        return endP;
+    }
+
+    public Point getMidP() {
+        return midP;
+    }
+
+    public Point getDir() {
+        return dir;
+    }
+
+    private Point endP;
+    private Point beginP;
+    private Point midP;
+    private Point dir;
 }
