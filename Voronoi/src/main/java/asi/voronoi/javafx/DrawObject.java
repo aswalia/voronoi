@@ -39,8 +39,8 @@ abstract public class DrawObject {
 
     public void drawLine(GraphicData g, Line l) {
 //        GraphicsContext g2 = g.c.getGraphicsContext2D();
-        Point p1 = transformPoint(l.getP1());
-        Point p2 = transformPoint(l.getP2());
+        Point p1 = transformPoint(l.getBeginP());
+        Point p2 = transformPoint(l.getEndP());
         g.c.moveTo(p1.x(), p1.y());
         g.c.lineTo(p2.x(), p2.y());
     }

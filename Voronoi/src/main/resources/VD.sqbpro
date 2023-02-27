@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="C:/Users/asi/Documents/home/Development/Voronoi/Voronoi/src/main/resources/VD.db" readonly="0" foreign_keys="" case_sensitive_like="" temp_store="" wal_autocheckpoint="" synchronous=""/><attached/><window><main_tabs open="structure browser pragmas query" current="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="2349"/><column_width id="4" width="0"/></tab_structure><tab_browse><current_table name="0,0:"/><default_encoding codec=""/><browse_table_settings/></tab_browse><tab_sql><sql name="SQL 1">SELECT point FROM binaryTrees WHERE point not in (
+  SELECT left FROM binaryTrees WHERE (left is not null)
+UNION
+  SELECT right FROM binaryTrees WHERE (right is not null)
+);
+
+SELECT binaryTrees.point, binaryTrees.left, binaryTrees.right, points.x, points.y FROM points, binaryTrees
+WHERE ((points.id = binaryTrees.point) AND (points.grp = binaryTrees.grp));
+  
+  
+SELECT point
+FROM binaryTrees;
+
+SELECT conveksHulls.point, conveksHulls.next, conveksHulls.previous, points.x, points.y 
+FROM conveksHulls, points
+WHERE ((points.id = conveksHulls.point) AND (points.grp = conveksHulls.grp))
+ORDER BY points.x, points.y ASC; 
+  
+SELECT conveksHullsAsLinesegments.linesegment, linesegments.beginpoint, linesegments.endpoint, points.x, points.y 
+FROM conveksHullsAsLinesegments, linesegments, points
+WHERE (conveksHullsAsLinesegments.linesegment = linesegments.id) 
+  AND (conveksHullsAsLinesegments.grp = linesegments.grp)
+  AND (linesegments.beginpoint = points.id);
+  
+SELECT dcels.edge, dcels.f_l, dcels.f_r, linesegments.beginpoint, linesegments.endpoint
+FROM dcels, linesegments
+WHERE (((linesegments.beginpoint NOTNULL) AND (linesegments.endpoint NOTNULL) AND linesegments.id = dcels.edge) AND (linesegments.grp = dcels.grp));
+
+SELECT dcels.edge, dcels.f_l, dcels.f_r, linesegments.beginpoint, linesegments.endpoint
+FROM dcels, linesegments
+WHERE ((((linesegments.beginpoint ISNULL) OR (linesegments.endpoint ISNULL)) AND linesegments.id = dcels.edge) AND (linesegments.grp = dcels.grp));
+
+SELECT dcels.edge, dcels.f_l, dcels.f_r, linesegments.beginpoint, linesegments.endpoint
+FROM dcels, linesegments
+WHERE (( linesegments.id = dcels.edge) AND (linesegments.grp = dcels.grp));     
+
+</sql><current_tab id="0"/></tab_sql></sqlb_project>

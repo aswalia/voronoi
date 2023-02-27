@@ -30,6 +30,47 @@ public class TestCircularLinkedList {
     }
     
     @Test
+    public void testGet() {
+        // only one point, so any index returns same point
+        Point expected = new Point(0,5);
+        assertEquals(expected, t.get(0));
+        assertEquals(expected, t.get(-24));
+        assertEquals(expected, t.get(47));
+        // add some more points and verify that get returns correct value
+        Point _1 = new Point(-1, 10);
+        t.add(0, -1, _1);
+        Point _2 = new Point(3,3);
+        t.add(0, -1, _2);
+        Point _3 = new Point(1,0);
+        t.add(0, -1, _3);
+        // points are added in sequence, but head moved to point to lowest value
+        assertEquals(_1, t.get(0));
+        assertEquals(expected, t.get(1));
+        assertEquals(_2, t.get(2));
+        assertEquals(_3, t.get(3));
+        // multipla of index returns correct point
+        // once away from base
+        assertEquals(_1, t.get(4));
+        assertEquals(expected, t.get(5));
+        assertEquals(_2, t.get(6));
+        assertEquals(_3, t.get(7));
+        assertEquals(_1, t.get(-4));
+        assertEquals(expected, t.get(-3));
+        assertEquals(_2, t.get(-2));
+        assertEquals(_3, t.get(-1));
+        // 4 times away
+        assertEquals(_1, t.get(4*4));
+        assertEquals(expected, t.get(4*4+1));
+        assertEquals(_2, t.get(6*4+2));
+        assertEquals(_3, t.get(7*4+3));
+        // 8 time, in negative direction
+        assertEquals(_1, t.get(-4*8));
+        assertEquals(expected, t.get(-3*8+1));
+        assertEquals(_2, t.get(-2*8+2));
+        assertEquals(_3, t.get(-1*8+3));        
+    }
+    
+    @Test
     public void testAdd() {
         Point expected = new Point(-1,10); 
         t.add(0, -1, expected);

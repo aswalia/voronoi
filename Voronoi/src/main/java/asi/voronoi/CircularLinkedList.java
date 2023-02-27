@@ -86,10 +86,16 @@ public class CircularLinkedList {
         return ret;
     }
     
+    public void connect(CircularLinkedList prv) {
+        CircularLinkedList tmp = this;
+        prv.head.next = tmp.head;
+        head.prev = prv.head;        
+    }
+    
     public Point get(int index) {
         return findNode(index).p;
     }
-
+    
     public void add(int addFront, int addBack, Point p) {
         Node tmp = new Node();
         tmp.p = p;

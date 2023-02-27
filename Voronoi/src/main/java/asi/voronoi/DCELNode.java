@@ -2,8 +2,15 @@ package asi.voronoi;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
+import java.util.Stack;
 
 public class DCELNode implements Constant, java.io.Serializable {
     private static FileWriter fw;
@@ -108,7 +115,7 @@ public class DCELNode implements Constant, java.io.Serializable {
         used = false;
         p_e = p_b = null;
     }
-
+    
     public void vor2file() throws Exception {
         try {
             initFile();
@@ -153,23 +160,98 @@ public class DCELNode implements Constant, java.io.Serializable {
             top = Point.coordinat(d, p, a_e);
             bottom = Point.coordinat(d, p, a_e + t);
         }
-        ret = new Line(bottom, top);
+        ret = new Line();
+        ret.setStartToEnd(bottom, top);
         return ret;
     }
 
     public String printDCEL() {
         String ret = "";
-        if (!used) {
-            used = true;
-            ret += this.toString();
-            if (p_b != null) {
-                ret += p_b.node.printDCEL();
-            }
-            if (p_e != null) {
-                ret += p_e.node.printDCEL();
-            }
+        List<DCELNode> nodes = getVoronoiEdgeList();
+        for (DCELNode n:nodes) {
+            ret += n.toString();
         }
         return ret;
+    }
+
+    public List<DCELNode> getVoronoiEdgeList() {
+        List<DCELNode> ret = new LinkedList<>();
+        Set<DCELNode> edgeSet = new HashSet<>();
+        Stack<DCELNode> stack = new Stack<>();
+        stack.push(this);
+        while (!stack.empty()) {
+            DCELNode elem = stack.pop();
+            edgeSet.add(elem);
+            if ((elem.p_b != null) && (!edgeSet.contains(elem.p_b.node))) {
+                stack.push(elem.p_b.node);
+            }
+            if ((elem.p_e != null) && (!edgeSet.contains(elem.p_e.node))) {
+                stack.push(elem.p_e.node);
+            }
+        }
+        ret.addAll(edgeSet);
+        return ret;
+    }
+    
+    private Line getLineSegment(DCELNode n) {
+        Line ls = new Line();
+        ls.setMidP(n.p);
+        ls.setDir(n.d);
+        if ((n.p_b != null) && (n.p_e != null)) {
+            // edge with a start and end point
+            ls.setEndP(Point.coordinat(n.d, n.p, n.a_e));
+            ls.setBeginP(Point.coordinat(n.d, n.p, n.a_b));
+        } else if (n.p_b != null) {
+            // edge with only a start point
+            ls.setBeginP(Point.coordinat(n.d, n.p, n.a_b));
+        } else if (n.p_e != null) {
+            // edge with only an end point
+            ls.setEndP(Point.coordinat(n.d, n.p, n.a_e));                
+        } // else an edge with no ends, should only occur one time in the whole diagram
+        return ls;
+    }
+    
+    private Properties addEdgePoints(int id, int grp, Line ls) throws SQLException {
+        Properties rp = new Properties();
+        List<String> listOfPoints = new LinkedList<>();
+        int pId = DatabaseHandler.getLargestPointId(grp);
+        if (ls.getBeginP() != null) {
+            rp.put("COLUMN:beginpoint", ""+pId);
+            listOfPoints.add("" + pId + ", " + grp + ", " + ls.getBeginP().x() +", " + ls.getBeginP().y());
+            pId++;
+        }
+        if (ls.getEndP() != null) {
+            rp.put("COLUMN:endpoint", ""+pId);
+            listOfPoints.add("" + pId + ", " + grp + ", " + ls.getEndP().x() +", " + ls.getEndP().y());
+            pId++;
+        }
+        listOfPoints.add("" + pId + ", " + grp + ", " + ls.getMidP().x() +", " + ls.getMidP().y());
+        rp.put("COLUMN:midpoint", ""+pId);
+        pId++;
+        listOfPoints.add("" + pId + ", " + grp + ", " + ls.getDir().x() +", " + ls.getDir().y());
+        DatabaseHandler.insertContent("points", listOfPoints);
+        rp.put("COLUMN:direction", ""+pId);
+        rp.put("PRIMARY:id", ""+id);
+        rp.put("PRIMARY:grp", ""+grp);
+        return rp;
+    }
+    
+    public void storeAsLinesegments(int grp, List<Properties> r) throws SQLException {
+        // save Voronoi Diagram as a list of strings
+        // each item representing a row in the
+        // database on DCELs table
+        List<DCELNode> ldn = getVoronoiEdgeList();
+        for (DCELNode n:ldn) {
+            Line ls = getLineSegment(n);
+            Properties rp;
+            int ifl = DatabaseHandler.getIndexFromPoint(n.f_l, grp);
+            int ifr = DatabaseHandler.getIndexFromPoint(n.f_r, grp);
+            int index = DatabaseHandler.insertDCELs(grp, "" + ifl + ", " + ifr);
+            if (index > 0) {
+                rp = addEdgePoints(index, grp, ls);
+                r.add(rp);
+            }
+        }
     }
 
     public DCELNode copyDCEL() {
@@ -248,5 +330,4 @@ public class DCELNode implements Constant, java.io.Serializable {
             }
         }
     }
-
 }

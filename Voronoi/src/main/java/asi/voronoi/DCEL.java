@@ -76,7 +76,7 @@ public class DCEL implements Constant, java.io.Serializable {
         String msg;
         PointPair pp = ch.getUpSupport();
         if (pp == null) {
-            msg = "3 points on a line";
+            msg = "3 points on a line ";
             throw new Exception(methodName + msg);        
         }
         upLft = pp.getLft(); upRgt = pp.getRgt();
