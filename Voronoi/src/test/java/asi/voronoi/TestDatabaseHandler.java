@@ -4,11 +4,15 @@
  */
 package asi.voronoi;
 
+import asi.voronoi.tree.AVLTree;
 import asi.voronoi.tree.BinaryTree;
+import asi.voronoi.tree.VTree;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -37,6 +41,11 @@ public class TestDatabaseHandler {
     @Before
     public void setUp() {
         DatabaseHandler.createNewDatabase(fileName);
+        try {
+            DatabaseHandler.createContent();
+        } catch (SQLException ex) {
+            fail("Exception occured: " + ex.getMessage());
+        }
     }
     
     @After
@@ -49,7 +58,6 @@ public class TestDatabaseHandler {
      */
     @Test
     public void testDropDatabase() {
-        System.out.println("dropDatabase");
         boolean expResult = true;
         boolean result = DatabaseHandler.dropDatabase(fileName);
         assertEquals(expResult, result);
@@ -61,7 +69,6 @@ public class TestDatabaseHandler {
     @Test
     public void testCreateNewDatabase() {
         String tempFile = "bob.db";
-        System.out.println("createNewDatabase");
         DatabaseHandler.createNewDatabase(tempFile);
         // let's see if we can delete it to prove it's existance
         if (!DatabaseHandler.dropDatabase(tempFile)) {
@@ -69,24 +76,10 @@ public class TestDatabaseHandler {
         }
     }
 
-    /**
-     * Test of createContent method, of class DatabaseHandler.
-     */
-    @Test
-    public void testCreateContent() {
-        System.out.println("createContent");
-        try {
-            DatabaseHandler.createContent();
-        } catch(SQLException se) {
-            fail("Exception occured: " + se.getMessage());
-        }
-        
-    }
-    
-    private void addPoints(List<Point> expected) throws SQLException {
+    private void addPoints(int grp, List<Point> expected) throws SQLException {
         List<String> rows = new LinkedList<>();
         for(int i=1; i<=expected.size(); i++) {
-            rows.add("" + i + ", 1, " + expected.get(i-1).x() + ", " + expected.get(i-1).y());
+            rows.add("" + i + ", " + grp + ", " + expected.get(i-1).x() + ", " + expected.get(i-1).y());
         }
         DatabaseHandler.insertContent("points", rows);        
     }
@@ -111,13 +104,8 @@ public class TestDatabaseHandler {
      */
     @Test
     public void testDatabaseContent() {
-        System.out.println("Database Content");
-        try {
-            DatabaseHandler.createContent();
-        } catch (SQLException ex) {
-            fail("Exception occured: " + ex.getMessage());
-        }
         List<String> rows = new LinkedList<>();
+        int grp = 1;
         // points table
         try {
             List<Point> expected = new LinkedList<>();
@@ -125,8 +113,8 @@ public class TestDatabaseHandler {
             expected.add(new Point(2.0,0.0));
             expected.add(new Point(1.0,0.0));
             expected.add(new Point(0.0,2.0));
-            addPoints(expected);
-            Map<Integer,Point> actual = DatabaseHandler.getPointsByGroup(1);
+            addPoints(grp, expected);
+            Map<Integer,Point> actual = DatabaseHandler.getPointsByGroup(grp);
             for(int i=1; i<=4; i++) {
                 assertEquals(expected.get(i-1),actual.get(i));
             }
@@ -172,7 +160,7 @@ public class TestDatabaseHandler {
         // dcels table
         try {
             rows.clear();
-            rows.add("2, 1, 1, 2");
+            rows.add("2, 1, 1, 2, 2, 2");
             DatabaseHandler.insertContent("dcels", rows);
             
         } catch (SQLException ex) {
@@ -185,19 +173,14 @@ public class TestDatabaseHandler {
      */
     @Test
     public void testGetIndexFromPoint() {
-        System.out.println("getIndexFromPoint");
-        try {
-            DatabaseHandler.createContent();
-        } catch (SQLException ex) {
-            fail("Exception occured: " + ex.getMessage());
-        }
+        int grp = 1;
         try {
             List<Point> expected = new LinkedList<>();
             expected.add(new Point(0.0,0.0));
             expected.add(new Point(2.0,0.0));
-            addPoints(expected);
-            int actual1 = DatabaseHandler.getIndexFromPoint(expected.get(0), 1);
-            int actual2 = DatabaseHandler.getIndexFromPoint(expected.get(1), 1);
+            addPoints(grp, expected);
+            int actual1 = DatabaseHandler.getIndexFromPoint(expected.get(0), grp);
+            int actual2 = DatabaseHandler.getIndexFromPoint(expected.get(1), grp);
             assertEquals(1,actual1);
             assertEquals(2,actual2);
         } catch (SQLException ex) {
@@ -210,22 +193,74 @@ public class TestDatabaseHandler {
      */
     @Test
     public void testGetIndexOfBinarytTreeRoot() {
-        System.out.println("getIndexOfBinarytTreeRoot");
-        try {
-            DatabaseHandler.createContent();
-        } catch (SQLException ex) {
-            fail("Exception occured: " + ex.getMessage());
-        }
+        int grp = 1;
         try {
             List<Point> points = new LinkedList<>();
             points.add(new Point(0.0,0.0));
             points.add(new Point(2.0,0.0));
-            addPoints(points);
+            addPoints(grp, points);
             addBinaryTree();
-            int actual = DatabaseHandler.getIndexOfBinarytTreeRoot(1);
+            int actual = DatabaseHandler.getIndexOfBinarytTreeRoot(grp);
             assertEquals(1,actual);
         } catch (SQLException ex) {
             fail("SQLException occured:" + ex.getMessage());
+        }
+    }
+    
+    private BinaryTree buildBinaryTree(int grp) {
+        Map<Integer,Point> mp = DatabaseHandler.getPointsByGroup(grp);
+        BinaryTree ret = null;
+        Set<Integer> sk = mp.keySet();
+        for (Integer i : sk) {
+            Point p = mp.get(i);
+            if (ret == null) {
+                // first point in set
+                ret = new AVLTree(p);
+            } else {
+                // rest of the set
+                ret = ret.insertNode(new Point(p));
+            }
+        }
+        return ret;
+    }
+    
+    @Test
+    public void testStoreDcels() {
+        int grp = 10;
+        try {
+            List<Point> points = new LinkedList<>();
+            points.add(new Point(0.0,0.0));
+            points.add(new Point(0.0,2.0));
+            points.add(new Point(1.0,1.0));
+            points.add(new Point(2.0,0.0));
+            points.add(new Point(2.0,2.0));
+            addPoints(grp, points);
+            BinaryTree bt = buildBinaryTree(grp);
+            VTree v = new VTree();
+            v.buildStructure(bt);
+            DCELNode dcn = v.getInfo().getNode();
+            List<Properties> r = new LinkedList<>();
+            dcn.storeInDatabase(grp, r);
+            DCEL dv = DatabaseHandler.getVoronoiDiagramByGroup(grp);
+            String exp1 = "lft and rgt: (0.0,0.0) (1.0,1.0)";
+            String exp2 = "lft and rgt: (0.0,0.0) (0.0,2.0)";
+            String exp3 = "lft and rgt: (0.0,2.0) (1.0,1.0)";
+            String exp4 = "lft and rgt: (0.0,2.0) (2.0,2.0)";
+            String exp5 = "lft and rgt: (1.0,1.0) (2.0,2.0)";
+            String exp6 = "lft and rgt: (2.0,0.0) (2.0,2.0)";
+            String exp7 = "lft and rgt: (1.0,1.0) (2.0,2.0)";
+            String exp8 = "lft and rgt: (0.0,0.0) (2.0,0.0)";
+            String actual = dv.toString();
+            assertTrue(actual, actual.contains(exp1));
+            assertTrue(actual, actual.contains(exp2));
+            assertTrue(actual, actual.contains(exp3));
+            assertTrue(actual, actual.contains(exp4));
+            assertTrue(actual, actual.contains(exp5));
+            assertTrue(actual, actual.contains(exp6));
+            assertTrue(actual, actual.contains(exp7));
+            assertTrue(actual, actual.contains(exp8));
+        } catch (SQLException ex) {
+            fail("SQLException occured:" + ex.getMessage());            
         }
     }
 }

@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.logging.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -33,7 +32,7 @@ public class Util {
     }
     
     
-    public static void prepareDatabaseWithPoints(int noOfPoints) throws SQLException {
+    public static void prepareDatabaseWithRandomPoints(int noOfPoints) throws SQLException {
         double x, y;
         Set<Point> sp = new HashSet<>();
         for (int i=0; i < noOfPoints; i++) {
@@ -52,6 +51,33 @@ public class Util {
         }
         DatabaseHandler.insertContent("points", l);
     } 
+    
+    public static void prepareDatabaseWithFixedPoints() throws SQLException {
+        List<String> l = new LinkedList<>();
+        Point p = new Point(6,2);
+        String r = "1 , 1" + " , " + p.x() + " , " + p.y();
+        l.add(r);
+        p = new Point(0,3);
+        r = "2 , 1" + " , " + p.x() + " , " + p.y();
+        l.add(r);
+        p = new Point(1,12);
+        r = "3 , 1" + " , " + p.x() + " , " + p.y();
+        l.add(r);
+        p = new Point(3,13);
+        r = "4 , 1" + " , " + p.x() + " , " + p.y();
+        l.add(r);
+        p = new Point(0,11);
+        r = "5 , 1" + " , " + p.x() + " , " + p.y();
+        l.add(r);
+        p = new Point(6,5);
+        r = "6 , 1" + " , " + p.x() + " , " + p.y();
+        l.add(r);
+        p = new Point(12,8);
+        r = "7 , 1" + " , " + p.x() + " , " + p.y();
+        l.add(r);
+        DatabaseHandler.insertContent("points", l);
+        
+    }
     
     public static BinaryTree generateBTree(int noOfPoints) {
         BinaryTree ret = new AVLTree(new Point((int) (Math.random() * FACTOR * noOfPoints),
@@ -88,7 +114,8 @@ public class Util {
         String fileName = "src/main/resources/VD.db";
         try {
             Util.createDatabase(fileName);
-            Util.prepareDatabaseWithPoints(1000);
+            Util.prepareDatabaseWithRandomPoints(1000);
+//            Util.prepareDatabaseWithFixedPoints();
         } catch(SQLException se) {
             LOG.error("Failed to prepare database: " + se.getSQLState());
         }
@@ -154,14 +181,9 @@ public class Util {
         r.clear();
         DCELNode dcn = v.getInfo().getNode();
         try {
-            dcn.storeAsLinesegments(grp, r);
+            dcn.storeInDatabase(grp, r);
         } catch (SQLException ex) {
-            LOG.error("Unable to build Linesegments for DCELs: " + ex.getSQLState());
-        }
-        try {
-            DatabaseHandler.updateContent("linesegments", r);
-        } catch (SQLException ex) {
-            LOG.error("Unable to update Linesegments for DCELs: " + ex.getSQLState());
+            LOG.error("Unable to build Linesegments for DCELs: " + ex.getMessage());
         }
         System.out.println();
         System.out.println("Done! took: " + (System.currentTimeMillis() - timeStart) + " millisec");
