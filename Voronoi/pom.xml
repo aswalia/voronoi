@@ -72,6 +72,7 @@
                 <version>0.0.8</version>
                 <configuration>
                     <mainClass>${mainClass}</mainClass>
+                    <commandlineArgs>${commandArg}</commandlineArgs>
                 </configuration>
             </plugin>
             <plugin>
@@ -96,7 +97,8 @@
         <maven.compiler.release>11</maven.compiler.release>
         <javafx.version>17</javafx.version>
         <mainClass>asi.voronoi.javafx.Main</mainClass>
-        <log4j.version>2.17.1</log4j.version> 
+        <log4j.version>2.17.1</log4j.version>
+        <commandArg>100</commandArg> 
     </properties>
     <dependencies>
         <dependency>
@@ -125,19 +127,16 @@
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-base</artifactId>
             <version>${javafx.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
             <version>${javafx.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-graphics</artifactId>
             <version>${javafx.version}</version>
-            <scope>provided</scope>
         </dependency>
         <!--dependency>
             <groupId>org.openjfx</groupId>
