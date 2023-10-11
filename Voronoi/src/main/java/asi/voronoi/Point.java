@@ -1,5 +1,12 @@
 package asi.voronoi;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.StringTokenizer;
+
 public class Point implements java.io.Serializable {
     private double x, y;
 
@@ -84,6 +91,14 @@ public class Point implements java.io.Serializable {
         return ((this.x == s.x) && (this.y == s.y));
     }
 
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 79 * hash + (int) (Double.doubleToLongBits(this.x) ^ (Double.doubleToLongBits(this.x) >>> 32));
+        hash = 79 * hash + (int) (Double.doubleToLongBits(this.y) ^ (Double.doubleToLongBits(this.y) >>> 32));
+        return hash;
+    }
+
     public boolean isLess(Point t) {
         return (this.x < t.x) || ((this.x == t.x) && (this.y < t.y));
     }
@@ -96,4 +111,5 @@ public class Point implements java.io.Serializable {
     public static Point coordinat(Point d, Point p, double t) {
         return p.add(d.mult(t));
     }
+    
 }

@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.StringTokenizer;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -75,7 +74,7 @@ public class TestVTree {
         assertTrue(actual.contains("lft and rgt: (1.0,1.0) (2.0,0.0)"));
         assertTrue(actual.contains("lft and rgt: (0.0,0.0) (2.0,0.0)"));
         Integer count = (actual.split("lft and rgt: ").length ) - 1;
-        assertEquals(new Integer(3), count);
+        assertTrue(3 == count);
     }
     
     @Test
@@ -272,6 +271,6 @@ public class TestVTree {
                 "lft and rgt: " + "(2.0,0.0)" + " " + "(3.0,2.0)" + "\n"));
         // there are no more edges in the DCEL graph, i.e. count equals 12
         Integer count = (actual.split("lft and rgt: ").length ) - 1;
-        assertEquals(new Integer(12), count);
+        assertTrue(12 == count);
      }
 }

@@ -7,6 +7,7 @@ import asi.voronoi.tree.BinaryTree;
 import asi.voronoi.tree.VTree;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,8 +23,6 @@ public class Util {
     private static final int FACTOR = 10;
     private static VTree v;
     private static BinaryTree t;
-    private static DrawingBoard d;
-    private static DrawObject dobj;
     
     public static void createDatabase(String fileName) throws SQLException {
         DatabaseHandler.dropDatabase(fileName);
@@ -32,7 +31,7 @@ public class Util {
     }
     
     
-    public static void prepareDatabaseWithRandomPoints(int noOfPoints) throws SQLException {
+    public static void prepareDatabaseWithRandomPoints(int noOfPoints, int group) throws SQLException {
         double x, y;
         Set<Point> sp = new HashSet<>();
         for (int i=0; i < noOfPoints; i++) {
@@ -43,7 +42,6 @@ public class Util {
         }
         List<String> l = new LinkedList<>();
         int count = 1;
-        int group = 1;
         for (Point p: sp) {
             String r = count + " , " + group + " , " + p.x() + " , " + p.y();
             l.add(r);
@@ -88,6 +86,49 @@ public class Util {
         }
         return ret;
     }
+    
+    public static BinaryTree bTreeFromPointSet(String filename) throws Exception {
+        PointSet ps = new PointSet();
+        Set<Point> pointsFromFile = ps.buildPointSet(filename);
+        BinaryTree ret = null;
+        for (Point p : pointsFromFile) {
+            if (ret == null) {
+                ret = new AVLTree(p);
+            } else {
+                ret = ret.insertNode(p);
+            }
+        }
+        return ret;
+    }
+    
+    public static BinaryTree generateBTree(String filename) {
+        BinaryTree tree = new AVLTree();
+        try {
+            tree = tree.buildBinaryTree(filename);
+        } catch (IOException ex) {
+            tree = null;
+            LOG.error(ex.getMessage());
+        }
+        return tree;
+    }
+    
+    public static BinaryTree generateBTree(int noOfPoints, String dbName, int group) throws SQLException {
+        Util.createDatabase(dbName);
+        Util.prepareDatabaseWithRandomPoints(noOfPoints, group);
+        BinaryTree ret = null;
+        Map<Integer,Point> points = DatabaseHandler.getPointsByGroup(group);
+        Collection<Point> pointSet = points.values();
+        for (Point p:pointSet) {
+            if (ret == null) {
+                // first point in set
+                ret = new AVLTree(p);
+            } else {
+                // rest of the set
+                ret = ret.insertNode(new Point(p));
+            }
+        }
+        return ret;
+    }
 
     private static void generateVoronoi(int noOfPoints) {
         boolean success = false;
@@ -114,7 +155,7 @@ public class Util {
         String fileName = "src/main/resources/VD.db";
         try {
             Util.createDatabase(fileName);
-            Util.prepareDatabaseWithRandomPoints(1000);
+            Util.prepareDatabaseWithRandomPoints(1000,1);
 //            Util.prepareDatabaseWithFixedPoints();
         } catch(SQLException se) {
             LOG.error("Failed to prepare database: " + se.getSQLState());
