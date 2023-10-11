@@ -139,4 +139,5 @@ public class TestPoint {
         Point d = new Point(4,5);
         assertTrue("(2,3)+1.5*(4,5) = (8,10.5)", Point.coordinat(d,p,1.5).equals(new Point(8,10.5)));
     }
+    
 }

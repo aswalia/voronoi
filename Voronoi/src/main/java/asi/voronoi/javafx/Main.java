@@ -6,7 +6,6 @@ import asi.voronoi.tree.BinaryTree;
 import asi.voronoi.Util;
 import asi.voronoi.tree.ConveksHullTree;
 import asi.voronoi.tree.VTree;
-
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.geometry.Pos;
@@ -58,8 +57,10 @@ public class Main extends Application {
         primaryStage.show();
     }
 
-    public static void main(String[] args) {
-        tree = Util.generateBTree(Integer.parseInt(args[0]));
+    public static void main(String[] args) throws Exception {
+//        String fileName = "src/main/resources/VD.db";
+//        tree = Util.generateBTree(Integer.parseInt(args[0]),fileName,Integer.parseInt(args[1]));
+        tree = Util.bTreeFromPointSet(args[0]);
         ConveksHullTree cht = new ConveksHullTree();
         cht.buildStructure(tree);
         ch = cht.getInfo();

@@ -63,8 +63,8 @@ public class DCELView extends Pane {
     }
     
     private void setView() {
-        wM =  0.8 * getWidth();
-        hM =  0.8 * getHeight();
+        wM =  0.95 * getWidth();
+        hM =  0.95 * getHeight();
         fx = wM / (xMax - xMin);
         fy = hM / (yMax - yMin);
     }
