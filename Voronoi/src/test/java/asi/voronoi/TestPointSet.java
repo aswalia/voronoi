@@ -53,7 +53,7 @@ public class TestPointSet {
             actual.buildPointSet(fileName);
             fail("Exception expected");
         } catch (Exception ex) {
-            assertEquals("Called from: 0 parse error: 0:[",ex.getMessage());
+            assertEquals("Called from: 0 parse error: [",ex.getMessage());
         }
     }
 }

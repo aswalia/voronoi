@@ -72,83 +72,83 @@ public class PointSet {
         return sm;
     }
     
-    private void error(String m) throws Exception {
-        throw new Exception("Called from: " + m + " parse error: " + state + ":" + nextToken);
+    private void error() throws Exception {
+        throw new Exception("Called from: " + state + " parse error: " + nextToken);
     } 
     
     private void zero() throws Exception {
         switch(nextToken) {
             case ' ', '\t', '\n', '\r' -> state = stateMachine[state][0];
-            case '(' -> {valueX = ""; valueY = ""; state = state = stateMachine[state][1];}
-            default -> error("0");
+            case '(' -> {valueX = ""; valueY = ""; state = stateMachine[state][1];}
+            default -> error();
         }
     }
     
     private void one() throws Exception {
         switch(nextToken) {
             case ' ', '\t', '\n', '\r' -> state = stateMachine[state][0];
-            case '+' -> state = state = stateMachine[state][2];
-            case '-' -> {valueX += nextToken; state = state = stateMachine[state][3];}
+            case '+' -> state = stateMachine[state][2];
+            case '-' -> {valueX += nextToken; state = stateMachine[state][3];}
             case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' ->  {valueX += nextToken; state = stateMachine[state][4];}
-            default -> error("1");
+            default -> error();
         }
     }
     
     private void two() throws Exception {
         switch(nextToken) {
             case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' ->  {valueX += nextToken; state = stateMachine[state][4];}
-            case ',' -> state = state = stateMachine[state][5];
-            case '.' -> {valueX += nextToken; state = state = stateMachine[state][9];}
-            default -> error("2");
+            case ',' -> state = stateMachine[state][5];
+            case '.' -> {valueX += nextToken; state = stateMachine[state][9];}
+            default -> error();
         }
     }
     
     private void three() throws Exception {
         switch(nextToken) {
             case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' ->  {valueX += nextToken; state = stateMachine[state][4];}
-            default -> error("3");
+            default -> error();
         }
     }
     
     private void four() throws Exception {
         switch(nextToken) {
             case ' ', '\t', '\n', '\r' -> state = stateMachine[state][0];
-            case '+' -> state = state = stateMachine[state][2];
-            case '-' -> {valueY += nextToken; state = state = stateMachine[state][3];}
+            case '+' -> state = stateMachine[state][2];
+            case '-' -> {valueY += nextToken; state = stateMachine[state][3];}
             case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' ->  {valueY += nextToken; state = stateMachine[state][4];}
-            default -> error("4");
+            default -> error();
         }
     }
     
     private void five() throws Exception {
         switch(nextToken) {
             case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' ->  {valueX += nextToken; state = stateMachine[state][4];}
-            case ',' -> state = state = stateMachine[state][5];
-            default -> error("5");
+            case ',' -> state = stateMachine[state][5];
+            default -> error();
         }
     }
     
     private void six() throws Exception {
         switch(nextToken) {
-            case '.' -> {valueY += nextToken; state = state = stateMachine[state][9];}
-            case ')'-> {state = state = stateMachine[state][6];}
+            case '.' -> {valueY += nextToken; state = stateMachine[state][9];}
+            case ')'-> {state = stateMachine[state][6];}
             case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' ->  {valueY += nextToken; state = stateMachine[state][4];}
-            default -> error("6");
+            default -> error();
         }
     }
     
     private void seven() throws Exception {
         switch(nextToken) {
             case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' ->  {valueY += nextToken; state = stateMachine[state][4];}
-            default -> error("7");
+            default -> error();
         }
     }
     
     private void eight() throws Exception {
         switch(nextToken) {
             case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' ->  {valueY += nextToken; state = stateMachine[state][4];}
-            case ')' -> state = state = stateMachine[state][6];
-            default -> error("8");
+            case ')' -> state = stateMachine[state][6];
+            default -> error();
         }
     }
     
@@ -159,17 +159,17 @@ public class PointSet {
     private void nine() throws Exception {
         switch(nextToken) {
             case ';' -> {
-                storePoint(); state = state = stateMachine[state][7];
+                storePoint(); state = stateMachine[state][7];
             }
-            default -> error("9");
+            default -> error();
         }
     }
     
     private void ten() throws Exception {
         switch(nextToken) {
             case ' ', '\t', '\n', '\r' -> state = stateMachine[state][0];
-            case '(' -> {valueX = ""; state = state = stateMachine[state][1];}
-            default -> error("10");
+            case '(' -> {valueX = ""; state = stateMachine[state][1];}
+            default -> error();
         }
     }
     
