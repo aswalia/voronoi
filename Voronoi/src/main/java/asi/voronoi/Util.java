@@ -1,8 +1,6 @@
 package asi.voronoi;
 
 import asi.voronoi.tree.AVLTree;
-import asi.voronoi.javafx.DrawingBoard;
-import asi.voronoi.javafx.DrawObject;
 import asi.voronoi.tree.BinaryTree;
 import asi.voronoi.tree.VTree;
 import java.io.IOException;
@@ -228,28 +226,6 @@ public class Util {
         }
         System.out.println();
         System.out.println("Done! took: " + (System.currentTimeMillis() - timeStart) + " millisec");
-
-        
-/*
-        Util m = new Util();
-
-        if (argv.length == 1) {
-            generateVoronoi(Integer.parseInt(argv[0]));
-            try {
-                ((DCEL) m.v.getInfo()).toFile();
-            } catch (Exception ex) {
-                LOG.error(ex);
-            }
-        } else {
-            if (Boolean.parseBoolean(argv[0])) {
-                drawFromFile(argv);
-            } else {
-                drawRandom(argv);
-            }
-//            d.main(argv);
-        }
-
-*/
     }
 
     public static void drawRandom(String[] argv) {
