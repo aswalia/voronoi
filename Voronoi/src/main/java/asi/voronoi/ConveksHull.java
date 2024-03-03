@@ -49,7 +49,9 @@ public class ConveksHull implements Constant, java.io.Serializable, ModelObject 
 
     @Override
     public String toString() {
-        String ret = "ConveksHull:" + "\n";
+        String ret = """
+                     ConveksHull:
+                     """;
         ret += head+"\n";
         ret += "lft:" + lft + " rgt:" + rgt + " up:" + up + " down:" + down+"\n";
         return ret;
@@ -412,28 +414,21 @@ public class ConveksHull implements Constant, java.io.Serializable, ModelObject 
         boolean done = false;
         do {
             switch (test(i,p)) {
-                case CONCAVE:
-                    i--;
-                    break;
-                case REFLEX:
-                    i++;
-                    break;
-                case SUPPORT:
+                case CONCAVE -> i--;
+                case REFLEX -> i++;
+                case SUPPORT -> {
                     switch (Point.area(p, head.get(i), head.get(i-1))) {
-                        case 0:
+                        case 0 -> {
                             if (head.get(i+1).equals(head.get(i-1)) && (Point.direction(head.get(i), head.get(i-1), p) < 0)) {
                                 done = true;
                             } else {
                                 i--;
                             }
-                            break;
-                        case 1:
-                            done = true;
-                            break;
-                        case - 1:
-                            i--;
-                            break;
                     }
+                        case 1 -> done = true;
+                        case - 1 -> i--;
+                    }
+                }
             }
         } while (!done);
         return head.get(i);
@@ -444,28 +439,21 @@ public class ConveksHull implements Constant, java.io.Serializable, ModelObject 
         boolean done = false;
         do {
             switch (test(i,p)) {
-                case CONCAVE:
-                    i++;
-                    break;
-                case REFLEX:
-                    i--;
-                    break;
-                case SUPPORT:
+                case CONCAVE -> i++;
+                case REFLEX -> i--;
+                case SUPPORT -> {
                     switch (Point.area(p, head.get(i), head.get(i+1))) {
-                        case 0:
+                        case 0 -> {
                             if (head.get(i+1).equals(head.get(i-1)) && (Point.direction(head.get(i), head.get(i+1), p) < 0)) {
                                 done = true;
                             } else {
                                 i++;
                             }
-                            break;
-                        case 1:
-                            i++;
-                            break;
-                        case - 1:
-                            done = true;
-                            break;
                     }
+                        case 1 -> i++;
+                        case - 1 -> done = true;
+                    }
+                }
             }
         } while (!done);
         return head.get(i);
