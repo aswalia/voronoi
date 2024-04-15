@@ -3,6 +3,7 @@
 package asi.voronoi.tree;
 
 import asi.voronoi.Point;
+import java.io.File;
 import java.io.IOException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -21,11 +22,14 @@ public class TestAVLTree {
     public void testBuildBinaryTree() {
         try {
             BinaryTree b = new AVLTree();
-            b = b.buildBinaryTree("src/test/resources/test_10.bt");
-            String expected = "(3.0,7.0)\n" +
-                              "(0.0,9.0) (6.0,1.0)\n" +
-                              "[(0.0,2.0)] [(1.0,6.0)] (5.0,9.0) (8.0,1.0)\n" +
-                              "[(4.0,2.0)] [(6.0,0.0)] N [(9.0,4.0)]\n";
+            File file = new File("src/test/resources/test_10.bt");
+            b = b.buildBinaryTree(file);
+            String expected = """
+                              (3.0,7.0)
+                              (0.0,9.0) (6.0,1.0)
+                              [(0.0,2.0)] [(1.0,6.0)] (5.0,9.0) (8.0,1.0)
+                              [(4.0,2.0)] [(6.0,0.0)] N [(9.0,4.0)]
+                              """;
             assertEquals(expected, b.toString());
         } catch (IOException ex) {
             fail("unexpected exception");
@@ -201,15 +205,33 @@ public class TestAVLTree {
         BinaryTree b = new AVLTree(new Point(3,4));
         assertTrue("only root", b.toString().equals("[(3.0,4.0)]\n"));
         b = b.insertNode(new Point(4,4));
-        assertTrue("insert 1",  b.toString().equals(("(3.0,4.0)\n"+"N "+"[(4.0,4.0)]\n")));
+        assertTrue("insert 1",  b.toString().equals(("""
+                                                     (3.0,4.0)
+                                                     N [(4.0,4.0)]
+                                                     """)));
         b = b.insertNode(new Point(2,4));
-        assertTrue("insert 2", b.toString().equals(("(3.0,4.0)\n"+"[(2.0,4.0)] "+"[(4.0,4.0)]\n")));
+        assertTrue("insert 2", b.toString().equals(("""
+                                                    (3.0,4.0)
+                                                    [(2.0,4.0)] [(4.0,4.0)]
+                                                    """)));
         b = b.insertNode(new Point(6,4));
-        assertTrue("insert 3", b.toString().equals(("(3.0,4.0)\n"+"[(2.0,4.0)] "+"(4.0,4.0)\n"+"N "+"[(6.0,4.0)]\n")));
+        assertTrue("insert 3", b.toString().equals(("""
+                                                    (3.0,4.0)
+                                                    [(2.0,4.0)] (4.0,4.0)
+                                                    N [(6.0,4.0)]
+                                                    """)));
         b = b.insertNode(new Point(5,4));
-        assertTrue("insert 4: "+b.toString(), b.toString().equals(("(3.0,4.0)\n"+"[(2.0,4.0)] "+"(5.0,4.0)\n"+"[(4.0,4.0)] "+"[(6.0,4.0)]\n")));
+        assertTrue("insert 4: "+b.toString(), b.toString().equals(("""
+                                                                   (3.0,4.0)
+                                                                   [(2.0,4.0)] (5.0,4.0)
+                                                                   [(4.0,4.0)] [(6.0,4.0)]
+                                                                   """)));
         b = b.insertNode(new Point(1,1));
-        assertTrue("insert 5: "+b.toString(), b.toString().equals(("(3.0,4.0)\n"+"(2.0,4.0) "+"(5.0,4.0)\n"+"[(1.0,1.0)] "+"N "+"[(4.0,4.0)] "+"[(6.0,4.0)]\n")));
+        assertTrue("insert 5: "+b.toString(), b.toString().equals(("""
+                                                                   (3.0,4.0)
+                                                                   (2.0,4.0) (5.0,4.0)
+                                                                   [(1.0,1.0)] N [(4.0,4.0)] [(6.0,4.0)]
+                                                                   """)));
     }    /** tests the method asi.voronoi.BinaryTree.count() */
     @Test
     public void testCount() {
@@ -230,40 +252,54 @@ public class TestAVLTree {
         assertTrue("only root"+b.toString(), b.toString().equals("[(8.0,0.0)]\n"));
         b = b.insertNode(new Point(9,0));
         b = b.insertNode(new Point(10,0));
-        assertTrue("RR "+b.toString(), b.toString().equals(("(9.0,0.0)\n"+
-                                                            "[(8.0,0.0)] "+"[(10.0,0.0)]\n")));
+        assertTrue("RR "+b.toString(), b.toString().equals(("""
+                                                            (9.0,0.0)
+                                                            [(8.0,0.0)] [(10.0,0.0)]
+                                                            """)));
         b = b.insertNode(new Point(2,0));
         b = b.insertNode(new Point(1,0));
-        assertTrue("LL : "+b.toString(), b.toString().equals(("(9.0,0.0)\n"+
-                                                              "(2.0,0.0) "+"[(10.0,0.0)]\n"+
-                                                              "[(1.0,0.0)] "+"[(8.0,0.0)]\n")));
+        assertTrue("LL : "+b.toString(), b.toString().equals(("""
+                                                              (9.0,0.0)
+                                                              (2.0,0.0) [(10.0,0.0)]
+                                                              [(1.0,0.0)] [(8.0,0.0)]
+                                                              """)));
         b = b.insertNode(new Point(5,0));
-        assertTrue("LRa : "+b.toString(), b.toString().equals(("(8.0,0.0)\n"+
-                                                               "(2.0,0.0) "+"(9.0,0.0)\n"+
-                                                               "[(1.0,0.0)] "+"[(5.0,0.0)] "+"N "+"[(10.0,0.0)]\n")));
+        assertTrue("LRa : "+b.toString(), b.toString().equals(("""
+                                                               (8.0,0.0)
+                                                               (2.0,0.0) (9.0,0.0)
+                                                               [(1.0,0.0)] [(5.0,0.0)] N [(10.0,0.0)]
+                                                               """)));
         b = b.insertNode(new Point(3,0));
         b = b.insertNode(new Point(6,0));
         b = b.insertNode(new Point(4,0));
-        assertTrue("RLbc : "+b.toString(), b.toString().equals(("(8.0,0.0)\n"+
-                                                                "(3.0,0.0) "+"(9.0,0.0)\n"+
-                                                                "(2.0,0.0) "+"(5.0,0.0) "+"N "+"[(10.0,0.0)]\n"+
-                                                                "[(1.0,0.0)] "+"N "+"[(4.0,0.0)] "+"[(6.0,0.0)]\n")));
+        assertTrue("RLbc : "+b.toString(), b.toString().equals(("""
+                                                                (8.0,0.0)
+                                                                (3.0,0.0) (9.0,0.0)
+                                                                (2.0,0.0) (5.0,0.0) N [(10.0,0.0)]
+                                                                [(1.0,0.0)] N [(4.0,0.0)] [(6.0,0.0)]
+                                                                """)));
         b = b.insertNode(new Point(7,0));
-        assertTrue("LRbc : "+b.toString(), b.toString().equals(("(5.0,0.0)\n"+
-                                                                "(3.0,0.0) "+"(8.0,0.0)\n"+
-                                                                "(2.0,0.0) "+"[(4.0,0.0)] "+"(6.0,0.0) "+"(9.0,0.0)\n"+
-                                                                "[(1.0,0.0)] "+"N "+"N "+"[(7.0,0.0)] "+"N "+"[(10.0,0.0)]\n")));
+        assertTrue("LRbc : "+b.toString(), b.toString().equals(("""
+                                                                (5.0,0.0)
+                                                                (3.0,0.0) (8.0,0.0)
+                                                                (2.0,0.0) [(4.0,0.0)] (6.0,0.0) (9.0,0.0)
+                                                                [(1.0,0.0)] N N [(7.0,0.0)] N [(10.0,0.0)]
+                                                                """)));
         b = b.insertNode(new Point(11,0));
-        assertTrue("RR : "+b.toString(), b.toString().equals(("(5.0,0.0)\n"+
-                                                              "(3.0,0.0) "+"(8.0,0.0)\n"+
-                                                              "(2.0,0.0) "+"[(4.0,0.0)] "+"(6.0,0.0) "+"(10.0,0.0)\n"+
-                                                              "[(1.0,0.0)] "+"N "+"N "+"[(7.0,0.0)] "+"[(9.0,0.0)] "+"[(11.0,0.0)]\n")));
+        assertTrue("RR : "+b.toString(), b.toString().equals(("""
+                                                              (5.0,0.0)
+                                                              (3.0,0.0) (8.0,0.0)
+                                                              (2.0,0.0) [(4.0,0.0)] (6.0,0.0) (10.0,0.0)
+                                                              [(1.0,0.0)] N N [(7.0,0.0)] [(9.0,0.0)] [(11.0,0.0)]
+                                                              """)));
         b = b.insertNode(new Point(12,0));
-        assertTrue("no change : "+b.toString(), b.toString().equals(("(5.0,0.0)\n"+
-                                                                     "(3.0,0.0) "+"(8.0,0.0)\n"+
-                                                                     "(2.0,0.0) "+"[(4.0,0.0)] "+"(6.0,0.0) "+"(10.0,0.0)\n"+
-                                                                     "[(1.0,0.0)] "+"N "+"N "+"[(7.0,0.0)] "+"[(9.0,0.0)] "+"(11.0,0.0)\n"+
-                                                                     "N "+"[(12.0,0.0)]\n")));
+        assertTrue("no change : "+b.toString(), b.toString().equals(("""
+                                                                     (5.0,0.0)
+                                                                     (3.0,0.0) (8.0,0.0)
+                                                                     (2.0,0.0) [(4.0,0.0)] (6.0,0.0) (10.0,0.0)
+                                                                     [(1.0,0.0)] N N [(7.0,0.0)] [(9.0,0.0)] (11.0,0.0)
+                                                                     N [(12.0,0.0)]
+                                                                     """)));
     }
     @Test
     public void testRRs() {
@@ -271,41 +307,57 @@ public class TestAVLTree {
         assertTrue("only root"+b.toString(), b.toString().equals("[(1.0,0.0)]\n"));
         b = b.insertNode(new Point(2,0));
         b = b.insertNode(new Point(3,0));
-        assertTrue("1: "+b.toString(), b.toString().equals(("(2.0,0.0)\n"+
-                                                            "[(1.0,0.0)] "+"[(3.0,0.0)]\n")));
+        assertTrue("1: "+b.toString(), b.toString().equals(("""
+                                                            (2.0,0.0)
+                                                            [(1.0,0.0)] [(3.0,0.0)]
+                                                            """)));
         b = b.insertNode(new Point(4,0));
         b = b.insertNode(new Point(5,0));
-        assertTrue("2: "+b.toString(), b.toString().equals(("(2.0,0.0)\n"+
-                                                            "[(1.0,0.0)] "+"(4.0,0.0)\n"+
-                                                            "[(3.0,0.0)] "+"[(5.0,0.0)]\n")));
+        assertTrue("2: "+b.toString(), b.toString().equals(("""
+                                                            (2.0,0.0)
+                                                            [(1.0,0.0)] (4.0,0.0)
+                                                            [(3.0,0.0)] [(5.0,0.0)]
+                                                            """)));
         b = b.insertNode(new Point(6,0));
-        assertTrue("3: "+b.toString(), b.toString().equals(("(4.0,0.0)\n"+
-                                                            "(2.0,0.0) "+"(5.0,0.0)\n"+
-                                                            "[(1.0,0.0)] "+"[(3.0,0.0)] "+"N "+"[(6.0,0.0)]\n")));
+        assertTrue("3: "+b.toString(), b.toString().equals(("""
+                                                            (4.0,0.0)
+                                                            (2.0,0.0) (5.0,0.0)
+                                                            [(1.0,0.0)] [(3.0,0.0)] N [(6.0,0.0)]
+                                                            """)));
         b = b.insertNode(new Point(7,0));
-        assertTrue("4: "+b.toString(), b.toString().equals(("(4.0,0.0)\n"+
-                                                            "(2.0,0.0) "+"(6.0,0.0)\n"+
-                                                            "[(1.0,0.0)] "+"[(3.0,0.0)] "+"[(5.0,0.0)] "+"[(7.0,0.0)]\n")));
+        assertTrue("4: "+b.toString(), b.toString().equals(("""
+                                                            (4.0,0.0)
+                                                            (2.0,0.0) (6.0,0.0)
+                                                            [(1.0,0.0)] [(3.0,0.0)] [(5.0,0.0)] [(7.0,0.0)]
+                                                            """)));
         b = b.insertNode(new Point(8,0));
         b = b.insertNode(new Point(9,0));
-        assertTrue("5: "+b.toString(), b.toString().equals(("(4.0,0.0)\n"+
-                                                            "(2.0,0.0) "+"(6.0,0.0)\n"+
-                                                            "[(1.0,0.0)] "+"[(3.0,0.0)] "+"[(5.0,0.0)] "+"(8.0,0.0)\n"+
-                                                            "[(7.0,0.0)] "+"[(9.0,0.0)]\n")));
+        assertTrue("5: "+b.toString(), b.toString().equals(("""
+                                                            (4.0,0.0)
+                                                            (2.0,0.0) (6.0,0.0)
+                                                            [(1.0,0.0)] [(3.0,0.0)] [(5.0,0.0)] (8.0,0.0)
+                                                            [(7.0,0.0)] [(9.0,0.0)]
+                                                            """)));
         b = b.insertNode(new Point(10,0));
-        assertTrue("6: "+b.toString(), b.toString().equals(("(4.0,0.0)\n"+
-                                                            "(2.0,0.0) "+"(8.0,0.0)\n"+
-                                                            "[(1.0,0.0)] "+"[(3.0,0.0)] "+"(6.0,0.0) "+"(9.0,0.0)\n"+
-                                                            "[(5.0,0.0)] "+"[(7.0,0.0)] "+"N "+"[(10.0,0.0)]\n")));
+        assertTrue("6: "+b.toString(), b.toString().equals(("""
+                                                            (4.0,0.0)
+                                                            (2.0,0.0) (8.0,0.0)
+                                                            [(1.0,0.0)] [(3.0,0.0)] (6.0,0.0) (9.0,0.0)
+                                                            [(5.0,0.0)] [(7.0,0.0)] N [(10.0,0.0)]
+                                                            """)));
         b = b.insertNode(new Point(11,0));
-        assertTrue("7: "+b.toString(), b.toString().equals(("(4.0,0.0)\n"+
-                                                            "(2.0,0.0) "+"(8.0,0.0)\n"+
-                                                            "[(1.0,0.0)] "+"[(3.0,0.0)] "+"(6.0,0.0) "+"(10.0,0.0)\n"+
-                                                            "[(5.0,0.0)] "+"[(7.0,0.0)] "+"[(9.0,0.0)] "+"[(11.0,0.0)]\n")));
+        assertTrue("7: "+b.toString(), b.toString().equals(("""
+                                                            (4.0,0.0)
+                                                            (2.0,0.0) (8.0,0.0)
+                                                            [(1.0,0.0)] [(3.0,0.0)] (6.0,0.0) (10.0,0.0)
+                                                            [(5.0,0.0)] [(7.0,0.0)] [(9.0,0.0)] [(11.0,0.0)]
+                                                            """)));
         b = b.insertNode(new Point(12,0));
-        assertTrue("8: : "+b.toString(), b.toString().equals(("(8.0,0.0)\n"+
-                                                              "(4.0,0.0) "+"(10.0,0.0)\n"+
-                                                              "(2.0,0.0) "+"(6.0,0.0) "+"[(9.0,0.0)] "+"(11.0,0.0)\n"+
-                                                              "[(1.0,0.0)] "+"[(3.0,0.0)] "+"[(5.0,0.0)] "+"[(7.0,0.0)] "+"N "+"[(12.0,0.0)]\n")));
+        assertTrue("8: : "+b.toString(), b.toString().equals(("""
+                                                              (8.0,0.0)
+                                                              (4.0,0.0) (10.0,0.0)
+                                                              (2.0,0.0) (6.0,0.0) [(9.0,0.0)] (11.0,0.0)
+                                                              [(1.0,0.0)] [(3.0,0.0)] [(5.0,0.0)] [(7.0,0.0)] N [(12.0,0.0)]
+                                                              """)));
     }
 }

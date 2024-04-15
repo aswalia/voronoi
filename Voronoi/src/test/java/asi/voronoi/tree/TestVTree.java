@@ -204,7 +204,8 @@ public class TestVTree {
                 // build and write actual result files
                 String fileName = fileEntry.getName();
                 if (fileName.endsWith("bt")) {
-                    bt = bt.buildBinaryTree(folderName + fileName);
+                    File file = new File(folderName + fileName);
+                    bt = bt.buildBinaryTree(file);
                     v.buildStructure(bt);
                     outFile = fileName.replace("bt", "act");
                     v.writeTree(folderName + outFile);

@@ -25,7 +25,7 @@ import javafx.stage.Stage;
 
 public class FXMain extends Application {
 
-/*    @Override
+    @Override
     public void start(Stage primaryStage) throws Exception {
         String path = "src/main/resources/media/pics/";
         StringBuilder sb = new StringBuilder(path);
@@ -64,8 +64,8 @@ public class FXMain extends Application {
         primaryStage.show();
 
     }
-*/
-    
+
+/*    
     @Override
     public void start(Stage stage) {
     //Creating a Path 
@@ -108,7 +108,7 @@ public class FXMain extends Application {
       //Displaying the contents of the stage 
       stage.show();         
     }
-
+*/
     public static void main(String[] args) {
         Application.launch(args);
     }

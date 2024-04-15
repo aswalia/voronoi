@@ -120,7 +120,8 @@ public class AVLTree extends BinaryTree {
     private AVLTree rebalance(AVLTree a) {
         AVLTree b, bl, br, cl, cr, c = null;
         switch (a.findRotation()) {
-            case LL: // init var for LL
+            case LL -> {
+                // init var for LL
                 b = (AVLTree)a.lft;
                 br = (AVLTree)b.rgt;
                 // do transform
@@ -128,8 +129,9 @@ public class AVLTree extends BinaryTree {
                 a.lft = br;
                 // set c to new root of subtree
                 c = b;
-                break;
-            case LRa: // init var LRa
+            }
+            case LRa -> {
+                // init var LRa
                 b = (AVLTree)a.lft;
                 c = (AVLTree)b.rgt;
                 // do transform
@@ -137,8 +139,9 @@ public class AVLTree extends BinaryTree {
                 c.rgt = a;
                 b.rgt = null;
                 a.lft = null;
-                break;
-            case LRbc: // init var for LRbc
+            }
+            case LRbc -> {
+                // init var for LRbc
                 b = (AVLTree)a.lft;
                 c = (AVLTree)b.rgt;
                 cl = (AVLTree)c.lft;
@@ -148,8 +151,9 @@ public class AVLTree extends BinaryTree {
                 c.rgt = a;
                 b.rgt = cl;
                 a.lft = cr;
-                break;
-            case RR: // init var for RR
+            }
+            case RR -> {
+                // init var for RR
                 b = (AVLTree)a.rgt;
                 bl = (AVLTree)b.lft;
                 // do transform
@@ -157,8 +161,9 @@ public class AVLTree extends BinaryTree {
                 a.rgt = bl;
                 // set c to new root of subtree
                 c = b;
-                break;
-            case RLa: // init var RLa
+            }
+            case RLa -> {
+                // init var RLa
                 b = (AVLTree)a.rgt;
                 c = (AVLTree)b.lft;
                 // do transform
@@ -166,8 +171,9 @@ public class AVLTree extends BinaryTree {
                 c.rgt = b;
                 b.lft = null;
                 a.rgt = null;
-                break;
-            case RLbc: // init var for RLbc
+            }
+            case RLbc -> {
+                // init var for RLbc
                 b = (AVLTree)a.rgt;
                 c = (AVLTree)b.lft;
                 cl = (AVLTree)c.lft;
@@ -177,7 +183,7 @@ public class AVLTree extends BinaryTree {
                 c.rgt = b;
                 a.rgt = cl;
                 b.lft = cr;
-                break;
+            }
         }
         return c;
     }

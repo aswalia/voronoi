@@ -5,8 +5,13 @@
 package asi.voronoi;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
+import java.sql.SQLException;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 
@@ -33,11 +38,22 @@ public class PointSet {
         return ps;
     }
     
-    public Set<Point> buildPointSet(String filename) throws Exception {
+    public Set<Point> buildPointSet(File filename) throws Exception {
         FileReader fr;
         fr = new FileReader(filename);
         br = new BufferedReader(fr);
         return parsePointSet();
+    }
+    
+    public static void store(int group, Set<Point> sp) throws SQLException {
+        List<String> l = new LinkedList<>();
+        int count = 1;
+        for (Point p : sp) {
+            String r = count + " , " + group + " , " + p.x() + " , " + p.y();
+            l.add(r);
+            count++;
+        }
+        DatabaseHandler.insertContent("points", l);        
     }
 
     private static int[][] configStateMachine() {

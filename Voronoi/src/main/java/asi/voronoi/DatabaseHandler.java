@@ -15,14 +15,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  *
  * @author asi
  */
 public class DatabaseHandler {
-
+    
     private static String url;
+    private static final Logger LOG = LogManager.getLogger(DatabaseHandler.class);
     
     public static boolean dropDatabase(String fileName) {
         // delete database file - that is drop database in SQLite
@@ -30,7 +33,7 @@ public class DatabaseHandler {
         return myObj.delete();
     }
 
-    public static void createNewDatabase(String fileName) {
+    public static void connectToDatabase(String fileName) {
 
         // SQLite connection string
         url = "jdbc:sqlite:" + fileName;
@@ -38,12 +41,11 @@ public class DatabaseHandler {
         try ( Connection conn = DriverManager.getConnection(url)) {
             if (conn != null) {
                 DatabaseMetaData meta = conn.getMetaData();
-                System.out.println("The driver name is " + meta.getDriverName());
-                System.out.println("A new database has been created.");
+                LOG.info("The driver name is " + meta.getDriverName());
             }
 
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            LOG.error(e.getMessage());
         }
     }
 
@@ -76,11 +78,10 @@ public class DatabaseHandler {
                midpoint INTEGER,
                direction INTEGER,
                PRIMARY KEY (id, grp),
-               FOREIGN KEY(grp) REFERENCES points(grp),
-               FOREIGN KEY(beginpoint) REFERENCES points(id),
-               FOREIGN KEY(endpoint) REFERENCES points(id),
-               FOREIGN KEY(midpoint) REFERENCES points(id),
-               FOREIGN KEY(direction) REFERENCES points(id)
+               FOREIGN KEY(beginpoint, grp) REFERENCES points(id, grp),
+               FOREIGN KEY(endpoint, grp) REFERENCES points(id, grp),
+               FOREIGN KEY(midpoint, grp) REFERENCES points(id, grp),
+               FOREIGN KEY(direction, grp) REFERENCES points(id, grp)
               );""";
         createNew(sql);
 
@@ -91,10 +92,9 @@ public class DatabaseHandler {
                left INTEGER,
                right INTEGER,
                PRIMARY KEY (point, grp),
-               FOREIGN KEY(point) REFERENCES points(id),
-               FOREIGN KEY(grp) REFERENCES points(grp),
-               FOREIGN KEY(left) REFERENCES points(id),
-               FOREIGN KEY(right) REFERENCES points(id)
+               FOREIGN KEY(point, grp) REFERENCES points(id, grp),
+               FOREIGN KEY(left, grp) REFERENCES points(id, grp),
+               FOREIGN KEY(right, grp) REFERENCES points(id, grp)
               );""";
         createNew(sql);
 
@@ -105,10 +105,9 @@ public class DatabaseHandler {
                next INTEGER,
                previous INTEGER,
                PRIMARY KEY (point, grp),
-               FOREIGN KEY(point) REFERENCES points(id),
-               FOREIGN KEY(grp) REFERENCES points(grp),
-               FOREIGN KEY(next) REFERENCES points(id),
-               FOREIGN KEY(previous) REFERENCES points(id)
+               FOREIGN KEY(point, grp) REFERENCES points(id, grp),
+               FOREIGN KEY(next, grp) REFERENCES points(id, grp),
+               FOREIGN KEY(previous, grp) REFERENCES points(id, grp)
               );""";
         createNew(sql);
 
@@ -117,8 +116,7 @@ public class DatabaseHandler {
                linesegment INTEGER,
                grp INTEGER,
                PRIMARY KEY (linesegment, grp),
-               FOREIGN KEY(linesegment) REFERENCES linesegments(id),
-               FOREIGN KEY(grp) REFERENCES linesegments(grp)
+               FOREIGN KEY(linesegment, grp) REFERENCES linesegments(id, grp)
               );""";
         createNew(sql);
 
@@ -131,12 +129,11 @@ public class DatabaseHandler {
                bp_ref INTEGER,
                ep_ref INTEGER,
                PRIMARY KEY (edge, grp),
-               FOREIGN KEY(grp) REFERENCES points(grp),
-               FOREIGN KEY(f_l) REFERENCES points(id),
-               FOREIGN KEY(f_r) REFERENCES points(id),
-               FOREIGN KEY(edge) REFERENCES linesegments(id)
-               FOREIGN KEY(bp_ref) REFERENCES linesegments(id)
-               FOREIGN KEY(ep_ref) REFERENCES linesegments(id)
+               FOREIGN KEY(f_l, grp) REFERENCES points(id, grp),
+               FOREIGN KEY(f_r, grp) REFERENCES points(id, grp),
+               FOREIGN KEY(edge, grp) REFERENCES linesegments(id, grp),
+               FOREIGN KEY(bp_ref, grp) REFERENCES linesegments(id, grp),
+               FOREIGN KEY(ep_ref, grp) REFERENCES linesegments(id, grp)
               );""";
         createNew(sql);
 
@@ -289,7 +286,7 @@ public class DatabaseHandler {
                 rows.add(row);
             }
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            LOG.error(e.getMessage());
         }
         DatabaseHandler.updateContent("dcels", rows);
     }
@@ -372,7 +369,7 @@ public class DatabaseHandler {
             }
             return mp;
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            LOG.error(e.getMessage());
             return null;
         }
     }
@@ -380,7 +377,8 @@ public class DatabaseHandler {
     public static int getIndexFromPoint(Point p, int grp) {
         String sql = """
                      SELECT id FROM points
-                     WHERE ((x = ?) AND (y = ?)) AND (grp = ?)""";
+                     WHERE ( ( (ABS(x - ?) < 1e-11) AND (ABS(y - ?) < 1e-11) ) AND (grp = ?) ) 
+                     """;
 
         try ( Connection conn = DriverManager.getConnection(url);  
               PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -391,7 +389,7 @@ public class DatabaseHandler {
             ResultSet rs = pstmt.executeQuery();
             return rs.getInt("id");
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            LOG.error(e.getMessage());
             return -1;
         }
     }
@@ -411,7 +409,7 @@ public class DatabaseHandler {
             ResultSet rs = pstmt.executeQuery();
             return rs.getInt("point");
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            LOG.error(e.getMessage());
             return -1;
         }        
     }
@@ -445,7 +443,7 @@ public class DatabaseHandler {
             }
             return li;
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            LOG.error(e.getMessage());
             return null;
         }        
     }
@@ -494,18 +492,17 @@ public class DatabaseHandler {
             bt = mbt.get(root);
             return bt;
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            LOG.error(e.getMessage());
             return null;
         }        
     }
 
     private static class ConveksHullNode {
         Point p;
-        int nxt, prv;
+        int prv;
 
         ConveksHullNode(Point p, int prv, int nxt) {
             this.p = p;
-            this.nxt = nxt;
             this.prv = prv;
         }
     }
@@ -557,7 +554,7 @@ public class DatabaseHandler {
             }
             return head;
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            LOG.error(e.getMessage());
             return null;
         }        
     }
@@ -686,7 +683,7 @@ public class DatabaseHandler {
             DCEL ret = new DCEL(mdn.get(1));            
             return ret;
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            LOG.error(e.getMessage());
             return null;
         }
     }
@@ -736,7 +733,7 @@ public class DatabaseHandler {
             ResultSet rs = pstmt.executeQuery();
             ni = rs.getInt("id") + 1;
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            LOG.error(e.getMessage());
             return ni;
         }        
         List<String> lni = new LinkedList<>();

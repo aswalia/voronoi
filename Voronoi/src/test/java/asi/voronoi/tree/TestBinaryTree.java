@@ -3,6 +3,7 @@
 package asi.voronoi.tree;
 
 import asi.voronoi.Point;
+import java.io.File;
 import java.io.IOException;
 import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
@@ -24,15 +25,18 @@ public class TestBinaryTree {
     public void testBuildBinaryTree() {
         try {
             BinaryTree b = new BinaryTree();
-            b = b.buildBinaryTree("src/test/resources/test_10.bt");
-            String expected = "(9.0,4.0)\n" +
-                              "(0.0,9.0) N\n" +
-                              "[(0.0,2.0)] (3.0,7.0)\n" +
-                              "[(1.0,6.0)] (4.0,2.0)\n" +
-                              "N (8.0,1.0)\n" +
-                              "(5.0,9.0) N\n" +
-                              "N (6.0,1.0)\n" +
-                              "[(6.0,0.0)] N\n";
+            File file = new File("src/test/resources/test_10.bt");
+            b = b.buildBinaryTree(file);
+            String expected = """
+                              (9.0,4.0)
+                              (0.0,9.0) N
+                              [(0.0,2.0)] (3.0,7.0)
+                              [(1.0,6.0)] (4.0,2.0)
+                              N (8.0,1.0)
+                              (5.0,9.0) N
+                              N (6.0,1.0)
+                              [(6.0,0.0)] N
+                              """;
             assertEquals(expected, b.toString());
         } catch (IOException ex) {
             fail("unexpected exception");

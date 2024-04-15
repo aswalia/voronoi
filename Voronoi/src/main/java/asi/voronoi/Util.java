@@ -3,6 +3,7 @@ package asi.voronoi;
 import asi.voronoi.tree.AVLTree;
 import asi.voronoi.tree.BinaryTree;
 import asi.voronoi.tree.VTree;
+import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -24,10 +25,9 @@ public class Util {
     
     public static void createDatabase(String fileName) throws SQLException {
         DatabaseHandler.dropDatabase(fileName);
-        DatabaseHandler.createNewDatabase(fileName);
+        DatabaseHandler.connectToDatabase(fileName);
         DatabaseHandler.createContent();        
     }
-    
     
     public static void prepareDatabaseWithRandomPoints(int noOfPoints, int group) throws SQLException {
         double x, y;
@@ -38,14 +38,7 @@ public class Util {
             Point p = new Point(x,y);
             sp.add(p);
         }
-        List<String> l = new LinkedList<>();
-        int count = 1;
-        for (Point p: sp) {
-            String r = count + " , " + group + " , " + p.x() + " , " + p.y();
-            l.add(r);
-            count++;
-        }
-        DatabaseHandler.insertContent("points", l);
+        PointSet.store(group, sp);
     } 
     
     public static void prepareDatabaseWithFixedPoints() throws SQLException {
@@ -85,9 +78,9 @@ public class Util {
         return ret;
     }
     
-    public static BinaryTree bTreeFromPointSet(String filename) throws Exception {
+    public static BinaryTree bTreeFromPointSet(File file) throws Exception {
         PointSet ps = new PointSet();
-        Set<Point> pointsFromFile = ps.buildPointSet(filename);
+        Set<Point> pointsFromFile = ps.buildPointSet(file);
         BinaryTree ret = null;
         for (Point p : pointsFromFile) {
             if (ret == null) {
@@ -99,10 +92,10 @@ public class Util {
         return ret;
     }
     
-    public static BinaryTree generateBTree(String filename) {
+    public static BinaryTree generateBTree(File file) {
         BinaryTree tree = new AVLTree();
         try {
-            tree = tree.buildBinaryTree(filename);
+            tree = tree.buildBinaryTree(file);
         } catch (IOException ex) {
             tree = null;
             LOG.error(ex.getMessage());
@@ -150,48 +143,40 @@ public class Util {
     }
 
     public static void main(String argv[]) {
-        String fileName = "src/main/resources/VD.db";
-        try {
-            Util.createDatabase(fileName);
-            Util.prepareDatabaseWithRandomPoints(1000,1);
-//            Util.prepareDatabaseWithFixedPoints();
-        } catch(SQLException se) {
-            LOG.error("Failed to prepare database: " + se.getSQLState());
-        }
+        String dbFileName = "src/main/resources/VD.db";
+        String psFileName = "src/test/resources/pointset_01.test";
         int grp = 1;
-        Map<Integer,Point> mp = DatabaseHandler.getPointsByGroup(grp);
-        BinaryTree ret = null;
-        Set<Integer> sk = mp.keySet();
-        for (Integer i : sk) {
-            Point p = mp.get(i);
-            if (ret == null) {
+        Set<Point> pointsFromFile = null;
+        try {
+            DatabaseHandler.connectToDatabase(dbFileName);
+            PointSet ps = new PointSet();
+            pointsFromFile = ps.buildPointSet(new File(psFileName));
+            PointSet.store(grp, pointsFromFile);
+        } catch (Exception ex) {
+            LOG.error("Unable to store Points in Database: " + ex.getMessage());
+        }
+        for (Point p : pointsFromFile) {
+            if (t == null) {
                 // first point in set
-                ret = new AVLTree(p);
+                t = new AVLTree(p);
             } else {
                 // rest of the set
-                ret = ret.insertNode(new Point(p));
+                t = t.insertNode(new Point(p));
             }
         }
         // Store BinaryTree to database
         List<String> l = new LinkedList<>();
-        ret.store(grp, l);
+        t.store(grp, l);
         try {
             DatabaseHandler.insertContent("binaryTrees", l);
         } catch (SQLException ex) {
             LOG.error("Unable to build BinaryTree: " + ex.getSQLState());
         }
-        // reset BinaryTree
-        ret = null;
-        // Build BinaryTree from database
-        ret = DatabaseHandler.getBinaryTreeByGroup(grp);
-        System.out.println(ret);
         v = new VTree();
-        v.buildStructure(ret);
-        System.out.println();
-        System.out.println(v);
+        v.buildStructure(t);
+        LOG.info(v);
         ConveksHull ch = v.getInfo().vor2CH();
-        System.out.println();
-        System.out.println(ch);
+        LOG.info(ch);
         l.clear();
         ch.store(grp, l);
         try {
@@ -199,10 +184,6 @@ public class Util {
         } catch (SQLException ex) {
             LOG.error("Unable to build ConveksHull: " + ex.getSQLState());
         }
-        ch = null;
-        ch = DatabaseHandler.getConveksHullByGroup(grp);
-        System.out.println();
-        System.out.println(ch);
         List<Properties> r = new LinkedList<>();
         try {
             ch.storeAsLinesegments(grp, r);
@@ -214,9 +195,6 @@ public class Util {
         } catch (SQLException ex) {
             LOG.error("Unable to update Linesegments for ConveksHulls: " + ex.getSQLState());
         }
-        System.out.println();
-        System.out.println("Store Voronoi diagram");
-        long timeStart = System.currentTimeMillis();
         r.clear();
         DCELNode dcn = v.getInfo().getNode();
         try {
@@ -224,30 +202,11 @@ public class Util {
         } catch (SQLException ex) {
             LOG.error("Unable to build Linesegments for DCELs: " + ex.getMessage());
         }
-        System.out.println();
-        System.out.println("Done! took: " + (System.currentTimeMillis() - timeStart) + " millisec");
     }
 
     public static void drawRandom(String[] argv) {
         int noOfPoints = Integer.parseInt(argv[1]);
         generateVoronoi(noOfPoints);
-//        dobj = new DrawVoronoi(v);
-//        d = new DrawingBoard();
-//        d.setDrawObject(dobj);
-    }
-
-    public static void drawFromFile(String[] argv) {
-        String folderName = "src/test/resources/";
-        VTree c = new VTree();
-        try {
-            // build and write actual result files
-            BinaryTree b = new AVLTree();
-            b = b.buildBinaryTree(folderName + argv[1]);
-            c.buildStructure(b);
-            LOG.info(c.getInfo().toString());
-        } catch (IOException ex) {
-            LOG.error(ex);
-        }
     }
 
 }
