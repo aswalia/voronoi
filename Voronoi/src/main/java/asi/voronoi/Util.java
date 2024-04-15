@@ -154,6 +154,7 @@ public class Util {
             PointSet.store(grp, pointsFromFile);
         } catch (Exception ex) {
             LOG.error("Unable to store Points in Database: " + ex.getMessage());
+            System.exit(-1);
         }
         for (Point p : pointsFromFile) {
             if (t == null) {

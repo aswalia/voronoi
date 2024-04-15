@@ -232,9 +232,11 @@ public class TestVTree {
     public void testEnd2End() throws Exception {
         // balanced binary tree for pointset
         // (0,2), (2,0), (2,4), (3,2), (4,0), (4,4) and (6,2)
-        String expected = "(3.0,2.0)\n"
-                        + "(2.0,0.0) (4.0,4.0)\n"
-                        + "[(0.0,2.0)] [(2.0,4.0)] [(4.0,0.0)] [(6.0,2.0)]\n";
+        String expected = """
+                          (3.0,2.0)
+                          (2.0,0.0) (4.0,4.0)
+                          [(0.0,2.0)] [(2.0,4.0)] [(4.0,0.0)] [(6.0,2.0)]
+                          """;
         BinaryTree b = new AVLTree(new Point(0, 2));
         b = b.insertNode(new Point(2, 0));
         b = b.insertNode(new Point(2, 4));

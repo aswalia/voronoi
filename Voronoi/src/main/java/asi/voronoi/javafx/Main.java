@@ -1,7 +1,5 @@
 package asi.voronoi.javafx;
 
-import asi.voronoi.ConveksHull;
-import asi.voronoi.DCEL;
 import asi.voronoi.tree.BinaryTree;
 import asi.voronoi.Util;
 import asi.voronoi.tree.ConveksHullTree;
