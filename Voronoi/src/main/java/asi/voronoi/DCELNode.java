@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Stack;
@@ -30,28 +31,6 @@ public class DCELNode implements Constant, java.io.Serializable {
 
     @Override
     public String toString() {
-/*        String ret;
-        Point top = null, bottom = null;
-        double t = Math.sqrt((Math.pow(f_l.x() - p.x(), 2) + Math.pow(f_l.y() - p.y(), 2)) / (Math.pow(d.x(), 2) + Math.pow(d.y(), 2)));
-        if ((p_b != null) && (p_e != null)) {
-            top = Point.coordinat(d, p, a_e);
-            bottom = Point.coordinat(d, p, a_b);
-        } else if (p_b != null) {
-            if (p.x() < 0) {
-                t = -t;
-            }
-            top = Point.coordinat(d, p, t);
-            bottom = Point.coordinat(d, p, a_b);
-        } else if (p_e != null) {
-            if (p.x() > 0) {
-                t = -t;
-            }
-            top = Point.coordinat(d, p, a_e);
-            bottom = Point.coordinat(d, p, t);
-        }
-        ret = top + " " + bottom + "\n";
-        ret += "lft and rgt: " + f_l + " " + f_r + "\n";
-*/
         return "lft and rgt: " + f_l + " " + f_r + "\n";
     }
     
@@ -137,6 +116,18 @@ public class DCELNode implements Constant, java.io.Serializable {
         } else {
             return !((a_e != ((DCELNode)o).a_e) || (a_b != ((DCELNode)o).a_b));
         }        
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 53 * hash + (int) (Double.doubleToLongBits(this.a_b) ^ (Double.doubleToLongBits(this.a_b) >>> 32));
+        hash = 53 * hash + (int) (Double.doubleToLongBits(this.a_e) ^ (Double.doubleToLongBits(this.a_e) >>> 32));
+        hash = 53 * hash + Objects.hashCode(this.f_l);
+        hash = 53 * hash + Objects.hashCode(this.f_r);
+        hash = 53 * hash + Objects.hashCode(this.p);
+        hash = 53 * hash + Objects.hashCode(this.d);
+        return hash;
     }
 
     public Line drawEdge() {

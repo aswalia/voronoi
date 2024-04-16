@@ -8,7 +8,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.8</version>
+                <version>0.8.10</version>
                 <executions>
                     <execution>
                         <goals>
@@ -60,17 +60,17 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
-                <version>3.0.0-M2</version>
+                <version>3.1.1</version>
             </plugin>      
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.3.1</version>
+                <version>3.6.0</version>
             </plugin>      
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.2.1</version>
+                <version>3.3.0</version>
             </plugin>
             <plugin>
                 <groupId>org.openjfx</groupId>
@@ -78,8 +78,8 @@
                 <version>0.0.8</version>
                 <configuration>
                     <mainClass>${mainClass}</mainClass>
-                    <!--commandlineArgs>${noOfPoints} ${dbGroup}</commandlineArgs-->
-                    <commandlineArgs>${filename}</commandlineArgs>
+                    <commandlineArgs>${noOfPoints} ${dbGroup}</commandlineArgs>
+                    <!--commandlineArgs>${filename}</commandlineArgs-->
                 </configuration>
                 <executions>
                     <execution>
@@ -102,7 +102,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.3.0</version>
+                <version>3.6.0</version>
                 <executions>
                     <execution>
                         <id>analyze</id>
@@ -118,7 +118,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>2.4.3</version>
+                <version>3.3.1</version>
                 <configuration>
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
@@ -126,9 +126,9 @@
         </plugins>
     </build>
     <properties>
-        <javafx.version>17</javafx.version>
+        <javafx.version>19</javafx.version>
         <mainClass>asi.voronoi.javafx.Main</mainClass>
-        <log4j.version>2.17.1</log4j.version>
+        <log4j.version>2.20.0</log4j.version>
         <noOfPoints>100</noOfPoints>
         <dbGroup>42</dbGroup>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -137,7 +137,7 @@
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
-            <version>3.41.2.2</version>
+            <version>3.43.0.0</version>
             <scope>runtime</scope>
         </dependency>        
         <dependency>
@@ -153,7 +153,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.13.1</version>
+            <version>4.13.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -171,25 +171,5 @@
             <artifactId>javafx-graphics</artifactId>
             <version>${javafx.version}</version>
         </dependency>
-        <!--dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-media</artifactId>
-            <version>${javafx.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-swing</artifactId>
-            <version>${javafx.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-fxml</artifactId>
-            <version>${javafx.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-web</artifactId>
-            <version>${javafx.version}</version>
-        </dependency-->    
     </dependencies>
 </project>

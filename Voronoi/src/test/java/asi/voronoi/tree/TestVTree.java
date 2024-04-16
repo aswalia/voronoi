@@ -204,7 +204,8 @@ public class TestVTree {
                 // build and write actual result files
                 String fileName = fileEntry.getName();
                 if (fileName.endsWith("bt")) {
-                    bt = bt.buildBinaryTree(folderName + fileName);
+                    File file = new File(folderName + fileName);
+                    bt = bt.buildBinaryTree(file);
                     v.buildStructure(bt);
                     outFile = fileName.replace("bt", "act");
                     v.writeTree(folderName + outFile);
@@ -231,9 +232,11 @@ public class TestVTree {
     public void testEnd2End() throws Exception {
         // balanced binary tree for pointset
         // (0,2), (2,0), (2,4), (3,2), (4,0), (4,4) and (6,2)
-        String expected = "(3.0,2.0)\n"
-                        + "(2.0,0.0) (4.0,4.0)\n"
-                        + "[(0.0,2.0)] [(2.0,4.0)] [(4.0,0.0)] [(6.0,2.0)]\n";
+        String expected = """
+                          (3.0,2.0)
+                          (2.0,0.0) (4.0,4.0)
+                          [(0.0,2.0)] [(2.0,4.0)] [(4.0,0.0)] [(6.0,2.0)]
+                          """;
         BinaryTree b = new AVLTree(new Point(0, 2));
         b = b.insertNode(new Point(2, 0));
         b = b.insertNode(new Point(2, 4));
@@ -245,30 +248,42 @@ public class TestVTree {
         VTree vt = new VTree();
         vt.buildStructure(b);
         String actual = vt.getInfo().toString();
-        assertTrue(actual, actual.contains(
-                "lft and rgt: " + "(0.0,2.0)" + " " + "(2.0,0.0)" + "\n"));
-        assertTrue(actual, actual.contains(
-                "lft and rgt: " + "(0.0,2.0)" + " " + "(3.0,2.0)" + "\n"));
-        assertTrue(actual, actual.contains(
-                "lft and rgt: " + "(0.0,2.0)" + " " + "(2.0,4.0)" + "\n"));
-        assertTrue(actual, actual.contains(
-                "lft and rgt: " + "(2.0,4.0)" + " " + "(3.0,2.0)" + "\n"));
-        assertTrue(actual, actual.contains(
-                "lft and rgt: " + "(2.0,4.0)" + " " + "(4.0,4.0)" + "\n"));
-        assertTrue(actual, actual.contains(
-                "lft and rgt: " + "(3.0,2.0)" + " " + "(4.0,4.0)" + "\n"));
-        assertTrue(actual, actual.contains(
-                "lft and rgt: " + "(4.0,4.0)" + " " + "(6.0,2.0)" + "\n"));
-        assertTrue(actual, actual.contains(
-                "lft and rgt: " + "(3.0,2.0)" + " " + "(6.0,2.0)" + "\n"));
-        assertTrue(actual, actual.contains(
-                "lft and rgt: " + "(4.0,0.0)" + " " + "(6.0,2.0)" + "\n"));
-        assertTrue(actual, actual.contains(
-                "lft and rgt: " + "(3.0,2.0)" + " " + "(4.0,0.0)" + "\n"));
-        assertTrue(actual, actual.contains(
-                "lft and rgt: " + "(2.0,0.0)" + " " + "(4.0,0.0)" + "\n"));
-        assertTrue(actual, actual.contains(
-                "lft and rgt: " + "(2.0,0.0)" + " " + "(3.0,2.0)" + "\n"));
+        assertTrue(actual, actual.contains("""
+                                           lft and rgt: (0.0,2.0) (2.0,0.0)
+                                           """));
+        assertTrue(actual, actual.contains("""
+                                           lft and rgt: (0.0,2.0) (3.0,2.0)
+                                           """));
+        assertTrue(actual, actual.contains("""
+                                           lft and rgt: (0.0,2.0) (2.0,4.0)
+                                           """));
+        assertTrue(actual, actual.contains("""
+                                           lft and rgt: (2.0,4.0) (3.0,2.0)
+                                           """));
+        assertTrue(actual, actual.contains("""
+                                           lft and rgt: (2.0,4.0) (4.0,4.0)
+                                           """));
+        assertTrue(actual, actual.contains("""
+                                           lft and rgt: (3.0,2.0) (4.0,4.0)
+                                           """));
+        assertTrue(actual, actual.contains("""
+                                           lft and rgt: (4.0,4.0) (6.0,2.0)
+                                           """));
+        assertTrue(actual, actual.contains("""
+                                           lft and rgt: (3.0,2.0) (6.0,2.0)
+                                           """));
+        assertTrue(actual, actual.contains("""
+                                           lft and rgt: (4.0,0.0) (6.0,2.0)
+                                           """));
+        assertTrue(actual, actual.contains("""
+                                           lft and rgt: (3.0,2.0) (4.0,0.0)
+                                           """));
+        assertTrue(actual, actual.contains("""
+                                           lft and rgt: (2.0,0.0) (4.0,0.0)
+                                           """));
+        assertTrue(actual, actual.contains("""
+                                           lft and rgt: (2.0,0.0) (3.0,2.0)
+                                           """));
         // there are no more edges in the DCEL graph, i.e. count equals 12
         Integer count = (actual.split("lft and rgt: ").length ) - 1;
         assertTrue(12 == count);

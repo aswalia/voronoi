@@ -40,7 +40,7 @@ public class TestDatabaseHandler {
     
     @Before
     public void setUp() {
-        DatabaseHandler.createNewDatabase(fileName);
+        DatabaseHandler.connectToDatabase(fileName);
         try {
             DatabaseHandler.createContent();
         } catch (SQLException ex) {
@@ -64,12 +64,12 @@ public class TestDatabaseHandler {
     }
 
     /**
-     * Test of createNewDatabase method, of class DatabaseHandler.
+     * Test of connectToDatabase method, of class DatabaseHandler.
      */
     @Test
     public void testCreateNewDatabase() {
         String tempFile = "bob.db";
-        DatabaseHandler.createNewDatabase(tempFile);
+        DatabaseHandler.connectToDatabase(tempFile);
         // let's see if we can delete it to prove it's existance
         if (!DatabaseHandler.dropDatabase(tempFile)) {
             fail("Failed to dropDatabase");

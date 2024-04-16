@@ -3,6 +3,7 @@
 package asi.voronoi.tree;
 
 import asi.voronoi.Point;
+import java.io.File;
 import java.io.IOException;
 import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
@@ -18,21 +19,23 @@ import org.junit.Test;
 public class TestBinaryTree {
     /**
      * constructor.
-     * @param    aName     a test name
      */
     @Test
     public void testBuildBinaryTree() {
         try {
             BinaryTree b = new BinaryTree();
-            b = b.buildBinaryTree("src/test/resources/test_10.bt");
-            String expected = "(9.0,4.0)\n" +
-                              "(0.0,9.0) N\n" +
-                              "[(0.0,2.0)] (3.0,7.0)\n" +
-                              "[(1.0,6.0)] (4.0,2.0)\n" +
-                              "N (8.0,1.0)\n" +
-                              "(5.0,9.0) N\n" +
-                              "N (6.0,1.0)\n" +
-                              "[(6.0,0.0)] N\n";
+            File file = new File("src/test/resources/test_10.bt");
+            b = b.buildBinaryTree(file);
+            String expected = """
+                              (9.0,4.0)
+                              (0.0,9.0) N
+                              [(0.0,2.0)] (3.0,7.0)
+                              [(1.0,6.0)] (4.0,2.0)
+                              N (8.0,1.0)
+                              (5.0,9.0) N
+                              N (6.0,1.0)
+                              [(6.0,0.0)] N
+                              """;
             assertEquals(expected, b.toString());
         } catch (IOException ex) {
             fail("unexpected exception");
@@ -191,15 +194,35 @@ public class TestBinaryTree {
         BinaryTree b = new BinaryTree(new Point(3,4));
         Assert.assertTrue("only root", b.toString().equals("[(3.0,4.0)]\n"));
         b.insertNode(new Point(4,4));
-        Assert.assertTrue("insert 1",  b.toString().equals(("(3.0,4.0)\n"+"N "+"[(4.0,4.0)]\n")));
+        Assert.assertTrue("insert 1",  b.toString().equals(("""
+                                                            (3.0,4.0)
+                                                            N [(4.0,4.0)]
+                                                            """)));
         b.insertNode(new Point(2,4));
-        Assert.assertTrue("insert 2", b.toString().equals(("(3.0,4.0)\n"+"[(2.0,4.0)] "+"[(4.0,4.0)]\n")));
+        Assert.assertTrue("insert 2", b.toString().equals(("""
+                                                           (3.0,4.0)
+                                                           [(2.0,4.0)] [(4.0,4.0)]
+                                                           """)));
         b.insertNode(new Point(6,4));
-        Assert.assertTrue("insert 3", b.toString().equals(("(3.0,4.0)\n"+"[(2.0,4.0)] "+"(4.0,4.0)\n"+"N "+"[(6.0,4.0)]\n")));
+        Assert.assertTrue("insert 3", b.toString().equals(("""
+                                                           (3.0,4.0)
+                                                           [(2.0,4.0)] (4.0,4.0)
+                                                           N [(6.0,4.0)]
+                                                           """)));
         b.insertNode(new Point(5,4));
-        Assert.assertTrue("insert 4", b.toString().equals(("(3.0,4.0)\n"+"[(2.0,4.0)] "+"(4.0,4.0)\n"+"N "+"(6.0,4.0)\n"+"[(5.0,4.0)] "+"N\n")));
+        Assert.assertTrue("insert 4", b.toString().equals(("""
+                                                           (3.0,4.0)
+                                                           [(2.0,4.0)] (4.0,4.0)
+                                                           N (6.0,4.0)
+                                                           [(5.0,4.0)] N
+                                                           """)));
         b.insertNode(new Point(1,1));
-        Assert.assertTrue(b.toString(), b.toString().equals(("(3.0,4.0)\n"+"(2.0,4.0) "+"(4.0,4.0)\n"+"[(1.0,1.0)] N N "+"(6.0,4.0)\n"+"[(5.0,4.0)] "+"N\n")));
+        Assert.assertTrue(b.toString(), b.toString().equals(("""
+                                                             (3.0,4.0)
+                                                             (2.0,4.0) (4.0,4.0)
+                                                             [(1.0,1.0)] N N (6.0,4.0)
+                                                             [(5.0,4.0)] N
+                                                             """)));
     }    /** tests the method asi.voronoi.BinaryTree.count() */
     @Test
     public void testCount() {
@@ -213,13 +236,5 @@ public class TestBinaryTree {
         Assert.assertTrue("insert 3", b.count()==4);
         b.insertNode(new Point(5,4));
         Assert.assertTrue("insert 4", b.count()==5);
-    }/**
- * @link
- * @shapeType PatternLink
- * @pattern <{TestCase}>
- * @clientRole tests
- * @supplierRole tested
- * @hidden 
- */
-/*# private BinaryTree _binaryTree; */
+    }
 }

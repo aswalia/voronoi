@@ -15,14 +15,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  *
  * @author asi
  */
 public class DatabaseHandler {
-
+    
     private static String url;
+    private static final Logger LOG = LogManager.getLogger(DatabaseHandler.class);
     
     public static boolean dropDatabase(String fileName) {
         // delete database file - that is drop database in SQLite
@@ -30,7 +33,7 @@ public class DatabaseHandler {
         return myObj.delete();
     }
 
-    public static void createNewDatabase(String fileName) {
+    public static void connectToDatabase(String fileName) {
 
         // SQLite connection string
         url = "jdbc:sqlite:" + fileName;
@@ -38,12 +41,11 @@ public class DatabaseHandler {
         try ( Connection conn = DriverManager.getConnection(url)) {
             if (conn != null) {
                 DatabaseMetaData meta = conn.getMetaData();
-                System.out.println("The driver name is " + meta.getDriverName());
-                System.out.println("A new database has been created.");
+                LOG.info("The driver name is " + meta.getDriverName());
             }
 
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            LOG.error(e.getMessage());
         }
     }
 
@@ -57,105 +59,118 @@ public class DatabaseHandler {
     public static void createContent() throws SQLException {
         String sql;
 
-        sql = "CREATE TABLE IF NOT EXISTS points (\n"
-                + " id INTEGER,\n"
-                + " grp INTEGER,\n"
-                + " x REAL NOT NULL,\n"
-                + " y REAL NOT NULL,\n"
-                + " PRIMARY KEY (id, grp)\n"
-                + ");";
+        sql = """
+              CREATE TABLE IF NOT EXISTS points (
+               id INTEGER,
+               grp INTEGER,
+               x REAL NOT NULL,
+               y REAL NOT NULL,
+               PRIMARY KEY (id, grp)
+              );""";
         createNew(sql);
 
-        sql = "CREATE TABLE IF NOT EXISTS linesegments (\n"
-                + " id INTEGER,\n"
-                + " grp INTEGER,\n"
-                + " beginpoint INTEGER,\n"
-                + " endpoint INTEGER,\n"
-                + " midpoint INTEGER,\n"
-                + " direction INTEGER,\n"
-                + " PRIMARY KEY (id, grp),\n"
-                + " FOREIGN KEY(grp) REFERENCES points(grp),\n"
-                + " FOREIGN KEY(beginpoint) REFERENCES points(id),\n"
-                + " FOREIGN KEY(endpoint) REFERENCES points(id),\n"
-                + " FOREIGN KEY(midpoint) REFERENCES points(id),\n"
-                + " FOREIGN KEY(direction) REFERENCES points(id)\n"
-                + ");";
+        sql = """
+              CREATE TABLE IF NOT EXISTS linesegments (
+               id INTEGER,
+               grp INTEGER,
+               beginpoint INTEGER,
+               endpoint INTEGER,
+               midpoint INTEGER,
+               direction INTEGER,
+               PRIMARY KEY (id, grp),
+               FOREIGN KEY(beginpoint, grp) REFERENCES points(id, grp),
+               FOREIGN KEY(endpoint, grp) REFERENCES points(id, grp),
+               FOREIGN KEY(midpoint, grp) REFERENCES points(id, grp),
+               FOREIGN KEY(direction, grp) REFERENCES points(id, grp)
+              );""";
         createNew(sql);
 
-        sql = "CREATE TABLE IF NOT EXISTS binaryTrees (\n"
-                + " point INTEGER,\n"
-                + " grp INTEGER,\n"
-                + " left INTEGER,\n"
-                + " right INTEGER,\n"
-                + " PRIMARY KEY (point, grp),\n"
-                + " FOREIGN KEY(point) REFERENCES points(id),\n"
-                + " FOREIGN KEY(grp) REFERENCES points(grp),\n"
-                + " FOREIGN KEY(left) REFERENCES points(id),\n"
-                + " FOREIGN KEY(right) REFERENCES points(id)\n"
-                + ");";
+        sql = """
+              CREATE TABLE IF NOT EXISTS binaryTrees (
+               point INTEGER,
+               grp INTEGER,
+               left INTEGER,
+               right INTEGER,
+               PRIMARY KEY (point, grp),
+               FOREIGN KEY(point, grp) REFERENCES points(id, grp),
+               FOREIGN KEY(left, grp) REFERENCES points(id, grp),
+               FOREIGN KEY(right, grp) REFERENCES points(id, grp)
+              );""";
         createNew(sql);
 
-        sql = "CREATE TABLE IF NOT EXISTS conveksHulls (\n"
-                + " point INTEGER,\n"
-                + " grp INTEGER,\n"
-                + " next INTEGER,\n"
-                + " previous INTEGER,\n"
-                + " PRIMARY KEY (point, grp),\n"
-                + " FOREIGN KEY(point) REFERENCES points(id),\n"
-                + " FOREIGN KEY(grp) REFERENCES points(grp),\n"
-                + " FOREIGN KEY(next) REFERENCES points(id),\n"
-                + " FOREIGN KEY(previous) REFERENCES points(id)\n"
-                + ");";
+        sql = """
+              CREATE TABLE IF NOT EXISTS conveksHulls (
+               point INTEGER,
+               grp INTEGER,
+               next INTEGER,
+               previous INTEGER,
+               PRIMARY KEY (point, grp),
+               FOREIGN KEY(point, grp) REFERENCES points(id, grp),
+               FOREIGN KEY(next, grp) REFERENCES points(id, grp),
+               FOREIGN KEY(previous, grp) REFERENCES points(id, grp)
+              );""";
         createNew(sql);
 
-        sql = "CREATE TABLE IF NOT EXISTS conveksHullsAsLinesegments (\n"
-                + " linesegment INTEGER,\n"
-                + " grp INTEGER,\n"
-                + " PRIMARY KEY (linesegment, grp),\n"
-                + " FOREIGN KEY(linesegment) REFERENCES linesegments(id),\n"
-                + " FOREIGN KEY(grp) REFERENCES linesegments(grp)\n"
-                + ");";
+        sql = """
+              CREATE TABLE IF NOT EXISTS conveksHullsAsLinesegments (
+               linesegment INTEGER,
+               grp INTEGER,
+               PRIMARY KEY (linesegment, grp),
+               FOREIGN KEY(linesegment, grp) REFERENCES linesegments(id, grp)
+              );""";
         createNew(sql);
 
-        sql = "CREATE TABLE IF NOT EXISTS dcels (\n"
-                + " edge INTEGER,\n"
-                + " grp INTEGER,\n"
-                + " f_l INTEGER NOT NULL,\n"
-                + " f_r INTEGER NOT NULL,\n"
-                + " bp_ref INTEGER,\n"
-                + " ep_ref INTEGER,\n"
-                + " PRIMARY KEY (edge, grp),\n"
-                + " FOREIGN KEY(grp) REFERENCES points(grp),\n"
-                + " FOREIGN KEY(f_l) REFERENCES points(id),\n"
-                + " FOREIGN KEY(f_r) REFERENCES points(id),\n"
-                + " FOREIGN KEY(edge) REFERENCES linesegments(id)\n"
-                + " FOREIGN KEY(bp_ref) REFERENCES linesegments(id)\n"
-                + " FOREIGN KEY(ep_ref) REFERENCES linesegments(id)\n"
-                + ");";
+        sql = """
+              CREATE TABLE IF NOT EXISTS dcels (
+               edge INTEGER,
+               grp INTEGER,
+               f_l INTEGER NOT NULL,
+               f_r INTEGER NOT NULL,
+               bp_ref INTEGER,
+               ep_ref INTEGER,
+               PRIMARY KEY (edge, grp),
+               FOREIGN KEY(f_l, grp) REFERENCES points(id, grp),
+               FOREIGN KEY(f_r, grp) REFERENCES points(id, grp),
+               FOREIGN KEY(edge, grp) REFERENCES linesegments(id, grp),
+               FOREIGN KEY(bp_ref, grp) REFERENCES linesegments(id, grp),
+               FOREIGN KEY(ep_ref, grp) REFERENCES linesegments(id, grp)
+              );""";
         createNew(sql);
 
-        sql = "CREATE INDEX idx_points_grp\n"
-                + "ON points(grp)\n";
+        sql = """
+              CREATE INDEX idx_points_grp
+              ON points(grp)
+              """;
         createNew(sql);
 
-        sql = "CREATE INDEX idx_linesegments_grp\n"
-                + "ON linesegments(grp)\n";
+        sql = """
+              CREATE INDEX idx_linesegments_grp
+              ON linesegments(grp)
+              """;
         createNew(sql);
 
-        sql = "CREATE INDEX idx_binaryTrees_grp\n"
-                + "ON binaryTrees(grp)\n";
+        sql = """
+              CREATE INDEX idx_binaryTrees_grp
+              ON binaryTrees(grp)
+              """;
         createNew(sql);
 
-        sql = "CREATE INDEX idx_conveksHulls_grp\n"
-                + "ON conveksHulls(grp)\n";
+        sql = """
+              CREATE INDEX idx_conveksHulls_grp
+              ON conveksHulls(grp)
+              """;
         createNew(sql);
 
-        sql = "CREATE INDEX idx_conveksHullsAsLinesegments_grp\n"
-                + "ON conveksHullsAsLinesegments(grp)\n";
+        sql = """
+              CREATE INDEX idx_conveksHullsAsLinesegments_grp
+              ON conveksHullsAsLinesegments(grp)
+              """;
         createNew(sql);
 
-        sql = "CREATE INDEX idx_dcels_grp\n"
-                + "ON dcels(grp)\n";
+        sql = """
+              CREATE INDEX idx_dcels_grp
+              ON dcels(grp)
+              """;
         createNew(sql);
     }
     
@@ -220,30 +235,32 @@ public class DatabaseHandler {
     
 
     public static void updateDcels(int grp) throws SQLException {
-        String sql1 = "SELECT dx.edge, dy.edge\n" +
-                      "FROM dcels dx, dcels dy, linesegments lx, linesegments ly, points px, points py\n" +
-                      "WHERE (dx.grp = ?) AND\n" +
-                      "      ((lx.id = dx.edge) AND (lx.grp = dx.grp)) AND\n" +
-                      "      ((ly.id = dy.edge) AND (ly.grp = dy.grp)) AND\n" +
-                      "	     ((dx.f_l = dy.f_l) OR (dx.f_l = dy.f_r)) AND\n" +
-                      "	     ((lx.beginpoint = px.id) AND (lx.grp = px.grp)) AND\n" +
-                      "	     (dx.edge != dy.edge) AND\n" +
-                      "	     (((ly.endpoint = py.id) AND (ly.grp = py.grp) AND\n" +
-                      "	       (round(px.x,6) = round(py.x,6)) AND (round(px.y,6) = round(py.y,6))) OR\n" +
-                      "	      ((ly.beginpoint = py.id) AND (ly.grp = py.grp) AND\n" +
-                      "	       (round(px.x,6) = round(py.x,6)) AND (round(px.y,6) = round(py.y,6))));";      
-        String sql2 = "SELECT dx.edge, dy.edge\n" +
-                      "FROM dcels dx, dcels dy, linesegments lx, linesegments ly, points px, points py\n" +
-                      "WHERE (dx.grp = ?) AND\n" +
-                      "      ((lx.id = dx.edge) AND (lx.grp = dx.grp)) AND\n" +
-                      "      ((ly.id = dy.edge) AND (ly.grp = dy.grp)) AND\n" +
-                      "      ((dx.f_r = dy.f_l) OR (dx.f_r = dy.f_r)) AND\n" +
-                      "	     ((lx.endpoint = px.id) AND (lx.grp = px.grp)) AND\n" +
-                      "	     (dx.edge != dy.edge) AND\n" +
-                      "	     (((ly.endpoint = py.id) AND (ly.grp = py.grp) AND\n" +
-                      "	       (round(px.x,6) = round(py.x,6)) AND (round(px.y,6) = round(py.y,6))) OR\n" +
-                      "	      ((ly.beginpoint = py.id) AND (ly.grp = py.grp) AND\n" +
-                      "	       (round(px.x,6) = round(py.x,6)) AND (round(px.y,6) = round(py.y,6))));";      
+        String sql1 = """
+                      SELECT dx.edge, dy.edge
+                      FROM dcels dx, dcels dy, linesegments lx, linesegments ly, points px, points py
+                      WHERE (dx.grp = ?) AND
+                            ((lx.id = dx.edge) AND (lx.grp = dx.grp)) AND
+                            ((ly.id = dy.edge) AND (ly.grp = dy.grp)) AND
+                      \t     ((dx.f_l = dy.f_l) OR (dx.f_l = dy.f_r)) AND
+                      \t     ((lx.beginpoint = px.id) AND (lx.grp = px.grp)) AND
+                      \t     (dx.edge != dy.edge) AND
+                      \t     (((ly.endpoint = py.id) AND (ly.grp = py.grp) AND
+                      \t       (round(px.x,6) = round(py.x,6)) AND (round(px.y,6) = round(py.y,6))) OR
+                      \t      ((ly.beginpoint = py.id) AND (ly.grp = py.grp) AND
+                      \t       (round(px.x,6) = round(py.x,6)) AND (round(px.y,6) = round(py.y,6))));""";      
+        String sql2 = """
+                      SELECT dx.edge, dy.edge
+                      FROM dcels dx, dcels dy, linesegments lx, linesegments ly, points px, points py
+                      WHERE (dx.grp = ?) AND
+                            ((lx.id = dx.edge) AND (lx.grp = dx.grp)) AND
+                            ((ly.id = dy.edge) AND (ly.grp = dy.grp)) AND
+                            ((dx.f_r = dy.f_l) OR (dx.f_r = dy.f_r)) AND
+                      \t     ((lx.endpoint = px.id) AND (lx.grp = px.grp)) AND
+                      \t     (dx.edge != dy.edge) AND
+                      \t     (((ly.endpoint = py.id) AND (ly.grp = py.grp) AND
+                      \t       (round(px.x,6) = round(py.x,6)) AND (round(px.y,6) = round(py.y,6))) OR
+                      \t      ((ly.beginpoint = py.id) AND (ly.grp = py.grp) AND
+                      \t       (round(px.x,6) = round(py.x,6)) AND (round(px.y,6) = round(py.y,6))));""";      
         List<Properties> rows = new LinkedList<>();
         try ( Connection conn = DriverManager.getConnection(url);  
               PreparedStatement pstmt1 = conn.prepareStatement(sql1);
@@ -269,7 +286,7 @@ public class DatabaseHandler {
                 rows.add(row);
             }
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            LOG.error(e.getMessage());
         }
         DatabaseHandler.updateContent("dcels", rows);
     }
@@ -352,14 +369,16 @@ public class DatabaseHandler {
             }
             return mp;
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            LOG.error(e.getMessage());
             return null;
         }
     }
     
     public static int getIndexFromPoint(Point p, int grp) {
-        String sql = "SELECT id FROM points\n"
-                   + "WHERE ((x = ?) AND (y = ?)) AND (grp = ?)";
+        String sql = """
+                     SELECT id FROM points
+                     WHERE ( ( (ABS(x - ?) < 1e-11) AND (ABS(y - ?) < 1e-11) ) AND (grp = ?) ) 
+                     """;
 
         try ( Connection conn = DriverManager.getConnection(url);  
               PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -370,18 +389,18 @@ public class DatabaseHandler {
             ResultSet rs = pstmt.executeQuery();
             return rs.getInt("id");
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            LOG.error(e.getMessage());
             return -1;
         }
     }
     
     public static int getIndexOfBinarytTreeRoot(int grp) {
-        String sql = "SELECT point FROM binaryTrees "
-                   + "WHERE grp = ? AND point not in (\n" 
-                   + "  SELECT left FROM binaryTrees WHERE (left is not null)\n" 
-                   + "  UNION\n" 
-                   + "  SELECT right FROM binaryTrees WHERE (right is not null)\n"
-                   + ")";
+        String sql = """
+                     SELECT point FROM binaryTrees WHERE grp = ? AND point not in (
+                       SELECT left FROM binaryTrees WHERE (left is not null)
+                       UNION
+                       SELECT right FROM binaryTrees WHERE (right is not null)
+                     )""";
         
         try ( Connection conn = DriverManager.getConnection(url);  
               PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -390,7 +409,7 @@ public class DatabaseHandler {
             ResultSet rs = pstmt.executeQuery();
             return rs.getInt("point");
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            LOG.error(e.getMessage());
             return -1;
         }        
     }
@@ -408,9 +427,10 @@ public class DatabaseHandler {
     
     public static List<Integer> getIndexFromBinaryTree(int grp) {
         List<Integer> li = new LinkedList<>();
-        String sql = "SELECT point \n"
-                   + "FROM binaryTrees \n"
-                   + "WHERE grp = ?";
+        String sql = """
+                     SELECT point 
+                     FROM binaryTrees 
+                     WHERE grp = ?""";
         
         try ( Connection conn = DriverManager.getConnection(url);  
               PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -423,7 +443,7 @@ public class DatabaseHandler {
             }
             return li;
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            LOG.error(e.getMessage());
             return null;
         }        
     }
@@ -431,12 +451,13 @@ public class DatabaseHandler {
     public static BinaryTree getBinaryTreeByGroup(int grp) {
         Map<Integer,BinaryTreeNode> m = new HashMap<>();
         Map<Integer,BinaryTree> mbt = new HashMap<>();
-        String sql = "SELECT binaryTrees.point, binaryTrees.left, binaryTrees.right, points.x, points.y \n"
-                   + "FROM points, binaryTrees \n"
-                   + "WHERE (\n"
-                   + "       (binaryTrees.grp = ?) AND \n"
-                   + "       (points.id = binaryTrees.point) AND \n"
-                   + "       (points.grp = binaryTrees.grp))"; 
+        String sql = """
+                     SELECT binaryTrees.point, binaryTrees.left, binaryTrees.right, points.x, points.y 
+                     FROM points, binaryTrees 
+                     WHERE (
+                            (binaryTrees.grp = ?) AND 
+                            (points.id = binaryTrees.point) AND 
+                            (points.grp = binaryTrees.grp))"""; 
         
         try ( Connection conn = DriverManager.getConnection(url);  
               PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -471,18 +492,17 @@ public class DatabaseHandler {
             bt = mbt.get(root);
             return bt;
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            LOG.error(e.getMessage());
             return null;
         }        
     }
 
     private static class ConveksHullNode {
         Point p;
-        int nxt, prv;
+        int prv;
 
         ConveksHullNode(Point p, int prv, int nxt) {
             this.p = p;
-            this.nxt = nxt;
             this.prv = prv;
         }
     }
@@ -490,11 +510,12 @@ public class DatabaseHandler {
     public static ConveksHull getConveksHullByGroup(int grp) {
         Map<Integer,ConveksHullNode> m = new HashMap<>();
         Map<Integer,ConveksHull> mch = new HashMap<>();
-        String sql = "SELECT conveksHulls.point, conveksHulls.next, conveksHulls.previous, points.x, points.y \n"
-                   + "FROM points, conveksHulls\n"
-                   + "WHERE ((points.id = conveksHulls.point) AND (points.grp = conveksHulls.grp) \n"
-                   + "      AND (conveksHulls.grp = ?))\n"
-                   + "ORDER BY points.x, points.y ASC";
+        String sql = """
+                     SELECT conveksHulls.point, conveksHulls.next, conveksHulls.previous, points.x, points.y 
+                     FROM points, conveksHulls
+                     WHERE ((points.id = conveksHulls.point) AND (points.grp = conveksHulls.grp) 
+                           AND (conveksHulls.grp = ?))
+                     ORDER BY points.x, points.y ASC""";
         try ( Connection conn = DriverManager.getConnection(url);  
               PreparedStatement pstmt = conn.prepareStatement(sql)) {
             // set the value
@@ -533,7 +554,7 @@ public class DatabaseHandler {
             }
             return head;
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            LOG.error(e.getMessage());
             return null;
         }        
     }
@@ -555,36 +576,39 @@ public class DatabaseHandler {
     }
     
     public static DCEL getVoronoiDiagramByGroup(int grp) {
-        String sql1 = "SELECT d.edge, d.bp_ref, d.ep_ref, bp.x, bp.y, ep.x, ep.y, mp.x, mp.y, dir.x, dir.y, lp.x, lp.y, rp.x, rp.y\n"
-                    + "FROM dcels d, linesegments l, points bp, points ep, points mp, points dir, points lp, points rp\n"
-                    + "WHERE (d.grp = ?) AND\n"
-                    + "      ((l.id = d.edge) AND (l.grp = d.grp)) AND\n"
-                    + "      ((bp.id = l.beginpoint) AND (bp.grp = l.grp)) AND\n"
-                    + "      ((ep.id = l.endpoint) AND (ep.grp = l.grp)) AND\n"
-                    + "      ((mp.id = l.midpoint) AND (mp.grp = l.grp)) AND\n"
-                    + "      ((dir.id = l.direction) AND (dir.grp = l.grp)) AND\n"
-                    + "      ((lp.id = d.f_l) AND (lp.grp = d.grp)) AND\n"
-                    + "      ((rp.id = d.f_r) AND (rp.grp = d.grp));";
-        String sql2 = "SELECT d.edge, d.bp_ref, bp.x, bp.y, mp.x, mp.y, dir.x, dir.y, lp.x, lp.y, rp.x, rp.y\n"
-                    + "FROM dcels d, linesegments l, points bp, points mp, points dir, points lp, points rp\n"
-                    + "WHERE (d.grp = ?) AND\n"
-                    + "      ((l.id = d.edge) AND (l.grp = d.grp)) AND\n"
-                    + "      ((bp.id = l.beginpoint) AND (bp.grp = l.grp)) AND\n"
-                    + "      (l.endpoint IS NULL) AND\n"
-                    + "      ((mp.id = l.midpoint) AND (mp.grp = l.grp)) AND\n"
-                    + "      ((dir.id = l.direction) AND (dir.grp = l.grp)) AND\n"
-                    + "      ((lp.id = d.f_l) AND (lp.grp = d.grp)) AND\n"
-                    + "      ((rp.id = d.f_r) AND (rp.grp = d.grp));";
-        String sql3 = "SELECT d.edge, d.ep_ref, ep.x, ep.y, mp.x, mp.y, dir.x, dir.y, lp.x, lp.y, rp.x, rp.y\n"
-                    + "FROM dcels d, linesegments l, points ep, points mp, points dir, points lp, points rp\n"
-                    + "WHERE (d.grp = ?) AND\n"
-                    + "      ((l.id = d.edge) AND (l.grp = d.grp)) AND\n"
-                    + "      (l.beginpoint IS NULL) AND\n"
-                    + "      ((ep.id = l.endpoint) AND (ep.grp = l.grp)) AND\n"
-                    + "      ((mp.id = l.midpoint) AND (mp.grp = l.grp)) AND\n"
-                    + "      ((dir.id = l.direction) AND (dir.grp = l.grp)) AND\n"
-                    + "      ((lp.id = d.f_l) AND (lp.grp = d.grp)) AND\n"
-                    + "      ((rp.id = d.f_r) AND (rp.grp = d.grp));";
+        String sql1 = """
+                      SELECT d.edge, d.bp_ref, d.ep_ref, bp.x, bp.y, ep.x, ep.y, mp.x, mp.y, dir.x, dir.y, lp.x, lp.y, rp.x, rp.y
+                      FROM dcels d, linesegments l, points bp, points ep, points mp, points dir, points lp, points rp
+                      WHERE (d.grp = ?) AND
+                            ((l.id = d.edge) AND (l.grp = d.grp)) AND
+                            ((bp.id = l.beginpoint) AND (bp.grp = l.grp)) AND
+                            ((ep.id = l.endpoint) AND (ep.grp = l.grp)) AND
+                            ((mp.id = l.midpoint) AND (mp.grp = l.grp)) AND
+                            ((dir.id = l.direction) AND (dir.grp = l.grp)) AND
+                            ((lp.id = d.f_l) AND (lp.grp = d.grp)) AND
+                            ((rp.id = d.f_r) AND (rp.grp = d.grp));""";
+        String sql2 = """
+                      SELECT d.edge, d.bp_ref, bp.x, bp.y, mp.x, mp.y, dir.x, dir.y, lp.x, lp.y, rp.x, rp.y
+                      FROM dcels d, linesegments l, points bp, points mp, points dir, points lp, points rp
+                      WHERE (d.grp = ?) AND
+                            ((l.id = d.edge) AND (l.grp = d.grp)) AND
+                            ((bp.id = l.beginpoint) AND (bp.grp = l.grp)) AND
+                            (l.endpoint IS NULL) AND
+                            ((mp.id = l.midpoint) AND (mp.grp = l.grp)) AND
+                            ((dir.id = l.direction) AND (dir.grp = l.grp)) AND
+                            ((lp.id = d.f_l) AND (lp.grp = d.grp)) AND
+                            ((rp.id = d.f_r) AND (rp.grp = d.grp));""";
+        String sql3 = """
+                      SELECT d.edge, d.ep_ref, ep.x, ep.y, mp.x, mp.y, dir.x, dir.y, lp.x, lp.y, rp.x, rp.y
+                      FROM dcels d, linesegments l, points ep, points mp, points dir, points lp, points rp
+                      WHERE (d.grp = ?) AND
+                            ((l.id = d.edge) AND (l.grp = d.grp)) AND
+                            (l.beginpoint IS NULL) AND
+                            ((ep.id = l.endpoint) AND (ep.grp = l.grp)) AND
+                            ((mp.id = l.midpoint) AND (mp.grp = l.grp)) AND
+                            ((dir.id = l.direction) AND (dir.grp = l.grp)) AND
+                            ((lp.id = d.f_l) AND (lp.grp = d.grp)) AND
+                            ((rp.id = d.f_r) AND (rp.grp = d.grp));""";
         try ( Connection conn = DriverManager.getConnection(url);  
               PreparedStatement pstmt1 = conn.prepareStatement(sql1);
               PreparedStatement pstmt2 = conn.prepareStatement(sql2);
@@ -659,15 +683,16 @@ public class DatabaseHandler {
             DCEL ret = new DCEL(mdn.get(1));            
             return ret;
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            LOG.error(e.getMessage());
             return null;
         }
     }
     
     public static int getLargestPointId(int grp) throws SQLException {
-        String sql = "SELECT id FROM points\n"
-                   + "WHERE (grp = ?)\n"
-                   + "ORDER BY points.id DESC";
+        String sql = """
+                     SELECT id FROM points
+                     WHERE (grp = ?)
+                     ORDER BY points.id DESC""";
         int ni = -1;
         try ( Connection conn = DriverManager.getConnection(url);  
               PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -680,9 +705,10 @@ public class DatabaseHandler {
     }
     
     public static int getLargestLinesegmentId(int grp) throws SQLException {
-        String sql = "SELECT id FROM linesegments\n"
-                   + "WHERE (grp = ?)\n"
-                   + "ORDER BY linesegments.id DESC";
+        String sql = """
+                     SELECT id FROM linesegments
+                     WHERE (grp = ?)
+                     ORDER BY linesegments.id DESC""";
         int ni = -1;
         try ( Connection conn = DriverManager.getConnection(url);  
               PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -695,9 +721,10 @@ public class DatabaseHandler {
     }
     
     private static int insertLinesegment(int grp) throws SQLException {
-        String sql = "SELECT id FROM linesegments\n"
-                   + "WHERE (grp = ?)\n"
-                   + "ORDER BY linesegments.id DESC";
+        String sql = """
+                     SELECT id FROM linesegments
+                     WHERE (grp = ?)
+                     ORDER BY linesegments.id DESC""";
         int ni = -1;
         try ( Connection conn = DriverManager.getConnection(url);  
               PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -706,7 +733,7 @@ public class DatabaseHandler {
             ResultSet rs = pstmt.executeQuery();
             ni = rs.getInt("id") + 1;
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            LOG.error(e.getMessage());
             return ni;
         }        
         List<String> lni = new LinkedList<>();

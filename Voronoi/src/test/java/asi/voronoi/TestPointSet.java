@@ -4,6 +4,7 @@
  */
 package asi.voronoi;
 
+import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 import org.junit.After;
@@ -32,6 +33,7 @@ public class TestPointSet {
     @Test
     public void testBuildPointSet() {
         String fileName = "src/test/resources/pointset_01.test";
+        File file = new File(fileName);
         Set<Point> expected = new HashSet<>();
         expected.add(new Point(1, 52));
         expected.add(new Point(0.52, 0));
@@ -39,7 +41,7 @@ public class TestPointSet {
         expected.add(new Point(3.1416, -123));
         Set<Point> res;
         try {
-            res = actual.buildPointSet(fileName);
+            res = actual.buildPointSet(file);
             assertEquals(expected,res);
         } catch (Exception ex) {
             fail("Unexpected exception: " + ex.getMessage());
@@ -49,11 +51,12 @@ public class TestPointSet {
     @Test
     public void testPointSetErrorParsing() {
         String fileName = "src/test/resources/pointset_02.test";
+        File file = new File(fileName);
         try {
-            actual.buildPointSet(fileName);
+            actual.buildPointSet(file);
             fail("Exception expected");
         } catch (Exception ex) {
-            assertEquals("Called from: 0 parse error: 0:[",ex.getMessage());
+            assertEquals("Called from: 0 parse error: [",ex.getMessage());
         }
     }
 }

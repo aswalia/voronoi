@@ -1,12 +1,5 @@
 package asi.voronoi;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.StringTokenizer;
-
 public class Point implements java.io.Serializable {
     private double x, y;
 
@@ -87,8 +80,12 @@ public class Point implements java.io.Serializable {
 
     @Override
     public boolean equals(Object t) {
-        Point s = (Point)t;
-        return ((this.x == s.x) && (this.y == s.y));
+        if (!(t instanceof Point)) {
+            return false;
+        } else {
+            Point s = (Point)t;
+            return ((this.x == s.x) && (this.y == s.y));
+        }
     }
 
     @Override

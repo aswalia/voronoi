@@ -8,7 +8,6 @@ import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.geometry.Pos;
-import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
@@ -17,15 +16,12 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.shape.LineTo;
-import javafx.scene.shape.MoveTo;
-import javafx.scene.shape.Path;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 public class FXMain extends Application {
 
-/*    @Override
+    @Override
     public void start(Stage primaryStage) throws Exception {
         String path = "src/main/resources/media/pics/";
         StringBuilder sb = new StringBuilder(path);
@@ -64,8 +60,8 @@ public class FXMain extends Application {
         primaryStage.show();
 
     }
-*/
-    
+
+/*    
     @Override
     public void start(Stage stage) {
     //Creating a Path 
@@ -108,7 +104,7 @@ public class FXMain extends Application {
       //Displaying the contents of the stage 
       stage.show();         
     }
-
+*/
     public static void main(String[] args) {
         Application.launch(args);
     }

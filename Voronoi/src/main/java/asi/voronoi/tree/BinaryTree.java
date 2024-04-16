@@ -5,6 +5,7 @@ import asi.voronoi.ModelObject;
 import asi.voronoi.Point;
 import asi.voronoi.Serializer;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.LinkedList;
@@ -29,9 +30,8 @@ public class BinaryTree implements java.io.Serializable, ModelObject {
         LOG.debug("Construct: "+p);
     }
 
-    public BinaryTree buildBinaryTree(String filename) throws IOException {
-        FileReader fr;
-        fr = new FileReader(filename);
+    public BinaryTree buildBinaryTree(File file) throws IOException {
+        FileReader fr = new FileReader(file);
         br = new BufferedReader(fr);
         return buildTreeFromFile();
     }
@@ -290,7 +290,9 @@ public class BinaryTree implements java.io.Serializable, ModelObject {
     }
 
     private Point parsePoint(String s) {
-        String delim = " " + ":" + "(" + ")" + "," + "\t\n\r\f";        
+        String delim = """
+                        :(),\t
+                       \r\f""";        
         String iToken;
         StringTokenizer st = new StringTokenizer(s, delim);
         double x, y;

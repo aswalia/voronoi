@@ -380,9 +380,11 @@ public class TestConveksHull {
         c1.merge(c2);
         c3.merge(c4);
         c1.merge(c3);
-        String expected = "ConveksHull:\n"+
-                          "(0.0,5.0)(1.0,0.0)(5.0,0.0)(7.0,3.0)(6.0,7.0)(2.0,7.0)\n"+
-                          "lft:(0.0,5.0) rgt:(7.0,3.0) up:(2.0,7.0) down:(1.0,0.0)\n";
+        String expected = """
+                          ConveksHull:
+                          (0.0,5.0)(1.0,0.0)(5.0,0.0)(7.0,3.0)(6.0,7.0)(2.0,7.0)
+                          lft:(0.0,5.0) rgt:(7.0,3.0) up:(2.0,7.0) down:(1.0,0.0)
+                          """;
         assertEquals(expected, c1.toString());
     }
     

@@ -245,23 +245,21 @@ public class DCEL implements Constant, java.io.Serializable {
         DCEL ret = null;
         e = node.edgeType();
         switch (e) {
-            case ENDLESS:
-                ret = this;
-                break;
-            case SEMI:
+            case ENDLESS -> ret = this;
+            case SEMI -> {
                 if (node.p_b != null) {
                     ret = node.p_b;
                 } else {
                     ret = node.p_e;
                 }
-                break;
-            case CLOSED:
+            }
+            case CLOSED -> {
                 if (node.p_e.node.samePoint(p)) {
                     ret = node.p_e;
                 } else {
                     ret = node.p_b;
                 }
-                break;
+            }
         }
         return ret;
     }
@@ -271,23 +269,21 @@ public class DCEL implements Constant, java.io.Serializable {
         DCEL ret = null;
         e = node.edgeType();
         switch (e) {
-            case ENDLESS:
-                ret = this;
-                break;
-            case SEMI:
+            case ENDLESS -> ret = this;
+            case SEMI -> {
                 if (node.p_b != null) {
                     ret = node.p_b.positivDir(p);
                 } else {
                     ret = node.p_e.positivDir(p);
                 }
-                break;
-            case CLOSED:
+            }
+            case CLOSED -> {
                 if (node.p_b.node.samePoint(p)) {
                     ret = node.p_e.positivDir(p);
                 } else {
                     ret = node.p_b.positivDir(p);
                 }
-                break;
+            }
         }
         return ret;
     }
@@ -300,10 +296,8 @@ public class DCEL implements Constant, java.io.Serializable {
         l = next.node.cutPoint(node);
         if (!l.equals(ZERO)) {
             switch (next.node.edgeType()) {
-                case ENDLESS:
-                    nCut = true;
-                    break;
-                case SEMI:
+                case ENDLESS -> nCut = true;
+                case SEMI -> {
                     if (next.node.p_b != null) {
                         is4Point = next.node.a_b == l.x();
                         nCut = l.x() > next.node.a_b;
@@ -311,20 +305,18 @@ public class DCEL implements Constant, java.io.Serializable {
                         is4Point = next.node.a_e == l.x();
                         nCut = l.x() < next.node.a_e;
                     }
-                    break;
-                case CLOSED:
+                }
+                case CLOSED -> {
                     is4Point = (l.x() == next.node.a_b) || (l.x() == next.node.a_e);
                     nCut = (l.x() > next.node.a_b) && (l.x() < next.node.a_e);
-                    break;
+                }
             }
             switch (node.edgeType()) {
-                case ENDLESS:
-                    cCut = true;
-                    break;
-                case SEMI:
+                case ENDLESS -> cCut = true;
+                case SEMI -> {
                     is4Point &= l.y() < node.a_e;
                     cCut = l.y() < node.a_e;
-                    break;
+                }
             }
             if (is4Point) {
                 ret = FOURPOINTS;
