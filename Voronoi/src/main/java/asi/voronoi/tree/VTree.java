@@ -1,11 +1,13 @@
 package asi.voronoi.tree;
 
 import asi.voronoi.DCEL;
+import asi.voronoi.DCELNode;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 
 public class VTree {
+
     private DCEL info;
     private VTree lft, rgt;
 
@@ -17,14 +19,13 @@ public class VTree {
     public void toFile() throws Exception {
         info.toFile();
     }
-    
+
     public DCEL getInfo() {
         return info;
     }
 
     public void writeTree(String filename) throws IOException {
-        try (FileWriter fw = new FileWriter(filename); 
-             BufferedWriter bw = new BufferedWriter(fw)) {
+        try (FileWriter fw = new FileWriter(filename); BufferedWriter bw = new BufferedWriter(fw)) {
             bw.write(this.toString());
         }
     }
@@ -33,7 +34,7 @@ public class VTree {
         if (b == null) {
             info = null;
         } else if (b.isLeaf()) {
-            info = new DCEL(b.p);  
+            info = new DCEL(b.p);
         } else if (b.lft == null) {
             try {
                 info = new DCEL(b.p);
@@ -51,7 +52,7 @@ public class VTree {
                 info = info.merge(lft.info);
             } catch (Exception ex) {
                 throw new RuntimeException(ex.getMessage());
-            }            
+            }
         } else {
             try {
                 info = new DCEL(b.p);
@@ -63,7 +64,15 @@ public class VTree {
                 info = info.merge(rgt.info);
             } catch (Exception e) {
                 throw new RuntimeException(e.getMessage());
-            }            
+            }
         }
+
+        if (info != null && info.getNode() != null) {
+            var lines = info.getNode().getVoronoiEdgeList().stream()
+                    .map(DCELNode::getLineSegment)
+                    .toList();
+            asi.voronoi.anim.VoronoiEvents.fireFinalized(lines);
+        }
+
     }
 }

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+    <action>
+        <actionName>CUSTOM-javafx-run</actionName>
+        <displayName>javafx-run</displayName>
+        <goals>
+            <goal>javafx:run</goal>
+        </goals>
+    </action>
+    <action>
+        <actionName>CUSTOM-javafx-debug</actionName>
+        <displayName>javafx-debug</displayName>
+        <goals>
+            <goal>javafx:run@debug</goal>
+        </goals>
+    </action>
+</actions>

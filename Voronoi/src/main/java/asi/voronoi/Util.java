@@ -22,52 +22,52 @@ public class Util {
     private static final int FACTOR = 10;
     private static VTree v;
     private static BinaryTree t;
-    
+
     public static void createDatabase(String fileName) throws SQLException {
         DatabaseHandler.dropDatabase(fileName);
         DatabaseHandler.connectToDatabase(fileName);
-        DatabaseHandler.createContent();        
+        DatabaseHandler.createContent();
     }
-    
+
     public static void prepareDatabaseWithRandomPoints(int noOfPoints, int group) throws SQLException {
         double x, y;
         Set<Point> sp = new HashSet<>();
-        for (int i=0; i < noOfPoints; i++) {
+        for (int i = 0; i < noOfPoints; i++) {
             x = (int) (Math.random() * FACTOR * noOfPoints);
             y = (int) (Math.random() * FACTOR * noOfPoints);
-            Point p = new Point(x,y);
+            Point p = new Point(x, y);
             sp.add(p);
         }
         PointSet.store(group, sp);
-    } 
-    
+    }
+
     public static void prepareDatabaseWithFixedPoints() throws SQLException {
         List<String> l = new LinkedList<>();
-        Point p = new Point(6,2);
+        Point p = new Point(6, 2);
         String r = "1 , 1" + " , " + p.x() + " , " + p.y();
         l.add(r);
-        p = new Point(0,3);
+        p = new Point(0, 3);
         r = "2 , 1" + " , " + p.x() + " , " + p.y();
         l.add(r);
-        p = new Point(1,12);
+        p = new Point(1, 12);
         r = "3 , 1" + " , " + p.x() + " , " + p.y();
         l.add(r);
-        p = new Point(3,13);
+        p = new Point(3, 13);
         r = "4 , 1" + " , " + p.x() + " , " + p.y();
         l.add(r);
-        p = new Point(0,11);
+        p = new Point(0, 11);
         r = "5 , 1" + " , " + p.x() + " , " + p.y();
         l.add(r);
-        p = new Point(6,5);
+        p = new Point(6, 5);
         r = "6 , 1" + " , " + p.x() + " , " + p.y();
         l.add(r);
-        p = new Point(12,8);
+        p = new Point(12, 8);
         r = "7 , 1" + " , " + p.x() + " , " + p.y();
         l.add(r);
         DatabaseHandler.insertContent("points", l);
-        
+
     }
-    
+
     public static BinaryTree generateBTree(int noOfPoints) {
         BinaryTree ret = new AVLTree(new Point((int) (Math.random() * FACTOR * noOfPoints),
                 (int) (Math.random() * FACTOR * noOfPoints)));
@@ -77,7 +77,7 @@ public class Util {
         }
         return ret;
     }
-    
+
     public static BinaryTree bTreeFromPointSet(File file) throws Exception {
         PointSet ps = new PointSet();
         Set<Point> pointsFromFile = ps.buildPointSet(file);
@@ -91,7 +91,13 @@ public class Util {
         }
         return ret;
     }
-    
+
+    public static Set<Point> getPoints(File file) throws Exception {
+        PointSet ps = new PointSet();
+//        Set<Point> pointsFromFile = ps.buildPointSet(file);
+        return ps.buildPointSet(file);
+    }
+
     public static BinaryTree generateBTree(File file) {
         BinaryTree tree = new AVLTree();
         try {
@@ -102,14 +108,14 @@ public class Util {
         }
         return tree;
     }
-    
+
     public static BinaryTree generateBTree(int noOfPoints, String dbName, int group) throws SQLException {
         Util.createDatabase(dbName);
         Util.prepareDatabaseWithRandomPoints(noOfPoints, group);
         BinaryTree ret = null;
-        Map<Integer,Point> points = DatabaseHandler.getPointsByGroup(group);
+        Map<Integer, Point> points = DatabaseHandler.getPointsByGroup(group);
         Collection<Point> pointSet = points.values();
-        for (Point p:pointSet) {
+        for (Point p : pointSet) {
             if (ret == null) {
                 // first point in set
                 ret = new AVLTree(p);
@@ -127,7 +133,7 @@ public class Util {
             t = generateBTree(noOfPoints);
             try {
                 LOG.info("\n" + t.toString());
-                v = new VTree();
+//                v = new VTree();
                 LOG.debug("# points: " + t.count());
                 v.buildStructure(t);
                 LOG.info(v.toString());
@@ -173,8 +179,8 @@ public class Util {
         } catch (SQLException ex) {
             LOG.error("Unable to build BinaryTree: " + ex.getSQLState());
         }
-        v = new VTree();
-        v.buildStructure(t);
+//        v = new VTree();
+//        v.buildStructure(t);
         LOG.info(v);
         ConveksHull ch = v.getInfo().vor2CH();
         LOG.info(ch);

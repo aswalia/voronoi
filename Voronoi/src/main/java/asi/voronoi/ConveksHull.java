@@ -7,25 +7,28 @@ import java.util.Properties;
 import java.util.Set;
 
 public class ConveksHull implements Constant, java.io.Serializable, ModelObject {
+
     private CircularLinkedList head;
     private Point lft, up, rgt, down;
     private PointPair upSupport, downSupport;
 
     public ConveksHull(ConveksHull c) {
         head = c.head.copy();
-        lft = c.getLft(); rgt = c.getRgt();
-        up = c.getUp(); down = c.getDown();
+        lft = c.getLft();
+        rgt = c.getRgt();
+        up = c.getUp();
+        down = c.getDown();
     }
 
     public ConveksHull() {
     }
-    
+
     public ConveksHull(Point p) {
         head = new CircularLinkedList(p);
         lft = rgt = up = down = p;
     }
-    
-    public ConveksHull(Point lft, Point rgt) {       
+
+    public ConveksHull(Point lft, Point rgt) {
         head = new CircularLinkedList(lft);
         head.add(0, -1, rgt);
         this.lft = lft;
@@ -38,13 +41,13 @@ public class ConveksHull implements Constant, java.io.Serializable, ModelObject 
             down = lft;
         }
     }
-    
+
     public void connect(ConveksHull prv, ConveksHull cur) {
         cur.head.connect(prv.head);
     }
-    
+
     public int size() {
-        return (head == null) ? 0 : head.length(); 
+        return (head == null) ? 0 : head.length();
     }
 
     @Override
@@ -52,11 +55,11 @@ public class ConveksHull implements Constant, java.io.Serializable, ModelObject 
         String ret = """
                      ConveksHull:
                      """;
-        ret += head+"\n";
-        ret += "lft:" + lft + " rgt:" + rgt + " up:" + up + " down:" + down+"\n";
+        ret += head + "\n";
+        ret += "lft:" + lft + " rgt:" + rgt + " up:" + up + " down:" + down + "\n";
         return ret;
     }
-    
+
     private void setPerimeter(Point p) {
         if (p.isLess(lft)) {
             lft = p;
@@ -67,25 +70,25 @@ public class ConveksHull implements Constant, java.io.Serializable, ModelObject 
             up = p;
         } else if (p.y() < down.y()) {
             down = p;
-        }        
+        }
     }
 
     public void setUpSupport(Point lft, Point rgt) {
-        upSupport = new PointPair(lft,rgt);
+        upSupport = new PointPair(lft, rgt);
     }
-    
+
     public void setDownSupport(Point lft, Point rgt) {
-        downSupport = new PointPair(lft,rgt);
+        downSupport = new PointPair(lft, rgt);
     }
-    
+
     public PointPair getUpSupport() {
         return upSupport;
     }
-    
+
     public PointPair getDownSupport() {
         return downSupport;
     }
-    
+
     public ConveksHull merge(Point p) {
         ConveksHull ret = this;
         if (size() == 1) {
@@ -101,30 +104,30 @@ public class ConveksHull implements Constant, java.io.Serializable, ModelObject 
             }
         } else {
             // check if point makes a line with head and head-1 and head+1        
-            if ((Point.area(p, head.get(0), head.get(-1)) == 0) &&
-                (Point.area(p, head.get(0), head.get(1)) == 0)) {
+            if ((Point.area(p, head.get(0), head.get(-1)) == 0)
+                    && (Point.area(p, head.get(0), head.get(1)) == 0)) {
                 int i = 0;
                 // if CH is a line and
                 // new point also on same line
-                if ((p.x() > lft.x()) &&
-                    (p.x() < rgt.x())) {
+                if ((p.x() > lft.x())
+                        && (p.x() < rgt.x())) {
                     // new point between the two edges
                     boolean done = false;
                     do {
-                        if ((p.x() < head.get(i).x()) &&
-                            (p.x() > head.get(i+1).x())) {
-                            head.add(i, i-1, p); 
+                        if ((p.x() < head.get(i).x())
+                                && (p.x() > head.get(i + 1).x())) {
+                            head.add(i, i - 1, p);
                             done = true;
                         }
                         i++;
                     } while (!done);
-                }  else {
+                } else {
                     // new point either to the left of head or
                     // to the right of head.next.
                     if (p.x() < lft.x()) {
                         lft = up = p;
                         rgt = down = head.get(-1);
-                    }  else {
+                    } else {
                         lft = up = head.get(0);
                         rgt = down = p;
                     }
@@ -137,27 +140,27 @@ public class ConveksHull implements Constant, java.io.Serializable, ModelObject 
                 Set<Integer> candidateIndex = new HashSet();
                 double a;
                 do {
-                    a = Point.areaDouble(head.get(i), p, head.get(i+1));
+                    a = Point.areaDouble(head.get(i), p, head.get(i + 1));
                     // any head, p and head+1 line-segments in "positive" 
                     // direction is a candidate
-                    if ((a > 0) || 
-                        ((a == 0) && 
-                         (Point.direction(head.get(i), p, head.get(i+1)) > 0))) {
+                    if ((a > 0)
+                            || ((a == 0)
+                            && (Point.direction(head.get(i), p, head.get(i + 1)) > 0))) {
                         candidateIndex.add(i);
                     }
                     i++;
                 } while (!head.get(i).equals(start));
                 // true line-segment is the one where head-1, head and p
                 // make a conveks bend (positive or 0 area)
-                for (Integer index: candidateIndex) {
-                    if (Point.area(head.get(index-1), head.get(index), p) >= 0) {
+                for (Integer index : candidateIndex) {
+                    if (Point.area(head.get(index - 1), head.get(index), p) >= 0) {
                         i = index;
                     }
                 }
                 int j = i;
                 i++;
                 // find which point of current CH is to be next point in merges CH
-                while (Point.area(p, head.get(i), head.get(i+1)) < 0) {
+                while (Point.area(p, head.get(i), head.get(i + 1)) < 0) {
                     // current next point is not part of merged CH
                     i++;
                 }
@@ -166,7 +169,7 @@ public class ConveksHull implements Constant, java.io.Serializable, ModelObject 
                     setDownSupport(head.get(j), p);
                 } else {
                     setUpSupport(p, head.get(j));
-                    setDownSupport(p, head.get(i));                
+                    setDownSupport(p, head.get(i));
                 }
                 head.add(i, j, p);
             }
@@ -174,7 +177,7 @@ public class ConveksHull implements Constant, java.io.Serializable, ModelObject 
         setPerimeter(p);
         return ret;
     }
-    
+
     public ConveksHull merge(ConveksHull subCH) {
         ConveksHull ret = this;
         if (size() == 1) {
@@ -249,10 +252,10 @@ public class ConveksHull implements Constant, java.io.Serializable, ModelObject 
                 if (head.get(0).isLess(subCH.head.get(0))) {
                     head.mergeLinearCH(true, subCH.head);
                 } else {
-                    head.mergeLinearCH(false, subCH.head);                
+                    head.mergeLinearCH(false, subCH.head);
                 }
             } else {
-                head.mergeList(upLft, upRgt, downLft, downRgt, subCH.head);            
+                head.mergeList(upLft, upRgt, downLft, downRgt, subCH.head);
             }
             setPerimeter(subCH.lft);
             setPerimeter(subCH.rgt);
@@ -317,7 +320,7 @@ public class ConveksHull implements Constant, java.io.Serializable, ModelObject 
     public static ConveksHull fetch(String filename) throws java.io.IOException, ClassNotFoundException {
         return (ConveksHull) Serializer.fetch(filename);
     }
-    
+
     public void store(int grp, List<String> r) {
         // save ConveksHull as a list of strings
         // each item representing a row in the
@@ -331,21 +334,21 @@ public class ConveksHull implements Constant, java.io.Serializable, ModelObject 
             int index = DatabaseHandler.getIndexFromPoint(cur, grp);
             r.add("" + index + " , " + grp + " ," + index + " , " + index);
         } else if (prv.equals(nxt) && !prv.equals(cur)) {
-        // two points CH
+            // two points CH
             int index = DatabaseHandler.getIndexFromPoint(cur, grp);
             int im1 = DatabaseHandler.getIndexFromPoint(prv, grp);
             r.add("" + im1 + " , " + grp + " ," + index + " , " + index);
             r.add("" + index + " , " + grp + " ," + im1 + " , " + im1);
         } else {
-        // 3 or more points
-            for (int i=1; i<=size(); i++) {
+            // 3 or more points
+            for (int i = 1; i <= size(); i++) {
                 int index = DatabaseHandler.getIndexFromPoint(cur, grp);
                 int im1 = DatabaseHandler.getIndexFromPoint(prv, grp);
                 int ip1 = DatabaseHandler.getIndexFromPoint(nxt, grp);
                 r.add("" + index + " , " + grp + " ," + ip1 + " , " + im1);
                 prv = cur;
                 cur = nxt;
-                nxt = head.get(i+2);
+                nxt = head.get(i + 2);
             }
         }
     }
@@ -364,38 +367,38 @@ public class ConveksHull implements Constant, java.io.Serializable, ModelObject 
             int index = DatabaseHandler.insertConveksHullLinesegment(grp);
             if (index > 0) {
                 int indexpoint = DatabaseHandler.getIndexFromPoint(cur, grp);
-                rp.put("COLUMN:beginpoint", ""+indexpoint);
-                rp.put("COLUMN:endpoint", ""+indexpoint);
-                rp.put("PRIMARY:id", ""+index);
-                rp.put("PRIMARY:grp", ""+grp);
+                rp.put("COLUMN:beginpoint", "" + indexpoint);
+                rp.put("COLUMN:endpoint", "" + indexpoint);
+                rp.put("PRIMARY:id", "" + index);
+                rp.put("PRIMARY:grp", "" + grp);
                 r.add(rp);
             }
         } else if (prv.equals(nxt) && !prv.equals(cur)) {
-        // two points CH
+            // two points CH
             int index = DatabaseHandler.insertConveksHullLinesegment(grp);
             if (index > 0) {
                 int ic = DatabaseHandler.getIndexFromPoint(cur, grp);
                 int im1 = DatabaseHandler.getIndexFromPoint(prv, grp);
-                rp.put("COLUMN:beginpoint", ""+im1);
-                rp.put("COLUMN:endpoint", ""+ic);
-                rp.put("PRIMARY:id", ""+index);
-                rp.put("PRIMARY:grp", ""+grp);
+                rp.put("COLUMN:beginpoint", "" + im1);
+                rp.put("COLUMN:endpoint", "" + ic);
+                rp.put("PRIMARY:id", "" + index);
+                rp.put("PRIMARY:grp", "" + grp);
                 r.add(rp);
             }
         } else {
-        // 3 or more points
-            for (int i=1; i<=size(); i++) {
+            // 3 or more points
+            for (int i = 1; i <= size(); i++) {
                 int index = DatabaseHandler.insertConveksHullLinesegment(grp);
                 if (index > 0) {
-                    int ic =  DatabaseHandler.getIndexFromPoint(cur, grp);
+                    int ic = DatabaseHandler.getIndexFromPoint(cur, grp);
                     int ip1 = DatabaseHandler.getIndexFromPoint(nxt, grp);
-                    rp.put("COLUMN:beginpoint", ""+ic);
-                    rp.put("COLUMN:endpoint", ""+ip1);
-                    rp.put("PRIMARY:id", ""+index);
-                    rp.put("PRIMARY:grp", ""+grp);
+                    rp.put("COLUMN:beginpoint", "" + ic);
+                    rp.put("COLUMN:endpoint", "" + ip1);
+                    rp.put("PRIMARY:id", "" + index);
+                    rp.put("PRIMARY:grp", "" + grp);
                     r.add(rp);
                     cur = nxt;
-                    nxt = head.get(i+2);
+                    nxt = head.get(i + 2);
                     rp = new Properties();
                 }
             }
@@ -403,8 +406,8 @@ public class ConveksHull implements Constant, java.io.Serializable, ModelObject 
     }
 
     private short test(int index, Point p) {
-        short back = Point.area(p, head.get(index), head.get(index-1));
-        short front = Point.area(p, head.get(index), head.get(index+1));
+        short back = Point.area(p, head.get(index), head.get(index - 1));
+        short front = Point.area(p, head.get(index), head.get(index + 1));
         short ret = (back * front >= 0) ? SUPPORT : ((back >= 0) ? REFLEX : CONCAVE);
         return ret;
     }
@@ -413,20 +416,24 @@ public class ConveksHull implements Constant, java.io.Serializable, ModelObject 
         int i = 0;
         boolean done = false;
         do {
-            switch (test(i,p)) {
-                case CONCAVE -> i--;
-                case REFLEX -> i++;
+            switch (test(i, p)) {
+                case CONCAVE ->
+                    i--;
+                case REFLEX ->
+                    i++;
                 case SUPPORT -> {
-                    switch (Point.area(p, head.get(i), head.get(i-1))) {
+                    switch (Point.area(p, head.get(i), head.get(i - 1))) {
                         case 0 -> {
-                            if (head.get(i+1).equals(head.get(i-1)) && (Point.direction(head.get(i), head.get(i-1), p) < 0)) {
+                            if (head.get(i + 1).equals(head.get(i - 1)) && (Point.direction(head.get(i), head.get(i - 1), p) < 0)) {
                                 done = true;
                             } else {
                                 i--;
                             }
-                    }
-                        case 1 -> done = true;
-                        case - 1 -> i--;
+                        }
+                        case 1 ->
+                            done = true;
+                        case - 1 ->
+                            i--;
                     }
                 }
             }
@@ -438,20 +445,24 @@ public class ConveksHull implements Constant, java.io.Serializable, ModelObject 
         int i = 0;
         boolean done = false;
         do {
-            switch (test(i,p)) {
-                case CONCAVE -> i++;
-                case REFLEX -> i--;
+            switch (test(i, p)) {
+                case CONCAVE ->
+                    i++;
+                case REFLEX ->
+                    i--;
                 case SUPPORT -> {
-                    switch (Point.area(p, head.get(i), head.get(i+1))) {
+                    switch (Point.area(p, head.get(i), head.get(i + 1))) {
                         case 0 -> {
-                            if (head.get(i+1).equals(head.get(i-1)) && (Point.direction(head.get(i), head.get(i+1), p) < 0)) {
+                            if (head.get(i + 1).equals(head.get(i - 1)) && (Point.direction(head.get(i), head.get(i + 1), p) < 0)) {
                                 done = true;
                             } else {
                                 i++;
                             }
-                    }
-                        case 1 -> i++;
-                        case - 1 -> done = true;
+                        }
+                        case 1 ->
+                            i++;
+                        case - 1 ->
+                            done = true;
                     }
                 }
             }

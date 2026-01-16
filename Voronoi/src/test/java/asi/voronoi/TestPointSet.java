@@ -17,14 +17,14 @@ import static org.junit.Assert.*;
  * @author asi
  */
 public class TestPointSet {
-    
+
     private PointSet actual;
-    
+
     @Before
     public void setUp() {
         actual = new PointSet();
     }
-    
+
     @After
     public void tearDown() {
         actual = null;
@@ -42,12 +42,12 @@ public class TestPointSet {
         Set<Point> res;
         try {
             res = actual.buildPointSet(file);
-            assertEquals(expected,res);
+            assertEquals(expected, res);
         } catch (Exception ex) {
             fail("Unexpected exception: " + ex.getMessage());
         }
     }
-    
+
     @Test
     public void testPointSetErrorParsing() {
         String fileName = "src/test/resources/pointset_02.test";
@@ -56,7 +56,7 @@ public class TestPointSet {
             actual.buildPointSet(file);
             fail("Exception expected");
         } catch (Exception ex) {
-            assertEquals("Called from: 0 parse error: [",ex.getMessage());
+            assertEquals("Parse error - in state 'beginPoint' Got: [", ex.getMessage());
         }
     }
 }

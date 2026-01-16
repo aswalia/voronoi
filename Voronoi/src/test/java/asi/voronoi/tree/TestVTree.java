@@ -36,47 +36,47 @@ public class TestVTree {
         c.buildStructure(b);
         assertEquals(null, c.getInfo());
     }
-    
+
     @Test
     public void testBuildStructure_OnePoint() {
         //VTree for one points is a single DCEL with lft equals rgt
-        BinaryTree b = new BinaryTree(new Point(0,0));
+        BinaryTree b = new BinaryTree(new Point(0, 0));
         VTree v = new VTree();
         v.buildStructure(b);
-        assertEquals(new DCEL(new Point(0,0)).toString(),v.getInfo().toString());
+        assertEquals(new DCEL(new Point(0, 0)).toString(), v.getInfo().toString());
     }
-    
+
     @Test
     public void testBuildStructure_TwoPoints() {
         //VTree for two points is a single DCEL with lft and rgt
-        BinaryTree b = new BinaryTree(new Point(1,1));
-        b.insertNode(new Point(0,0));
+        BinaryTree b = new BinaryTree(new Point(1, 1));
+        b.insertNode(new Point(0, 0));
         VTree v = new VTree();
         v.buildStructure(b);
-        assertEquals(new DCEL(new Point(0,0), new Point(1,1)).toString(),v.getInfo().toString());
-        b = new BinaryTree(new Point(0,0));
-        b.insertNode(new Point(1,1));
+        assertEquals(new DCEL(new Point(0, 0), new Point(1, 1)).toString(), v.getInfo().toString());
+        b = new BinaryTree(new Point(0, 0));
+        b.insertNode(new Point(1, 1));
         v = new VTree();
         v.buildStructure(b);
-        assertEquals(new DCEL(new Point(0,0), new Point(1,1)).toString(),v.getInfo().toString());
+        assertEquals(new DCEL(new Point(0, 0), new Point(1, 1)).toString(), v.getInfo().toString());
     }
-    
+
     @Test
     public void testBuildStructure_ThreePoints() {
         //VTree for three points is a graph of 3 DCELs
-        BinaryTree b = new BinaryTree(new Point(1,1));
-        b.insertNode(new Point(0,0));
-        b.insertNode(new Point(2,0));        
+        BinaryTree b = new BinaryTree(new Point(1, 1));
+        b.insertNode(new Point(0, 0));
+        b.insertNode(new Point(2, 0));
         VTree v = new VTree();
         v.buildStructure(b);
         String actual = v.toString();
         assertTrue(actual.contains("lft and rgt: (0.0,0.0) (1.0,1.0)"));
         assertTrue(actual.contains("lft and rgt: (1.0,1.0) (2.0,0.0)"));
         assertTrue(actual.contains("lft and rgt: (0.0,0.0) (2.0,0.0)"));
-        Integer count = (actual.split("lft and rgt: ").length ) - 1;
+        Integer count = (actual.split("lft and rgt: ").length) - 1;
         assertTrue(3 == count);
     }
-    
+
     @Test
     public void testBuildStructure_Point_and_Line() {
         // a 3 point CH, where all point are on a line
@@ -156,7 +156,7 @@ public class TestVTree {
             return null;
         }
     }
-    
+
     private boolean compareLines(String expected, String actual) {
         String[] expSt = expected.split("\n");
         String[] actSt = actual.split("\n");
@@ -186,7 +186,7 @@ public class TestVTree {
             // skip test when no expected file
             ret = true;
         } else {
-            ret = (actual != null) && compareLines(expected,actual);
+            ret = (actual != null) && compareLines(expected, actual);
         }
         return ret;
     }
@@ -285,7 +285,7 @@ public class TestVTree {
                                            lft and rgt: (2.0,0.0) (3.0,2.0)
                                            """));
         // there are no more edges in the DCEL graph, i.e. count equals 12
-        Integer count = (actual.split("lft and rgt: ").length ) - 1;
+        Integer count = (actual.split("lft and rgt: ").length) - 1;
         assertTrue(12 == count);
-     }
+    }
 }

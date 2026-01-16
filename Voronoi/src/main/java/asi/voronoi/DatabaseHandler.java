@@ -23,13 +23,13 @@ import org.apache.logging.log4j.Logger;
  * @author asi
  */
 public class DatabaseHandler {
-    
+
     private static String url;
     private static final Logger LOG = LogManager.getLogger(DatabaseHandler.class);
-    
+
     public static boolean dropDatabase(String fileName) {
         // delete database file - that is drop database in SQLite
-        File myObj = new File(fileName); 
+        File myObj = new File(fileName);
         return myObj.delete();
     }
 
@@ -38,7 +38,7 @@ public class DatabaseHandler {
         // SQLite connection string
         url = "jdbc:sqlite:" + fileName;
 
-        try ( Connection conn = DriverManager.getConnection(url)) {
+        try (Connection conn = DriverManager.getConnection(url)) {
             if (conn != null) {
                 DatabaseMetaData meta = conn.getMetaData();
                 LOG.info("The driver name is " + meta.getDriverName());
@@ -50,8 +50,7 @@ public class DatabaseHandler {
     }
 
     private static void createNew(String sql) throws SQLException {
-        try ( Connection conn = DriverManager.getConnection(url);  
-              Statement stmt = conn.createStatement()) {
+        try (Connection conn = DriverManager.getConnection(url); Statement stmt = conn.createStatement()) {
             stmt.execute(sql);
         }
     }
@@ -173,11 +172,10 @@ public class DatabaseHandler {
               """;
         createNew(sql);
     }
-    
+
     public static void insertContent(String table, List<String> rows) throws SQLException {
         String sql;
-        try ( Connection conn = DriverManager.getConnection(url);
-              Statement stmt = conn.createStatement()) {
+        try (Connection conn = DriverManager.getConnection(url); Statement stmt = conn.createStatement()) {
             conn.setAutoCommit(false);
             for (String r : rows) {
                 sql = "INSERT INTO " + table + " VALUES (" + r + ")";
@@ -186,30 +184,30 @@ public class DatabaseHandler {
             conn.commit();
         }
     }
-    
+
     private static String clause(String clauseType, String separator, Properties p) {
         String ret = "";
         List<String> lc = new LinkedList<>();
         List<String> lv = new LinkedList<>();
         Set<String> s = p.stringPropertyNames();
-        for (String i:s) {
+        for (String i : s) {
             if (i.startsWith(clauseType)) {
                 lc.add(i.substring(clauseType.length()));
                 lv.add(p.getProperty(i));
             }
         }
-        for (int i=0; i<lc.size()-1; i++) {
+        for (int i = 0; i < lc.size() - 1; i++) {
             ret += lc.get(i) + "=" + lv.get(i) + separator;
         }
-        ret += lc.get(lc.size()-1) + "=" + lv.get(lc.size()-1);
+        ret += lc.get(lc.size() - 1) + "=" + lv.get(lc.size() - 1);
         return ret;
-        
+
     }
-    
+
     private static String setClause(Properties p) {
         return clause("COLUMN:", ", ", p);
     }
-    
+
     private static String whereClause(Properties p) {
         return clause("PRIMARY:", " AND ", p);
 
@@ -217,22 +215,20 @@ public class DatabaseHandler {
 
     public static void updateContent(String table, List<Properties> rows) throws SQLException {
         String sql;
-        try ( Connection conn = DriverManager.getConnection(url);  
-              Statement stmt = conn.createStatement()) {
+        try (Connection conn = DriverManager.getConnection(url); Statement stmt = conn.createStatement()) {
             conn.setAutoCommit(false);
             String setClause, whereClause;
-            for (Properties prop:rows) {                
+            for (Properties prop : rows) {
                 setClause = setClause(prop);
                 whereClause = whereClause(prop);
-                sql = "UPDATE " + table + 
-                      " SET " + setClause + 
-                      " WHERE " + whereClause + ";";
+                sql = "UPDATE " + table
+                        + " SET " + setClause
+                        + " WHERE " + whereClause + ";";
                 stmt.execute(sql);
             }
             conn.commit();
         }
     }
-    
 
     public static void updateDcels(int grp) throws SQLException {
         String sql1 = """
@@ -247,7 +243,7 @@ public class DatabaseHandler {
                       \t     (((ly.endpoint = py.id) AND (ly.grp = py.grp) AND
                       \t       (round(px.x,6) = round(py.x,6)) AND (round(px.y,6) = round(py.y,6))) OR
                       \t      ((ly.beginpoint = py.id) AND (ly.grp = py.grp) AND
-                      \t       (round(px.x,6) = round(py.x,6)) AND (round(px.y,6) = round(py.y,6))));""";      
+                      \t       (round(px.x,6) = round(py.x,6)) AND (round(px.y,6) = round(py.y,6))));""";
         String sql2 = """
                       SELECT dx.edge, dy.edge
                       FROM dcels dx, dcels dy, linesegments lx, linesegments ly, points px, points py
@@ -260,11 +256,9 @@ public class DatabaseHandler {
                       \t     (((ly.endpoint = py.id) AND (ly.grp = py.grp) AND
                       \t       (round(px.x,6) = round(py.x,6)) AND (round(px.y,6) = round(py.y,6))) OR
                       \t      ((ly.beginpoint = py.id) AND (ly.grp = py.grp) AND
-                      \t       (round(px.x,6) = round(py.x,6)) AND (round(px.y,6) = round(py.y,6))));""";      
+                      \t       (round(px.x,6) = round(py.x,6)) AND (round(px.y,6) = round(py.y,6))));""";
         List<Properties> rows = new LinkedList<>();
-        try ( Connection conn = DriverManager.getConnection(url);  
-              PreparedStatement pstmt1 = conn.prepareStatement(sql1);
-              PreparedStatement pstmt2 = conn.prepareStatement(sql2)) {
+        try (Connection conn = DriverManager.getConnection(url); PreparedStatement pstmt1 = conn.prepareStatement(sql1); PreparedStatement pstmt2 = conn.prepareStatement(sql2)) {
             pstmt1.setInt(1, grp);
             ResultSet rs1 = pstmt1.executeQuery();
             while (rs1.next()) {
@@ -274,7 +268,7 @@ public class DatabaseHandler {
                 row.setProperty("COLUMN:bp_ref", "" + yid);
                 row.setProperty("PRIMARY:edge", "" + xid);
                 rows.add(row);
-            }            
+            }
             pstmt2.setInt(1, grp);
             ResultSet rs2 = pstmt2.executeQuery();
             while (rs2.next()) {
@@ -290,48 +284,48 @@ public class DatabaseHandler {
         }
         DatabaseHandler.updateContent("dcels", rows);
     }
-    
+
     public static void storeDcels(int grp, List<DCELNode> ldn, List<Properties> r) throws SQLException {
         int pId = DatabaseHandler.getLargestPointId(grp);
         int lId = DatabaseHandler.getLargestLinesegmentId(grp);
         String ibp = "null";
         String iep = "null";
         String imp, idp;
-        try ( Connection conn = DriverManager.getConnection(url)) {
+        try (Connection conn = DriverManager.getConnection(url)) {
             conn.setAutoCommit(false);
             Statement stmt = conn.createStatement();
-            String sql,row;
+            String sql, row;
             Line ls;
             int ifl, ifr;
             Point bp, ep;
-            for (DCELNode n:ldn) {
+            for (DCELNode n : ldn) {
                 ls = n.getLineSegment();
                 ifl = DatabaseHandler.getIndexFromPoint(n.f_l, grp);
                 ifr = DatabaseHandler.getIndexFromPoint(n.f_r, grp);
-                if (ls.getBeginP() != null) {
-                    bp = new Point(ls.getBeginP().x(), ls.getBeginP().y());
-                    row = "" + pId + ", " + grp + ", " + bp.x() +", " + bp.y();
+                if (ls.getBeginP().isPresent()) {
+                    bp = new Point(ls.getBeginP().get().x(), ls.getBeginP().get().y());
+                    row = "" + pId + ", " + grp + ", " + bp.x() + ", " + bp.y();
                     sql = "INSERT INTO points VALUES (" + row + ");";
                     stmt.execute(sql);
                     ibp = "" + pId;
-                    pId++;                        
+                    pId++;
                 }
-                if (ls.getEndP() != null) {
-                    ep = new Point(ls.getEndP().x(), ls.getEndP().y());
-                    row = "" + pId + ", " + grp + ", " + ep.x() +", " + ep.y();
+                if (ls.getEndP().isPresent()) {
+                    ep = new Point(ls.getEndP().get().x(), ls.getEndP().get().y());
+                    row = "" + pId + ", " + grp + ", " + ep.x() + ", " + ep.y();
                     sql = "INSERT INTO points VALUES (" + row + ");";
                     stmt.execute(sql);
                     iep = "" + pId;
                     pId++;
                 }
-                Point mp = new Point(ls.getMidP().x(),ls.getMidP().y());
+                Point mp = new Point(ls.getMidP().x(), ls.getMidP().y());
                 row = "" + pId + ", " + grp + ", " + mp.x() + ", " + mp.y();
                 sql = "INSERT INTO points VALUES (" + row + ");";
                 stmt.execute(sql);
                 imp = "" + pId;
                 pId++;
-                Point dp = new Point(ls.getDir().x(),ls.getDir().y());
-                row = "" + pId + ", " + grp + ", " + dp.x() +", " + dp.y();
+                Point dp = new Point(ls.getDir().x(), ls.getDir().y());
+                row = "" + pId + ", " + grp + ", " + dp.x() + ", " + dp.y();
                 sql = "INSERT INTO points VALUES (" + row + ");";
                 stmt.execute(sql);
                 idp = "" + pId;
@@ -350,16 +344,15 @@ public class DatabaseHandler {
             conn.commit();
         }
     }
-    
-    public static Map<Integer,Point> getPointsByGroup(int grp) {
+
+    public static Map<Integer, Point> getPointsByGroup(int grp) {
         String sql = "SELECT id, x, y FROM points WHERE grp = ?";
 
-        try ( Connection conn = DriverManager.getConnection(url);  
-              PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DriverManager.getConnection(url); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             // set the value
             pstmt.setInt(1, grp);
             ResultSet rs = pstmt.executeQuery();
-            Map<Integer,Point> mp = new HashMap<>();
+            Map<Integer, Point> mp = new HashMap<>();
             while (rs.next()) {
                 int id = rs.getInt("id");
                 double x = rs.getDouble("x");
@@ -373,15 +366,14 @@ public class DatabaseHandler {
             return null;
         }
     }
-    
+
     public static int getIndexFromPoint(Point p, int grp) {
         String sql = """
                      SELECT id FROM points
                      WHERE ( ( (ABS(x - ?) < 1e-11) AND (ABS(y - ?) < 1e-11) ) AND (grp = ?) ) 
                      """;
 
-        try ( Connection conn = DriverManager.getConnection(url);  
-              PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DriverManager.getConnection(url); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             // set the value
             pstmt.setDouble(1, p.x());
             pstmt.setDouble(2, p.y());
@@ -393,7 +385,7 @@ public class DatabaseHandler {
             return -1;
         }
     }
-    
+
     public static int getIndexOfBinarytTreeRoot(int grp) {
         String sql = """
                      SELECT point FROM binaryTrees WHERE grp = ? AND point not in (
@@ -401,9 +393,8 @@ public class DatabaseHandler {
                        UNION
                        SELECT right FROM binaryTrees WHERE (right is not null)
                      )""";
-        
-        try ( Connection conn = DriverManager.getConnection(url);  
-              PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+        try (Connection conn = DriverManager.getConnection(url); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             // set the value
             pstmt.setInt(1, grp);
             ResultSet rs = pstmt.executeQuery();
@@ -411,10 +402,11 @@ public class DatabaseHandler {
         } catch (SQLException e) {
             LOG.error(e.getMessage());
             return -1;
-        }        
+        }
     }
-    
+
     private static class BinaryTreeNode {
+
         Point p;
         int lft, rgt;
 
@@ -424,20 +416,19 @@ public class DatabaseHandler {
             this.rgt = rgt;
         }
     }
-    
+
     public static List<Integer> getIndexFromBinaryTree(int grp) {
         List<Integer> li = new LinkedList<>();
         String sql = """
                      SELECT point 
                      FROM binaryTrees 
                      WHERE grp = ?""";
-        
-        try ( Connection conn = DriverManager.getConnection(url);  
-              PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+        try (Connection conn = DriverManager.getConnection(url); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             // set the value
             pstmt.setInt(1, grp);
             ResultSet rs = pstmt.executeQuery();
-            while(rs.next()) {
+            while (rs.next()) {
                 var id = rs.getInt("binaryTrees.point");
                 li.add(id);
             }
@@ -445,45 +436,44 @@ public class DatabaseHandler {
         } catch (SQLException e) {
             LOG.error(e.getMessage());
             return null;
-        }        
+        }
     }
-    
+
     public static BinaryTree getBinaryTreeByGroup(int grp) {
-        Map<Integer,BinaryTreeNode> m = new HashMap<>();
-        Map<Integer,BinaryTree> mbt = new HashMap<>();
+        Map<Integer, BinaryTreeNode> m = new HashMap<>();
+        Map<Integer, BinaryTree> mbt = new HashMap<>();
         String sql = """
                      SELECT binaryTrees.point, binaryTrees.left, binaryTrees.right, points.x, points.y 
                      FROM points, binaryTrees 
                      WHERE (
                             (binaryTrees.grp = ?) AND 
                             (points.id = binaryTrees.point) AND 
-                            (points.grp = binaryTrees.grp))"""; 
-        
-        try ( Connection conn = DriverManager.getConnection(url);  
-              PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                            (points.grp = binaryTrees.grp))""";
+
+        try (Connection conn = DriverManager.getConnection(url); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             // set the value
             pstmt.setInt(1, grp);
             ResultSet rs = pstmt.executeQuery();
             BinaryTreeNode btn;
-            while(rs.next()) {
+            while (rs.next()) {
                 int id = rs.getInt("point");
                 int lft = rs.getInt("left");
                 int rgt = rs.getInt("right");
-                Point p = new Point(rs.getDouble("x"), 
-                                    rs.getDouble("y"));
-                btn = new BinaryTreeNode(p, lft, rgt); 
+                Point p = new Point(rs.getDouble("x"),
+                        rs.getDouble("y"));
+                btn = new BinaryTreeNode(p, lft, rgt);
                 m.put(id, btn);
             }
             int root = DatabaseHandler.getIndexOfBinarytTreeRoot(grp);
             BinaryTree bt;
             Set<Integer> mi = m.keySet();
-            for(Integer i : mi) {
+            for (Integer i : mi) {
                 btn = m.get(i);
                 bt = new BinaryTree(btn.p);
                 mbt.put(i, bt);
-            }    
+            }
             mi = mbt.keySet();
-            for(Integer i : mi) {
+            for (Integer i : mi) {
                 bt = mbt.get(i);
                 btn = m.get(i);
                 bt.setLft(mbt.get(btn.lft));
@@ -494,10 +484,11 @@ public class DatabaseHandler {
         } catch (SQLException e) {
             LOG.error(e.getMessage());
             return null;
-        }        
+        }
     }
 
     private static class ConveksHullNode {
+
         Point p;
         int prv;
 
@@ -506,63 +497,63 @@ public class DatabaseHandler {
             this.prv = prv;
         }
     }
-    
+
     public static ConveksHull getConveksHullByGroup(int grp) {
-        Map<Integer,ConveksHullNode> m = new HashMap<>();
-        Map<Integer,ConveksHull> mch = new HashMap<>();
+        Map<Integer, ConveksHullNode> m = new HashMap<>();
+        Map<Integer, ConveksHull> mch = new HashMap<>();
         String sql = """
                      SELECT conveksHulls.point, conveksHulls.next, conveksHulls.previous, points.x, points.y 
                      FROM points, conveksHulls
                      WHERE ((points.id = conveksHulls.point) AND (points.grp = conveksHulls.grp) 
                            AND (conveksHulls.grp = ?))
                      ORDER BY points.x, points.y ASC""";
-        try ( Connection conn = DriverManager.getConnection(url);  
-              PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DriverManager.getConnection(url); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             // set the value
             pstmt.setInt(1, grp);
             ResultSet rs = pstmt.executeQuery();
             ConveksHullNode chn;
             int first = -1;
-            while(rs.next()) {                
+            while (rs.next()) {
                 int id = rs.getInt("point");
                 if (first < 0) {
                     first = id;
                 }
                 int prev = rs.getInt("previous");
                 int next = rs.getInt("next");
-                Point p = new Point(rs.getDouble("x"), 
-                                    rs.getDouble("y"));
-                chn = new ConveksHullNode(p, prev, next); 
+                Point p = new Point(rs.getDouble("x"),
+                        rs.getDouble("y"));
+                chn = new ConveksHullNode(p, prev, next);
                 m.put(id, chn);
             }
             ConveksHull ch = null;
             ConveksHull head = null;
             Set<Integer> mi = m.keySet();
-            for(Integer i : mi) {
+            for (Integer i : mi) {
                 chn = m.get(i);
                 ch = new ConveksHull(chn.p);
                 mch.put(i, ch);
-            }    
+            }
             mi = mch.keySet();
-            for(Integer i : mi) {
+            for (Integer i : mi) {
                 ch = mch.get(i);
                 if (first == i) {
                     head = ch;
                 }
                 chn = m.get(i);
-                ch.connect(mch.get(chn.prv),ch);
+                ch.connect(mch.get(chn.prv), ch);
             }
             return head;
         } catch (SQLException e) {
             LOG.error(e.getMessage());
             return null;
-        }        
+        }
     }
-    
+
     private static class DcelStruct {
+
         DCELNode dn = new DCELNode();
         int bp_ref, ep_ref;
-        
+
         DcelStruct(double a_b, double a_e, Point mp, Point dir, int bp_ref, int ep_ref, Point f_l, Point f_r) {
             dn.a_b = a_b;
             dn.a_e = a_e;
@@ -574,7 +565,7 @@ public class DatabaseHandler {
             this.ep_ref = ep_ref;
         }
     }
-    
+
     public static DCEL getVoronoiDiagramByGroup(int grp) {
         String sql1 = """
                       SELECT d.edge, d.bp_ref, d.ep_ref, bp.x, bp.y, ep.x, ep.y, mp.x, mp.y, dir.x, dir.y, lp.x, lp.y, rp.x, rp.y
@@ -609,68 +600,65 @@ public class DatabaseHandler {
                             ((dir.id = l.direction) AND (dir.grp = l.grp)) AND
                             ((lp.id = d.f_l) AND (lp.grp = d.grp)) AND
                             ((rp.id = d.f_r) AND (rp.grp = d.grp));""";
-        try ( Connection conn = DriverManager.getConnection(url);  
-              PreparedStatement pstmt1 = conn.prepareStatement(sql1);
-              PreparedStatement pstmt2 = conn.prepareStatement(sql2);
-              PreparedStatement pstmt3 = conn.prepareStatement(sql3)) {
-            Map<Integer,DcelStruct> m = new HashMap<>();
+        try (Connection conn = DriverManager.getConnection(url); PreparedStatement pstmt1 = conn.prepareStatement(sql1); PreparedStatement pstmt2 = conn.prepareStatement(sql2); PreparedStatement pstmt3 = conn.prepareStatement(sql3)) {
+            Map<Integer, DcelStruct> m = new HashMap<>();
             // set the value
             pstmt1.setInt(1, grp);
             ResultSet rs = pstmt1.executeQuery();
             DcelStruct ds;
-            while(rs.next()) {                
+            while (rs.next()) {
                 int id = rs.getInt(1);
                 int bp_ref = rs.getInt(2);
-                Point mp = new Point(rs.getDouble(8), rs.getDouble(9));                    
-                Point dir = new Point(rs.getDouble(10), rs.getDouble(11));                    
+                Point mp = new Point(rs.getDouble(8), rs.getDouble(9));
+                Point dir = new Point(rs.getDouble(10), rs.getDouble(11));
                 Point bp = new Point(rs.getDouble(4), rs.getDouble(5));
-                double a_b = (bp.x() - mp.x())/dir.x();
+                double a_b = (bp.x() - mp.x()) / dir.x();
                 int ep_ref = rs.getInt(3);
-                Point ep = new Point(rs.getDouble(6), rs.getDouble(7));                    
-                double a_e = (ep.x() - mp.x())/dir.x();
+                Point ep = new Point(rs.getDouble(6), rs.getDouble(7));
+                double a_e = (ep.x() - mp.x()) / dir.x();
                 Point f_l = new Point(rs.getDouble(12), rs.getDouble(13));
                 Point f_r = new Point(rs.getDouble(14), rs.getDouble(15));
-                ds = new DcelStruct(a_b, a_e, mp, dir, bp_ref, ep_ref, f_l, f_r); 
+                ds = new DcelStruct(a_b, a_e, mp, dir, bp_ref, ep_ref, f_l, f_r);
                 m.put(id, ds);
             }
             // set the value
             pstmt2.setInt(1, grp);
             rs = pstmt2.executeQuery();
-            while(rs.next()) {                
+            while (rs.next()) {
                 int id = rs.getInt(1);
                 int bp_ref = rs.getInt(2);
-                Point mp = new Point(rs.getDouble(5), rs.getDouble(6));                    
-                Point dir = new Point(rs.getDouble(7), rs.getDouble(8));                    
+                Point mp = new Point(rs.getDouble(5), rs.getDouble(6));
+                Point dir = new Point(rs.getDouble(7), rs.getDouble(8));
                 Point bp = new Point(rs.getDouble(3), rs.getDouble(4));
-                double a_b = (bp.x() - mp.x())/dir.x();
+                double a_b = (bp.x() - mp.x()) / dir.x();
                 Point f_l = new Point(rs.getDouble(9), rs.getDouble(10));
                 Point f_r = new Point(rs.getDouble(11), rs.getDouble(12));
-                ds = new DcelStruct(a_b, 0.0, mp, dir, bp_ref, 0, f_l, f_r); 
+                ds = new DcelStruct(a_b, 0.0, mp, dir, bp_ref, 0, f_l, f_r);
                 m.put(id, ds);
             }
             // set the value
             pstmt3.setInt(1, grp);
             rs = pstmt3.executeQuery();
-            while(rs.next()) {                
+            while (rs.next()) {
                 int id = rs.getInt(1);
                 int ep_ref = rs.getInt(2);
-                Point mp = new Point(rs.getDouble(5), rs.getDouble(6));                    
-                Point dir = new Point(rs.getDouble(7), rs.getDouble(7));                    
+                Point mp = new Point(rs.getDouble(5), rs.getDouble(6));
+                Point dir = new Point(rs.getDouble(7), rs.getDouble(7));
                 Point ep = new Point(rs.getDouble(3), rs.getDouble(4));
-                double a_e = (ep.x() - mp.x())/dir.x();
+                double a_e = (ep.x() - mp.x()) / dir.x();
                 Point f_l = new Point(rs.getDouble(9), rs.getDouble(10));
                 Point f_r = new Point(rs.getDouble(11), rs.getDouble(12));
-                ds = new DcelStruct(0.0, a_e, mp, dir, 0, ep_ref, f_l, f_r); 
+                ds = new DcelStruct(0.0, a_e, mp, dir, 0, ep_ref, f_l, f_r);
                 m.put(id, ds);
             }
             Set<Integer> mi = m.keySet();
             Map<Integer, DCELNode> mdn = new HashMap<>();
-            for(Integer i : mi) {
+            for (Integer i : mi) {
                 ds = m.get(i);
                 DCELNode dn = new DCELNode(ds.dn);
                 mdn.put(i, dn);
-            }    
-            for(Integer i : mi) {
+            }
+            for (Integer i : mi) {
                 ds = m.get(i);
                 DCELNode dn = mdn.get(i);
                 if (ds.bp_ref != 0) {
@@ -679,55 +667,52 @@ public class DatabaseHandler {
                 if (ds.ep_ref != 0) {
                     dn.p_e = new DCEL(mdn.get(ds.ep_ref));
                 }
-            }    
-            DCEL ret = new DCEL(mdn.get(1));            
+            }
+            DCEL ret = new DCEL(mdn.get(1));
             return ret;
         } catch (SQLException e) {
             LOG.error(e.getMessage());
             return null;
         }
     }
-    
+
     public static int getLargestPointId(int grp) throws SQLException {
         String sql = """
                      SELECT id FROM points
                      WHERE (grp = ?)
                      ORDER BY points.id DESC""";
         int ni = -1;
-        try ( Connection conn = DriverManager.getConnection(url);  
-              PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DriverManager.getConnection(url); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             // set the value
             pstmt.setInt(1, grp);
             ResultSet rs = pstmt.executeQuery();
             ni = rs.getInt("id") + 1;
         }
-        return ni;        
+        return ni;
     }
-    
+
     public static int getLargestLinesegmentId(int grp) throws SQLException {
         String sql = """
                      SELECT id FROM linesegments
                      WHERE (grp = ?)
                      ORDER BY linesegments.id DESC""";
         int ni = -1;
-        try ( Connection conn = DriverManager.getConnection(url);  
-              PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DriverManager.getConnection(url); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             // set the value
             pstmt.setInt(1, grp);
             ResultSet rs = pstmt.executeQuery();
             ni = rs.getInt("id") + 1;
         }
-        return ni;        
+        return ni;
     }
-    
+
     private static int insertLinesegment(int grp) throws SQLException {
         String sql = """
                      SELECT id FROM linesegments
                      WHERE (grp = ?)
                      ORDER BY linesegments.id DESC""";
         int ni = -1;
-        try ( Connection conn = DriverManager.getConnection(url);  
-              PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DriverManager.getConnection(url); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             // set the value
             pstmt.setInt(1, grp);
             ResultSet rs = pstmt.executeQuery();
@@ -735,18 +720,18 @@ public class DatabaseHandler {
         } catch (SQLException e) {
             LOG.error(e.getMessage());
             return ni;
-        }        
+        }
         List<String> lni = new LinkedList<>();
         lni.add("" + ni + ", " + grp + ", null, null, null, null");
         DatabaseHandler.insertContent("linesegments", lni);
         return ni;
     }
-    
+
     public static int insertConveksHullLinesegment(int grp) throws SQLException {
         int ni = insertLinesegment(grp);
         List<String> lni = new LinkedList<>();
         lni.add("" + ni + ", " + grp);
         DatabaseHandler.insertContent("conveksHullsAsLinesegments", lni);
-        return ni;            
+        return ni;
     }
 }

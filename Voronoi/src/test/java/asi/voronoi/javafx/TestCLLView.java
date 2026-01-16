@@ -12,14 +12,14 @@ import static org.junit.Assert.*;
  * @author asi
  */
 public class TestCLLView {
-    
+
     public TestCLLView() {
     }
-    
+
     @Before
     public void setUp() {
     }
-    
+
     @After
     public void tearDown() {
     }
@@ -29,7 +29,7 @@ public class TestCLLView {
      */
     @Test
     public void testDisplayCircularLinkedList() {
-        
+
     }
-    
+
 }

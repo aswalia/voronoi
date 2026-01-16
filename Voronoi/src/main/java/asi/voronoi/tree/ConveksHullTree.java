@@ -3,9 +3,10 @@ package asi.voronoi.tree;
 import asi.voronoi.ConveksHull;
 
 public class ConveksHullTree {
+
     private ConveksHull info;
     private ConveksHullTree lft, rgt;
-    
+
     @Override
     public String toString() {
         return "" + info;
@@ -15,7 +16,7 @@ public class ConveksHullTree {
         if (b == null) {
             info = null;
         } else if (b.isLeaf()) {
-            info = new ConveksHull(b.p);  
+            info = new ConveksHull(b.p);
         } else if (b.lft == null) {
             info = new ConveksHull(b.p);
             rgt = new ConveksHullTree();
@@ -36,7 +37,7 @@ public class ConveksHullTree {
             info = info.merge(rgt.info);
         }
     }
-    
+
     public ConveksHull getInfo() {
         return info;
     }

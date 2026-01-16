@@ -1,16 +1,18 @@
 package asi.voronoi;
+
 import java.util.LinkedList;
 
 public class DCEL implements Constant, java.io.Serializable {
+
     DCELNode node;
     Point upLft, downLft, upRgt, downRgt;
 
     public DCEL() {
         node = null;
     }
-    
+
     public DCEL(Point p) {
-        node = new DCELNode(p);        
+        node = new DCELNode(p);
     }
 
     public DCEL(DCEL subVor) {
@@ -24,7 +26,7 @@ public class DCEL implements Constant, java.io.Serializable {
     public DCEL(DCELNode d) {
         node = d;
     }
-    
+
     public DCELNode getNode() {
         return node;
     }
@@ -53,7 +55,7 @@ public class DCEL implements Constant, java.io.Serializable {
             DCEL d = findOuterEdge();
             Point start;
             if (d.node.p_b != null) {
-            // left point
+                // left point
                 start = d.node.f_l;
             } else {
                 start = d.node.f_r;
@@ -68,30 +70,32 @@ public class DCEL implements Constant, java.io.Serializable {
         }
         return ret;
     }
-    
+
     private void support(ConveksHull ch) throws Exception {
-        String methodName = getClass().getName() + " : " + 
-                            new Exception().getStackTrace()[0].getMethodName() + 
-                            " : ";
+        String methodName = getClass().getName() + " : "
+                + new Exception().getStackTrace()[0].getMethodName()
+                + " : ";
         String msg;
         PointPair pp = ch.getUpSupport();
         if (pp == null) {
             msg = "3 points on a line ";
-            throw new Exception(methodName + msg);        
+            throw new Exception(methodName + msg);
         }
-        upLft = pp.getLft(); upRgt = pp.getRgt();
+        upLft = pp.getLft();
+        upRgt = pp.getRgt();
         pp = ch.getDownSupport();
-        downLft = pp.getLft(); downRgt = pp.getRgt();
-        if (upLft.equals(downLft) &&
-            upRgt.equals(downRgt)) {
+        downLft = pp.getLft();
+        downRgt = pp.getRgt();
+        if (upLft.equals(downLft)
+                && upRgt.equals(downRgt)) {
             msg = "4 points on a line ";
-            throw new Exception(methodName + msg + upLft + " " + upRgt);        
-        }         
+            throw new Exception(methodName + msg + upLft + " " + upRgt);
+        }
     }
-    
+
     private void setSupportPoints(Point p) throws Exception {
         ConveksHull c = vor2CH();
-        c.merge(p);     
+        c.merge(p);
         support(c);
     }
 
@@ -101,22 +105,26 @@ public class DCEL implements Constant, java.io.Serializable {
         ch1.merge(ch2);
         support(ch1);
     }
-    
+
     private boolean sizeIsOne() {
         return node.f_l.equals(node.f_r);
     }
-    
+
     public DCEL merge(Point p) throws Exception {
         // check if DCEL consists of one point
         if (sizeIsOne()) {
             if (node.f_l.isLess(p)) {
-                return new DCEL(node.f_l,p);
+                return new DCEL(node.f_l, p);
             } else {
                 return new DCEL(p, node.f_l);
             }
         } else {
             // build initial and final edge of DCEL
-            setSupportPoints(p);                
+            setSupportPoints(p);
+
+// I begge setSupportPoints(...) EFTER support(...):
+            asi.voronoi.anim.VoronoiEvents.fireMergeStart(upLft, upRgt, downLft, downRgt);
+
             DCEL lftNext, rgtNext;
             DCEL current = new DCEL(upLft, upRgt);
             DCEL ret = current;
@@ -133,7 +141,8 @@ public class DCEL implements Constant, java.io.Serializable {
                     next = current.findNextEdge(lftNext, null);
                     lftPoint = next.otherPoint(lftPoint);
                     tmp = current;
-                    current = (new DCEL(lftPoint, rgtPoint)).createSigmaChain(current, next);
+                    DCEL tmpNew = new DCEL(lftPoint, rgtPoint);
+                    current = tmpNew.createSigmaChain(current, next);
                     mergeList.addLast(new DCELPair(tmp, next, current));
                 } while (!lftPoint.equals(downLft));
             } else { // p is to the left of current vor diagram
@@ -144,7 +153,8 @@ public class DCEL implements Constant, java.io.Serializable {
                     next = current.findNextEdge(null, rgtNext);
                     rgtPoint = next.otherPoint(rgtPoint);
                     tmp = current;
-                    current = (new DCEL(lftPoint, rgtPoint)).createSigmaChain(current, next);
+                    DCEL tmpNew = new DCEL(lftPoint, rgtPoint);
+                    current = tmpNew.createSigmaChain(current, next);
                     mergeList.addLast(new DCELPair(tmp, next, current));
                 } while (!rgtPoint.equals(downRgt));
             }
@@ -152,20 +162,28 @@ public class DCEL implements Constant, java.io.Serializable {
                 listElem = (DCELPair) mergeList.removeFirst();
                 listElem.nextElem.adjustSigmaChain(listElem.currentElem, listElem.cutBy);
             } while (!mergeList.isEmpty());
+
+// I slutningen af begge merge(...) – før return:
+            fireSnapshot();
+
             return ret;
         }
     }
 
     public DCEL merge(DCEL subVor) throws Exception {
         if (sizeIsOne()) {
-        // DCEL consists of one point
+            // DCEL consists of one point
             return subVor.merge(node.f_l);
         } else if (subVor.sizeIsOne()) {
-        // subVor-DCEL consists of one point
+            // subVor-DCEL consists of one point
             return merge(subVor.node.f_l);
         } else {
             // build initial and final edge of DCEL
             setSupportPoints(subVor);
+
+// I begge setSupportPoints(...) EFTER support(...):
+            asi.voronoi.anim.VoronoiEvents.fireMergeStart(upLft, upRgt, downLft, downRgt);
+
             DCEL lftNext, rgtNext;
             Point lftPoint = upLft, rgtPoint = upRgt;
             DCEL next, tmp;
@@ -195,13 +213,18 @@ public class DCEL implements Constant, java.io.Serializable {
                     rgtNext = rgtNext.initEdge(rgtPoint, false);
                 }
                 tmp = current;
-                current = (new DCEL(lftPoint, rgtPoint)).createSigmaChain(current, next);
+                DCEL tmpNew = new DCEL(lftPoint, rgtPoint);
+                current = tmpNew.createSigmaChain(current, next);
                 mergeList.addLast(new DCELPair(tmp, next, current));
             } while (!lftPoint.equals(downLft) || !rgtPoint.equals(downRgt));
             do {
                 listElem = (DCELPair) mergeList.removeFirst();
                 listElem.nextElem.adjustSigmaChain(listElem.currentElem, listElem.cutBy);
             } while (!mergeList.isEmpty());
+
+// I slutningen af begge merge(...) – før return:
+            fireSnapshot();
+
             return ret;
         }
     }
@@ -245,7 +268,8 @@ public class DCEL implements Constant, java.io.Serializable {
         DCEL ret = null;
         e = node.edgeType();
         switch (e) {
-            case ENDLESS -> ret = this;
+            case ENDLESS ->
+                ret = this;
             case SEMI -> {
                 if (node.p_b != null) {
                     ret = node.p_b;
@@ -269,7 +293,8 @@ public class DCEL implements Constant, java.io.Serializable {
         DCEL ret = null;
         e = node.edgeType();
         switch (e) {
-            case ENDLESS -> ret = this;
+            case ENDLESS ->
+                ret = this;
             case SEMI -> {
                 if (node.p_b != null) {
                     ret = node.p_b.positivDir(p);
@@ -296,7 +321,8 @@ public class DCEL implements Constant, java.io.Serializable {
         l = next.node.cutPoint(node);
         if (!l.equals(ZERO)) {
             switch (next.node.edgeType()) {
-                case ENDLESS -> nCut = true;
+                case ENDLESS ->
+                    nCut = true;
                 case SEMI -> {
                     if (next.node.p_b != null) {
                         is4Point = next.node.a_b == l.x();
@@ -312,7 +338,8 @@ public class DCEL implements Constant, java.io.Serializable {
                 }
             }
             switch (node.edgeType()) {
-                case ENDLESS -> cCut = true;
+                case ENDLESS ->
+                    cCut = true;
                 case SEMI -> {
                     is4Point &= l.y() < node.a_e;
                     cCut = l.y() < node.a_e;
@@ -338,6 +365,9 @@ public class DCEL implements Constant, java.io.Serializable {
         node.a_e = p.y();
         edge1.node.p_b = this;
         node.p_e = edge1;
+
+// I createSigmaChain(...) – tilføj til sidst:
+        fireSnapshot();
         return this;
     }
 
@@ -369,6 +399,9 @@ public class DCEL implements Constant, java.io.Serializable {
             node.p_e = edge2;
             edge2.node.p_b = edge1;
         }
+
+// I adjustSigmaChain(...) – tilføj til sidst:
+        fireSnapshot();
         return this;
     }
 
@@ -401,16 +434,16 @@ public class DCEL implements Constant, java.io.Serializable {
         }
         return ret;
     }
-    
+
     private DCEL findNextEdge(DCEL lftEdge, DCEL rgtEdge) throws Exception {
         short lftCut = NO, rgtCut = NO;
         double lftCutPoint, rgtCutPoint;
         Point l, r;
         Point ll, rr;
         DCEL ret = this;
-        String methodName = getClass().getName() + " : " + 
-                            new Exception().getStackTrace()[0].getMethodName() + 
-                            " : ";
+        String methodName = getClass().getName() + " : "
+                + new Exception().getStackTrace()[0].getMethodName()
+                + " : ";
         String msg;
         if ((lftEdge != null) && (rgtEdge != null)) {
             ll = lftEdge.node.f_l.equals(node.f_l) ? lftEdge.node.f_r : lftEdge.node.f_l;
@@ -425,9 +458,9 @@ public class DCEL implements Constant, java.io.Serializable {
                     || ((rgtCut == FOURPOINTS) && (lftCut == YES) && (rgtCutPoint >= lftCutPoint))
                     || ((lftCut == FOURPOINTS) && (rgtCut != YES))
                     || ((rgtCut == FOURPOINTS) && (lftCut != YES))) {
-                msg = "4 points co-circular ";                
-                throw new Exception(methodName + msg + 
-                                    node.f_l + " " + node.f_r + " " + ll + " " + rr);        
+                msg = "4 points co-circular ";
+                throw new Exception(methodName + msg
+                        + node.f_l + " " + node.f_r + " " + ll + " " + rr);
             }
             if ((lftCut == YES) && (rgtCut == YES)) {
                 if (lftCutPoint > rgtCutPoint) {
@@ -435,51 +468,51 @@ public class DCEL implements Constant, java.io.Serializable {
                 } else if (rgtCutPoint > lftCutPoint) {
                     ret = rgtEdge;
                 } else {
-                msg = "Left and Right meet with current ";                
-                throw new Exception(methodName + msg + 
-                                    node.f_l + " " + node.f_r + " " + ll + " " + rr);        
+                    msg = "Left and Right meet with current ";
+                    throw new Exception(methodName + msg
+                            + node.f_l + " " + node.f_r + " " + ll + " " + rr);
                 }
             } else if (lftCut == YES) {
                 ret = lftEdge;
             } else if (rgtCut == YES) {
                 ret = rgtEdge;
             } else {
-                msg = "No next edge ";                
-                throw new Exception(methodName + msg + 
-                                    node.f_l + " " + node.f_r + " " + ll + " " + rr);        
+                msg = "No next edge ";
+                throw new Exception(methodName + msg
+                        + node.f_l + " " + node.f_r + " " + ll + " " + rr);
             }
         } else if (lftEdge != null) {
-                ll = lftEdge.node.f_l.equals(node.f_l) ? lftEdge.node.f_r : lftEdge.node.f_l;
+            ll = lftEdge.node.f_l.equals(node.f_l) ? lftEdge.node.f_r : lftEdge.node.f_l;
             lftCut = testCut(lftEdge);
             if (lftCut == PARALLEL) {
-                msg = "3 or 4 points on a line ";                
-                throw new Exception(methodName + msg + 
-                                    node.f_l + " " + node.f_r + " " + ll);        
+                msg = "3 or 4 points on a line ";
+                throw new Exception(methodName + msg
+                        + node.f_l + " " + node.f_r + " " + ll);
             }
             if (lftCut == FOURPOINTS) {
-                msg = "4 points co-circular ";                
-                throw new Exception(methodName + msg + 
-                                    node.f_l + " " + node.f_r + " " + ll);        
+                msg = "4 points co-circular ";
+                throw new Exception(methodName + msg
+                        + node.f_l + " " + node.f_r + " " + ll);
             }
             ret = lftEdge;
         } else if (rgtEdge != null) {
-                rr = rgtEdge.node.f_l.equals(node.f_r) ? rgtEdge.node.f_r : rgtEdge.node.f_l;
+            rr = rgtEdge.node.f_l.equals(node.f_r) ? rgtEdge.node.f_r : rgtEdge.node.f_l;
             rgtCut = testCut(rgtEdge);
             if (rgtCut == PARALLEL) {
-                msg = "3 or 4 points on a line ";                
-                throw new Exception(methodName + msg + 
-                                    node.f_l + " " + node.f_r + " " + rr);        
+                msg = "3 or 4 points on a line ";
+                throw new Exception(methodName + msg
+                        + node.f_l + " " + node.f_r + " " + rr);
             }
             if (rgtCut == FOURPOINTS) {
-                msg = "4 points co-circular ";                
-                throw new Exception(methodName + msg + 
-                                    node.f_l + " " + node.f_r + " " + rr);        
+                msg = "4 points co-circular ";
+                throw new Exception(methodName + msg
+                        + node.f_l + " " + node.f_r + " " + rr);
             }
             ret = rgtEdge;
         } else {
-                msg = "Both sets are null ";                
-                throw new Exception(methodName + msg + 
-                                    node.f_l + " " + node.f_r);        
+            msg = "Both sets are null ";
+            throw new Exception(methodName + msg
+                    + node.f_l + " " + node.f_r);
         }
         return ret;
     }
@@ -513,4 +546,16 @@ public class DCEL implements Constant, java.io.Serializable {
         }
         return ret;
     }
+
+    private void fireSnapshot() {
+        if (node == null) {
+            return;
+        }
+        java.util.List<asi.voronoi.Line> lines = new java.util.LinkedList<>();
+        for (DCELNode n : node.getVoronoiEdgeList()) {
+            lines.add(n.getLineSegment());
+        }
+        asi.voronoi.anim.VoronoiEvents.fireSnapshot(lines);
+    }
+
 }

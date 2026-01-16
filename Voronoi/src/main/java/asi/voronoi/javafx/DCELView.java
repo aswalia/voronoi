@@ -18,77 +18,76 @@ public class DCELView extends Pane {
 
     DCELView(DCELNode dn) {
         List<asi.voronoi.Line> el = new LinkedList<>();
-        for (DCELNode ls:dn.getVoronoiEdgeList()) {
+        for (DCELNode ls : dn.getVoronoiEdgeList()) {
             asi.voronoi.Line l = ls.getLineSegment();
             if (ls.getP_b() == null) {
                 // bp = ep - (len(f_l,f_r))
-                l.setBeginP(l.getEndP().add(Point.transpose(ls.getF_l(),ls.getF_r()).negate()));
+                l.setBeginP(l.getEndP().get().add(Point.transpose(ls.getF_l(), ls.getF_r()).negate()));
                 el.add(l);
             }
             if (ls.getP_e() == null) {
                 // ep = bp + (len(f_l,f_r))
-                l.setEndP(l.getBeginP().add(Point.transpose(ls.getF_l(),ls.getF_r())));
+                l.setEndP(l.getBeginP().get().add(Point.transpose(ls.getF_l(), ls.getF_r())));
                 el.add(l);
             }
             ll.add(l);
         }
         xMax = yMax = Double.NEGATIVE_INFINITY;
         xMin = yMin = Double.POSITIVE_INFINITY;
-        for (asi.voronoi.Line l:el) {
-            if (xMin > l.getBeginP().x()) {
-                xMin = l.getBeginP().x();
+        for (asi.voronoi.Line l : el) {
+            if (xMin > l.getBeginP().get().x()) {
+                xMin = l.getBeginP().get().x();
             }
-            if (xMin > l.getEndP().x()) {
-                xMin = l.getEndP().x();
+            if (xMin > l.getEndP().get().x()) {
+                xMin = l.getEndP().get().x();
             }
-            if (yMin > l.getBeginP().y()) {
-                yMin = l.getBeginP().y();
+            if (yMin > l.getBeginP().get().y()) {
+                yMin = l.getBeginP().get().y();
             }
-            if (yMin > l.getEndP().y()) {
-                yMin = l.getEndP().y();
+            if (yMin > l.getEndP().get().y()) {
+                yMin = l.getEndP().get().y();
             }
-            if (xMax < l.getBeginP().x()) {
-                xMax = l.getBeginP().x();
+            if (xMax < l.getBeginP().get().x()) {
+                xMax = l.getBeginP().get().x();
             }
-            if (xMax < l.getEndP().x()) {
-                xMax = l.getEndP().x();
+            if (xMax < l.getEndP().get().x()) {
+                xMax = l.getEndP().get().x();
             }
-            if (yMax < l.getBeginP().y()) {
-                yMax = l.getBeginP().y();
+            if (yMax < l.getBeginP().get().y()) {
+                yMax = l.getBeginP().get().y();
             }
-            if (yMax < l.getEndP().y()) {
-                yMax = l.getEndP().y();
+            if (yMax < l.getEndP().get().y()) {
+                yMax = l.getEndP().get().y();
             }
         }
     }
-    
+
     private void setView() {
-        wM =  0.95 * getWidth();
-        hM =  0.95 * getHeight();
+        wM = 0.95 * getWidth();
+        hM = 0.95 * getHeight();
         fx = wM / (xMax - xMin);
         fy = hM / (yMax - yMin);
     }
-    
+
     public void displayDcelList() {
         this.getChildren().clear(); // Clear the pane        
         // Display list
         setView();
-        for (asi.voronoi.Line l:ll) {
+        for (asi.voronoi.Line l : ll) {
             displayLine(l);
         }
     }
-    
+
     private void displayLine(asi.voronoi.Line l) {
-        
-        double bx = fx * (l.getBeginP().x() - xMin);
-        double by = hM - fy * (l.getBeginP().y() - yMin);       
-        double ex = fx * (l.getEndP().x() - xMin);
-        double ey = hM - fy * (l.getEndP().y() - yMin);
-        
+
+        double bx = fx * (l.getBeginP().get().x() - xMin);
+        double by = hM - fy * (l.getBeginP().get().y() - yMin);
+        double ex = fx * (l.getEndP().get().x() - xMin);
+        double ey = hM - fy * (l.getEndP().get().y() - yMin);
+
         Line dl;
         dl = new Line(bx, by, ex, ey);
-        getChildren().add(dl);     
+        getChildren().add(dl);
     }
-    
-}
 
+}

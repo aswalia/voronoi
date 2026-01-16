@@ -15,19 +15,20 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class BinaryTree implements java.io.Serializable, ModelObject {
+
     private static final Logger LOG = LogManager.getLogger(BinaryTree.class);
     private static BufferedReader br;
     protected BinaryTree lft, rgt;
     protected Point p;
-    
+
     public BinaryTree() {
-        
+
     }
-    
+
     public BinaryTree(Point p) {
         this.p = p;
         lft = rgt = null;
-        LOG.debug("Construct: "+p);
+        LOG.debug("Construct: " + p);
     }
 
     public BinaryTree buildBinaryTree(File file) throws IOException {
@@ -51,7 +52,7 @@ public class BinaryTree implements java.io.Serializable, ModelObject {
     public void setLft(BinaryTree l) {
         lft = l;
     }
-    
+
     public BinaryTree lft() {
         return lft;
     }
@@ -59,11 +60,11 @@ public class BinaryTree implements java.io.Serializable, ModelObject {
     public void setRgt(BinaryTree r) {
         rgt = r;
     }
-    
+
     public BinaryTree rgt() {
         return rgt;
     }
-    
+
     public BinaryTree findNode(Point t) {
         BinaryTree ret = this;
         if (p.equals(t)) {
@@ -82,21 +83,21 @@ public class BinaryTree implements java.io.Serializable, ModelObject {
 
     public BinaryTree insertNode(Point t) {
         // non recursive insert
-         if (inTree(t)) {
-             LOG.debug("Already exists"+p);
+        if (inTree(t)) {
+            LOG.debug("Already exists" + p);
             // already in tree
             return this;
-        } 
+        }
         BinaryTree root, tmp;
-        root = tmp = this; 
-        while (((tmp.lft != null) && t.isLess(tmp.p)) ||
-               ((tmp.rgt != null) && tmp.p.isLess(t))) {
+        root = tmp = this;
+        while (((tmp.lft != null) && t.isLess(tmp.p))
+                || ((tmp.rgt != null) && tmp.p.isLess(t))) {
             if (tmp.p.isLess(t)) {
                 tmp = tmp.rgt;
             } else {
                 tmp = tmp.lft;
             }
-        }    
+        }
         // insert the new node and adjust subtree
         addNode(t, tmp);
         return root;
@@ -109,18 +110,16 @@ public class BinaryTree implements java.io.Serializable, ModelObject {
         } else {
             tmp.lft = t1;
         }
-        LOG.debug("Parent: "+tmp+" "+t);
+        LOG.debug("Parent: " + tmp + " " + t);
     }
 
     protected int height(BinaryTree b) {
         if (b == null) {
             return 0;
         } else {
-            return Math.max(height(b.lft),height(b.rgt))+1;
+            return Math.max(height(b.lft), height(b.rgt)) + 1;
         }
     }
-    
-
 
     public Point max() {
         Point ret;
@@ -192,6 +191,7 @@ public class BinaryTree implements java.io.Serializable, ModelObject {
     private static LinkedList<PointElem> pList;
 
     private static class PointElem<T> {
+
         T b;
         int level;
 
@@ -226,12 +226,12 @@ public class BinaryTree implements java.io.Serializable, ModelObject {
                 ret += "N";
             } else if (!pe.b.isLeaf()) {
                 level++;
-                LOG.debug("Node: "+level);
+                LOG.debug("Node: " + level);
                 ret += pe.b.p.toString();
                 pList.add(new PointElem(pe.b.lft, level));
                 pList.add(new PointElem(pe.b.rgt, level));
             } else {
-                LOG.debug("Leaf: "+level);
+                LOG.debug("Leaf: " + level);
                 ret += "[" + pe.b.p + "]";
             }
             ret += eol;
@@ -253,11 +253,11 @@ public class BinaryTree implements java.io.Serializable, ModelObject {
         }
         return ret;
     }
-    
+
     public static BinaryTree fetch(String filename) throws java.io.IOException, ClassNotFoundException {
         return (BinaryTree) Serializer.fetch(filename);
     }
-    
+
     public void store(int grp, List<String> rows) {
         // save BinaryTree as a list of strings
         // each item representing a row in the
@@ -269,11 +269,11 @@ public class BinaryTree implements java.io.Serializable, ModelObject {
         String right = null;
         if (lft != null) {
             index = DatabaseHandler.getIndexFromPoint(lft.p, grp);
-            left = "" + index;            
+            left = "" + index;
         }
         if (rgt != null) {
             index = DatabaseHandler.getIndexFromPoint(rgt.p, grp);
-            right = "" + index;                        
+            right = "" + index;
         }
         String row = point + " , " + group + " , " + left + " , " + right;
         rows.add(row);
@@ -284,7 +284,7 @@ public class BinaryTree implements java.io.Serializable, ModelObject {
             rgt.store(grp, rows);
         }
     }
-    
+
     public BinaryTree buildTreeFromDatabase(int grp) {
         return DatabaseHandler.getBinaryTreeByGroup(grp);
     }
@@ -292,7 +292,7 @@ public class BinaryTree implements java.io.Serializable, ModelObject {
     private Point parsePoint(String s) {
         String delim = """
                         :(),\t
-                       \r\f""";        
+                       \r\f""";
         String iToken;
         StringTokenizer st = new StringTokenizer(s, delim);
         double x, y;
@@ -303,11 +303,11 @@ public class BinaryTree implements java.io.Serializable, ModelObject {
 
         return new Point(x, y);
     }
-    
+
     private BinaryTree buildTreeFromFile() throws IOException {
         String s = br.readLine();
         BinaryTree ret = newNode(parsePoint(s));
-        while ((s = br.readLine())!=null) {
+        while ((s = br.readLine()) != null) {
             ret = ret.insertNode(parsePoint(s));
         }
         return ret;
