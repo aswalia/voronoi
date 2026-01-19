@@ -18,11 +18,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.IntConsumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 // JavaFX
 import javafx.application.Application;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -59,6 +60,9 @@ public class Main extends Application {
     private Slider speedSlider;
     private Label speedLabel;
 
+    private static ToolBar statusBar;
+    private static final StringProperty frameStatus = new SimpleStringProperty();
+
 // I klassens felter (sammen med de andre knapper):
     private Button btnZoomIn, btnZoomOut, btnReset, btnFit;
     private Label zoomLabel;
@@ -71,9 +75,6 @@ public class Main extends Application {
     private Button btnFinishDraw, btnUndoDraw, btnClearDraw, btnCancelDraw;
     private Label drawCountLabel;
     
-    private HBox statusBar;
-    private Label statusLabel;
-
 // Menu
     private MenuItem addPointsMenuItem;
 
@@ -113,12 +114,11 @@ public class Main extends Application {
                 }
                 sb.delete(0, sb.length());
                 sb.append(selectedFile.getParent());
-                System.out.println("In read from file");
+//                System.out.println("In read from file");
                 tree = Util.bTreeFromPointSet(selectedFile);
                 initialize(); // bygger CH + VD som før
             } catch (Exception ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-                System.out.println("File missing: " + ex.getMessage());
+                showError("Error building Voronoi diagram: ", ex.getMessage());
             }
         });
         points.getItems().add(fromFile);
@@ -142,8 +142,7 @@ public class Main extends Application {
                 );
                 initialize();
             } catch (SQLException ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-                System.out.println("DB missing: " + ex.getMessage());
+                showError("Database error: ", ex.getMessage());
             }
         });
         points.getItems().add(fromDB);
@@ -153,7 +152,7 @@ public class Main extends Application {
         voronoi.getItems().add(animate);
 
         MenuItem export = new MenuItem("Export PNG");
-        export.setOnAction((var e) -> {
+        export.setOnAction((ActionEvent e) -> {
             if (animationView == null) {
                 return;
             }
@@ -167,18 +166,18 @@ public class Main extends Application {
             String prefix = "voronoi_" + ts;
             try {
                 animationView.exportPngs(dir, prefix);
-                showInfo("Eksport OK", "PNG-filer gemt i:\n" + dir.getAbsolutePath());
+                showInfo("Export done", "PNG-fils svaed in:\n" + dir.getAbsolutePath());
             } catch (Exception ex) {
-                ex.printStackTrace();
-                showError("Eksport fejlede", ex.getMessage());
+                showError("Export failed", ex.getMessage());
             }
         });
         voronoi.getItems().add(export);
 
         // --- Toolbar (Play/Pause/Speed/Export) ---
         toolBar = buildToolBar();
-
-        VBox top = new VBox(menuBar, toolBar);
+        statusBar = buildStatusBar();
+        
+        VBox top = new VBox(menuBar, toolBar, statusBar);
         rootPane.setTop(top);
 
         // Scene
@@ -267,6 +266,18 @@ public class Main extends Application {
 
         // Aktiver knapper
         setToolbarEnabled(true);
+    }
+    
+    private ToolBar buildStatusBar() {
+        Label statusText = new Label();
+        statusText.textProperty().bind(frameStatus);
+        
+        ToolBar sb = new ToolBar(
+            statusText
+        );
+        
+        return sb;
+
     }
 
     private ToolBar buildToolBar() {
@@ -412,11 +423,9 @@ public class Main extends Application {
                 new Label("Pos:"), miniCorner,
                 new Label("W:"), miniWSpin, new Label("H:"), miniHSpin,
                 new Separator(),
-                new Label("Speed:"), speedSlider, speedLabel,
-                new Separator()
-        //                new Label("FPS:"), fpsSpinner,
-        //                new Separator(),
+                new Label("Speed:"), speedSlider, speedLabel
         );
+    
         setToolbarEnabled(false);
         return tb;
     }
@@ -782,6 +791,7 @@ public class Main extends Application {
             }
             stop();
             currentIndex = java.lang.Math.min(currentIndex + 1, frames.size() - 1);
+            frameStatus.setValue(frames.get(currentIndex).label);
             redrawCurrent();
         }
 
@@ -791,6 +801,7 @@ public class Main extends Application {
             }
             stop();
             currentIndex = java.lang.Math.max(currentIndex - 1, 0);
+            frameStatus.setValue(frames.get(currentIndex).label);
             redrawCurrent();
         }
 
@@ -1303,6 +1314,8 @@ public class Main extends Application {
                 g.fillOval(sx(s.x()) - 2.5, sy(s.y()) - 2.5, 5, 5);
             }
             g.setGlobalAlpha(1.0);
+            
+            frameStatus.setValue(f.label);
 
             // division: bbox
             if (f.bbox != null) {
