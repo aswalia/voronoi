@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.Stack;
 
 public class DCELNode implements Constant, java.io.Serializable {
+
     private static FileWriter fw;
     private static BufferedWriter bw;
     double a_b, a_e;
@@ -33,15 +34,15 @@ public class DCELNode implements Constant, java.io.Serializable {
     public String toString() {
         return "lft and rgt: " + f_l + " " + f_r + "\n";
     }
-    
+
     public boolean isUsed() {
         return used;
     }
-    
+
     public void used() {
         used = true;
     }
-    
+
     public DCEL getP_b() {
         return p_b;
     }
@@ -49,7 +50,7 @@ public class DCELNode implements Constant, java.io.Serializable {
     public DCEL getP_e() {
         return p_e;
     }
-    
+
     public Point getF_l() {
         return f_l;
     }
@@ -79,8 +80,8 @@ public class DCELNode implements Constant, java.io.Serializable {
         a_e = a_b = 0.0;
         f_l = new Point(p);
         f_r = new Point(p);
-        this.p = new Point(0,0);
-        d = new Point(0,0);
+        this.p = new Point(0, 0);
+        d = new Point(0, 0);
         used = false;
         p_e = p_b = null;
     }
@@ -94,7 +95,7 @@ public class DCELNode implements Constant, java.io.Serializable {
         used = false;
         p_e = p_b = null;
     }
-    
+
     public void vor2file() throws Exception {
         try {
             initFile();
@@ -104,18 +105,18 @@ public class DCELNode implements Constant, java.io.Serializable {
             System.out.println("Failed: " + ioe);
         }
     }
-    
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof DCELNode)) {
             return false;
-        } else if (!(f_l.equals(((DCELNode)o).f_l)) || !(f_r.equals(((DCELNode)o).f_r))) {
+        } else if (!(f_l.equals(((DCELNode) o).f_l)) || !(f_r.equals(((DCELNode) o).f_r))) {
             return false;
-        } else if (!(p.equals(((DCELNode)o).p)) || !(d.equals(((DCELNode)o).d))) {
+        } else if (!(p.equals(((DCELNode) o).p)) || !(d.equals(((DCELNode) o).d))) {
             return false;
         } else {
-            return !((a_e != ((DCELNode)o).a_e) || (a_b != ((DCELNode)o).a_b));
-        }        
+            return !((a_e != ((DCELNode) o).a_e) || (a_b != ((DCELNode) o).a_b));
+        }
     }
 
     @Override
@@ -159,7 +160,7 @@ public class DCELNode implements Constant, java.io.Serializable {
     public String printDCEL() {
         String ret = "";
         List<DCELNode> nodes = getVoronoiEdgeList();
-        for (DCELNode n:nodes) {
+        for (DCELNode n : nodes) {
             ret += n.toString();
         }
         return ret;
@@ -183,7 +184,7 @@ public class DCELNode implements Constant, java.io.Serializable {
         ret.addAll(edgeSet);
         return ret;
     }
-    
+
     public Line getLineSegment() {
         Line ls = new Line();
         ls.setMidP(p);
@@ -197,11 +198,11 @@ public class DCELNode implements Constant, java.io.Serializable {
             ls.setBeginP(Point.coordinat(d, p, a_b));
         } else if (p_e != null) {
             // edge with only an end point
-            ls.setEndP(Point.coordinat(d, p, a_e));                
+            ls.setEndP(Point.coordinat(d, p, a_e));
         } // else an edge with no ends, should only occur one time in the whole diagram
         return ls;
     }
-    
+
     public void storeInDatabase(int grp, List<Properties> r) throws SQLException {
         // save Voronoi Diagram as a list of strings
         // each item representing a row in the

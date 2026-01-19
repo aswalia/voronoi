@@ -13,37 +13,92 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-
 /**
  *
  * @author asi
  */
 public class PointSet {
+
+    // the states defined within the state transition matrix
+    private enum State {
+        beginPoint,
+        beginXCoor,
+        xCoor,
+        xCoorBeginDecimal,
+        beginYCoor,
+        xCoorEndDecimal,
+        yCoor,
+        yCoorBeginDecimal,
+        yCoorEndDecimal,
+        endPoint,
+        e_unexp,
+        e_unkno
+    }
+
+    // the character types expected in parsing PointSet files
+    private enum CharType {
+        ws,
+        lPerentes,
+        plus,
+        minus,
+        digit,
+        komma,
+        rParentes,
+        semicolon,
+        unknown,
+        decimal
+    }
+    /*       0    1   2   3     4     5   6   7    8    9
+       | ws | ( | + | - | digit | , | ) | ; | uk  | . | ws = ' ' | '\t | '\n' |'\r'
+       ------------------------------------------------ digit = '0' | '1' | ... |'9'
+                                                        uk = unknown (any but the defined)
+     0 | 0  | 1 | - | - |   -   | - | - | - |  -  | - |0 = beginPoint     - = <error state>
+     1 | 1  | - | 2 | 2 |   2   | - | - | - |  -  | - |1 = beginXCoor
+     2 | -  | - | - | - |   2   | 4 | - | - |  -  | 3 |2 = xCoor
+     3 | -  | - | - | - |   5   | - | - | - |  -  | - |3 = xCoorBeginDecimal
+     4 | 4  | - | 6 | 6 |   6   | - | - | - |  -  | - |4 = beginYCoor
+     5 | -  | - | - | - |   5   | 4 | - | - |  -  | - |5 = xCoorEndDecimal
+     6 | -  | - | - | - |   6   | - | 9 | - |  -  | 7 |6 = yCoor
+     7 | -  | - | - | - |   8   | - | - | - |  -  | - |7 = yCoorBeginDecimal
+     8 | -  | - | - | - |   8   | - | 9 | - |  -  | - |8 = yCoorEndDecimal
+     9 | -  | - | - | - |   -   | - | - | 0 |  -  | - |9 = endPoint
+     */
+    private static final State[][] STATE_MACHINE = {
+        {State.beginPoint, State.beginXCoor, State.e_unexp, State.e_unexp, State.e_unexp, State.e_unexp, State.e_unexp, State.e_unexp, State.e_unkno, State.e_unexp}, //  beginPoint
+        {State.beginXCoor, State.e_unexp, State.xCoor, State.xCoor, State.xCoor, State.e_unexp, State.e_unexp, State.e_unexp, State.e_unkno, State.e_unexp}, //  beginXCoor
+        {State.e_unexp, State.e_unexp, State.e_unexp, State.e_unexp, State.xCoor, State.beginYCoor, State.e_unexp, State.e_unexp, State.e_unkno, State.xCoorBeginDecimal}, //  xCoor
+        {State.e_unexp, State.e_unexp, State.e_unexp, State.e_unexp, State.xCoorEndDecimal, State.e_unexp, State.e_unexp, State.e_unexp, State.e_unkno, State.e_unexp}, //  xCoorBeginDecimal
+        {State.beginYCoor, State.e_unexp, State.yCoor, State.yCoor, State.yCoor, State.e_unexp, State.e_unexp, State.e_unexp, State.e_unkno, State.e_unexp}, //  beginYCoor
+        {State.e_unexp, State.e_unexp, State.e_unexp, State.e_unexp, State.xCoorEndDecimal, State.beginYCoor, State.e_unexp, State.e_unexp, State.e_unkno, State.e_unexp}, //  xCoorEndDecimal
+        {State.e_unexp, State.e_unexp, State.e_unexp, State.e_unexp, State.yCoor, State.e_unexp, State.endPoint, State.e_unexp, State.e_unkno, State.yCoorBeginDecimal}, //  yCoor
+        {State.e_unexp, State.e_unexp, State.e_unexp, State.e_unexp, State.yCoorEndDecimal, State.e_unexp, State.e_unexp, State.e_unexp, State.e_unkno, State.e_unexp}, //  yCoorNeginDecimal
+        {State.e_unexp, State.e_unexp, State.e_unexp, State.e_unexp, State.yCoorEndDecimal, State.e_unexp, State.endPoint, State.e_unexp, State.e_unkno, State.e_unexp}, //  yCoorEndDecimal
+        {State.e_unexp, State.e_unexp, State.e_unexp, State.e_unexp, State.e_unexp, State.e_unexp, State.e_unexp, State.beginPoint, State.e_unkno, State.e_unexp} //  endPoint
+    };
+
     private BufferedReader br;
-    
-    private final int[][] stateMachine;
-    private int state;
+    private State state;
+    private CharType tokenType;
     private char nextToken;
     private String valueX, valueY;
     private final Set<Point> ps;
-    
+
     public PointSet() {
         ps = new HashSet<>();
-        stateMachine = PointSet.configStateMachine();
-        state = 0;        
+        state = State.beginPoint;
     }
-    
+
     public Set<Point> getPointSet() {
         return ps;
     }
-    
+
     public Set<Point> buildPointSet(File filename) throws Exception {
         FileReader fr;
         fr = new FileReader(filename);
         br = new BufferedReader(fr);
         return parsePointSet();
     }
-    
+
     public static void store(int group, Set<Point> sp) throws SQLException {
         List<String> l = new LinkedList<>();
         int count = 1;
@@ -52,163 +107,112 @@ public class PointSet {
             l.add(r);
             count++;
         }
-        DatabaseHandler.insertContent("points", l);        
+        DatabaseHandler.insertContent("points", l);
     }
 
-    private static int[][] configStateMachine() {
-        /*                 0   1   2   3     4     5   6   7    8    9
-                        | ws | ( | + | - | digit | , | ) | ; | eof | . | ws = ' ' | '\t | '\n' |'\r'
-                        ------------------------------------------------ digit = '0' | '1' | ... |'9'
-                      0 | 0  | 1 | - | - |   -   | - | - | - |  -  | - |
-                      1 | 1  | - | 2 | 2 |   2   | - | - | - |  -  | - |
-                      2 | -  | - | - | - |   2   | 4 | - | - |  -  | 3 |
-                      3 | -  | - | - | - |   5   | - | - | - |  -  | - |
-                      4 | 4  | - | 6 | 6 |   6   | - | - | - |  -  | - |
-                      5 | -  | - | - | - |   5   | 4 | - | - |  -  | - |
-                      6 | -  | - | - | - |   6   | - | 9 | - |  -  | 7 |
-                      7 | -  | - | - | - |   8   | - | - | - |  -  | - |
-                      8 | -  | - | - | - |   8   | - | 9 | - |  -  | - |
-                      9 | -  | - | - | - |   -   | - | - |10 |  -  | - |
-                     10 | 0  | 1 | - | - |   -   | - | - | - | OK  | - |
-        */
-        int[][] sm = {
-                        { 0,   1,  -1, -1, -1,     -1, -1, -1,  -1, -1},  //  0
-                        { 1,  -1,   2,  2,  2,     -1, -1, -1,  -1, -1},  //  1
-                        {-1,  -1,  -1, -1,  2,      4, -1, -1,  -1,  3},  //  2
-                        {-1,  -1,  -1, -1,  5,     -1, -1, -1,  -1, -1},  //  3
-                        { 4,  -1,   6,  6,  6,     -1, -1, -1,  -1, -1},  //  4
-                        {-1,  -1,  -1, -1,  5,      4, -1, -1,  -1, -1},  //  5
-                        {-1,  -1,  -1, -1,  6,     -1,  9, -1,  -1,  7},  //  6
-                        {-1,  -1,  -1, -1,  8,     -1, -1, -1,  -1, -1},  //  7
-                        {-1,  -1,  -1, -1,  8,     -1,  9, -1,  -1, -1},  //  8
-                        {-1,  -1,  -1, -1, -1,     -1, -1, 10,  -1, -1},  //  9
-                        { 0,   1,  -1, -1, -1,     -1, -1, -1, 100, -1}   // 10
-                     };
-        return sm;
+    private void error(State os, char oc) throws Exception {
+        throw new Exception("Parse error - in state \'" + os + "\' Got: " + oc);
     }
-    
-    private void error() throws Exception {
-        throw new Exception("Called from: " + state + " parse error: " + nextToken);
-    } 
-    
-    private void zero() throws Exception {
-        switch(nextToken) {
-            case ' ', '\t', '\n', '\r' -> state = stateMachine[state][0];
-            case '(' -> {valueX = ""; valueY = ""; state = stateMachine[state][1];}
-            default -> error();
+
+    private void nextTokenType() {
+        switch (nextToken) {
+            case ' ', '\t', '\n', '\r' ->
+                tokenType = CharType.ws;
+            case '+' ->
+                tokenType = CharType.plus;
+            case '-' ->
+                tokenType = CharType.minus;
+            case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' ->
+                tokenType = CharType.digit;
+            case '.' ->
+                tokenType = CharType.decimal;
+            case ',' ->
+                tokenType = CharType.komma;
+            case ';' ->
+                tokenType = CharType.semicolon;
+            case '(' ->
+                tokenType = CharType.lPerentes;
+            case ')' ->
+                tokenType = CharType.rParentes;
+            default ->
+                tokenType = CharType.unknown;
         }
     }
-    
-    private void one() throws Exception {
-        switch(nextToken) {
-            case ' ', '\t', '\n', '\r' -> state = stateMachine[state][0];
-            case '+' -> state = stateMachine[state][2];
-            case '-' -> {valueX += nextToken; state = stateMachine[state][3];}
-            case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' ->  {valueX += nextToken; state = stateMachine[state][4];}
-            default -> error();
+
+    private void beginPoint() throws Exception {
+        switch (tokenType) {
+            case lPerentes -> {
+                valueX = "";
+                valueY = "";
+            }
         }
     }
-    
-    private void two() throws Exception {
-        switch(nextToken) {
-            case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' ->  {valueX += nextToken; state = stateMachine[state][4];}
-            case ',' -> state = stateMachine[state][5];
-            case '.' -> {valueX += nextToken; state = stateMachine[state][9];}
-            default -> error();
+
+    private String beginCoordinat(String val) throws Exception {
+        switch (tokenType) {
+            case minus, digit ->
+                val += nextToken;
         }
+        return val;
     }
-    
-    private void three() throws Exception {
-        switch(nextToken) {
-            case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' ->  {valueX += nextToken; state = stateMachine[state][4];}
-            default -> error();
+
+    private String inCoordinat(String val) throws Exception {
+        switch (tokenType) {
+            case digit, decimal ->
+                val += nextToken;
         }
+        return val;
     }
-    
-    private void four() throws Exception {
-        switch(nextToken) {
-            case ' ', '\t', '\n', '\r' -> state = stateMachine[state][0];
-            case '+' -> state = stateMachine[state][2];
-            case '-' -> {valueY += nextToken; state = stateMachine[state][3];}
-            case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' ->  {valueY += nextToken; state = stateMachine[state][4];}
-            default -> error();
+
+    private String endCoordinat(String val) throws Exception {
+        switch (tokenType) {
+            case digit ->
+                val += nextToken;
         }
+        return val;
     }
-    
-    private void five() throws Exception {
-        switch(nextToken) {
-            case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' ->  {valueX += nextToken; state = stateMachine[state][4];}
-            case ',' -> state = stateMachine[state][5];
-            default -> error();
-        }
-    }
-    
-    private void six() throws Exception {
-        switch(nextToken) {
-            case '.' -> {valueY += nextToken; state = stateMachine[state][9];}
-            case ')'-> {state = stateMachine[state][6];}
-            case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' ->  {valueY += nextToken; state = stateMachine[state][4];}
-            default -> error();
-        }
-    }
-    
-    private void seven() throws Exception {
-        switch(nextToken) {
-            case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' ->  {valueY += nextToken; state = stateMachine[state][4];}
-            default -> error();
-        }
-    }
-    
-    private void eight() throws Exception {
-        switch(nextToken) {
-            case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' ->  {valueY += nextToken; state = stateMachine[state][4];}
-            case ')' -> state = stateMachine[state][6];
-            default -> error();
-        }
-    }
-    
+
     private void storePoint() {
-        ps.add(new Point(Double.parseDouble(valueX),Double.parseDouble(valueY)));
+        ps.add(new Point(Double.parseDouble(valueX), Double.parseDouble(valueY)));
     }
-    
-    private void nine() throws Exception {
-        switch(nextToken) {
-            case ';' -> {
-                storePoint(); state = stateMachine[state][7];
-            }
-            default -> error();
+
+    private void endPoint() throws Exception {
+        switch (tokenType) {
+            case semicolon ->
+                storePoint();
         }
     }
-    
-    private void ten() throws Exception {
-        switch(nextToken) {
-            case ' ', '\t', '\n', '\r' -> state = stateMachine[state][0];
-            case '(' -> {valueX = ""; state = stateMachine[state][1];}
-            default -> error();
-        }
-    }
-    
+
     private Set<Point> parsePointSet() throws Exception {
-        int ch = 0;
-        while (((ch = br.read()) != -1) && (state != 100)) {
+        int ch;
+        State oldState = null;
+        while ((ch = br.read()) != -1) {
+            char oldChar = nextToken;
             nextToken = (char) ch;
+            nextTokenType();
             switch (state) {
-                case 0 -> zero();
-                case 1 -> one();
-                case 2 -> two();
-                case 3 -> three();
-                case 4 -> four();
-                case 5 -> five();
-                case 6 -> six();
-                case 7 -> seven();
-                case 8 -> eight();
-                case 9 -> nine();
-                case 10 -> ten();
+                case beginPoint ->
+                    beginPoint();
+                case beginXCoor ->
+                    valueX = beginCoordinat(valueX);
+                case xCoor ->
+                    valueX = inCoordinat(valueX);
+                case xCoorBeginDecimal, xCoorEndDecimal ->
+                    valueX = endCoordinat(valueX);
+                case beginYCoor ->
+                    valueY = beginCoordinat(valueY);
+                case yCoor ->
+                    valueY = inCoordinat(valueY);
+                case yCoorBeginDecimal, yCoorEndDecimal ->
+                    valueY = endCoordinat(valueY);
+                case endPoint ->
+                    endPoint();
+                default ->
+                    error(oldState, oldChar);
             }
+            oldState = state;
+            state = STATE_MACHINE[state.ordinal()][tokenType.ordinal()];
         }
         return ps;
     }
-    
-
-    
 }

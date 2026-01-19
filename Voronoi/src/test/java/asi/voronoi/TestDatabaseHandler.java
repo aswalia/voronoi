@@ -25,19 +25,20 @@ import static org.junit.Assert.*;
  * @author asi
  */
 public class TestDatabaseHandler {
+
     private final String fileName = "src/test/resources/TestVD.db";
-    
+
     public TestDatabaseHandler() {
     }
-    
+
     @BeforeClass
     public static void setUpClass() {
     }
-    
+
     @AfterClass
     public static void tearDownClass() {
     }
-    
+
     @Before
     public void setUp() {
         DatabaseHandler.connectToDatabase(fileName);
@@ -47,7 +48,7 @@ public class TestDatabaseHandler {
             fail("Exception occured: " + ex.getMessage());
         }
     }
-    
+
     @After
     public void tearDown() {
         DatabaseHandler.dropDatabase(fileName);
@@ -78,25 +79,25 @@ public class TestDatabaseHandler {
 
     private void addPoints(int grp, List<Point> expected) throws SQLException {
         List<String> rows = new LinkedList<>();
-        for(int i=1; i<=expected.size(); i++) {
-            rows.add("" + i + ", " + grp + ", " + expected.get(i-1).x() + ", " + expected.get(i-1).y());
+        for (int i = 1; i <= expected.size(); i++) {
+            rows.add("" + i + ", " + grp + ", " + expected.get(i - 1).x() + ", " + expected.get(i - 1).y());
         }
-        DatabaseHandler.insertContent("points", rows);        
+        DatabaseHandler.insertContent("points", rows);
     }
-    
+
     private void addLinesegments() throws SQLException {
         List<String> rows = new LinkedList<>();
         rows.add("1, 1, 1, 2, null, null");
         rows.add("2, 1, null, null, 3, 4");
-        DatabaseHandler.insertContent("linesegments", rows);        
+        DatabaseHandler.insertContent("linesegments", rows);
     }
-    
+
     private void addBinaryTree() throws SQLException {
         List<String> rows = new LinkedList<>();
         rows.add("1, 1, null, 2");
         rows.add("2, 1, null, null");
         DatabaseHandler.insertContent("binaryTrees", rows);
-        
+
     }
 
     /**
@@ -109,14 +110,14 @@ public class TestDatabaseHandler {
         // points table
         try {
             List<Point> expected = new LinkedList<>();
-            expected.add(new Point(0.0,0.0));
-            expected.add(new Point(2.0,0.0));
-            expected.add(new Point(1.0,0.0));
-            expected.add(new Point(0.0,2.0));
+            expected.add(new Point(0.0, 0.0));
+            expected.add(new Point(2.0, 0.0));
+            expected.add(new Point(1.0, 0.0));
+            expected.add(new Point(0.0, 2.0));
             addPoints(grp, expected);
-            Map<Integer,Point> actual = DatabaseHandler.getPointsByGroup(grp);
-            for(int i=1; i<=4; i++) {
-                assertEquals(expected.get(i-1),actual.get(i));
+            Map<Integer, Point> actual = DatabaseHandler.getPointsByGroup(grp);
+            for (int i = 1; i <= 4; i++) {
+                assertEquals(expected.get(i - 1), actual.get(i));
             }
         } catch (SQLException ex) {
             fail("SQLException occured:" + ex.getMessage());
@@ -125,17 +126,17 @@ public class TestDatabaseHandler {
         try {
             addLinesegments();
             // no direct test of linesegments
-        } catch(SQLException ex) {
+        } catch (SQLException ex) {
             fail("SQLException occured:" + ex.getMessage());
         }
         // binaryTrees table
         try {
             addBinaryTree();
             BinaryTree actual = DatabaseHandler.getBinaryTreeByGroup(1);
-            BinaryTree expected = new BinaryTree(new Point(0.0,0.0));
-            expected.insertNode(new Point(2.0,0.0));
-            assertEquals(expected.toString(),actual.toString());            
-        } catch(SQLException ex) {
+            BinaryTree expected = new BinaryTree(new Point(0.0, 0.0));
+            expected.insertNode(new Point(2.0, 0.0));
+            assertEquals(expected.toString(), actual.toString());
+        } catch (SQLException ex) {
             fail("SQLException occured:" + ex.getMessage());
         }
         // conveksHulls table
@@ -144,9 +145,9 @@ public class TestDatabaseHandler {
             rows.add("2, 1, 1, 1");
             DatabaseHandler.insertContent("conveksHulls", rows);
             ConveksHull actual = DatabaseHandler.getConveksHullByGroup(1);
-            ConveksHull expected = new ConveksHull(new Point(0.0,0.0),new Point(2.0,0.0));
-            assertEquals(expected.getHead().toString(),actual.getHead().toString());
-        } catch(SQLException ex) {
+            ConveksHull expected = new ConveksHull(new Point(0.0, 0.0), new Point(2.0, 0.0));
+            assertEquals(expected.getHead().toString(), actual.getHead().toString());
+        } catch (SQLException ex) {
             fail("SQLException occured:" + ex.getMessage());
         }
         // conveksHullsAsLinesegments table
@@ -154,7 +155,7 @@ public class TestDatabaseHandler {
             rows.clear();
             rows.add("1, 1");
             DatabaseHandler.insertContent("conveksHullsAsLinesegments", rows);
-        } catch(SQLException ex) {
+        } catch (SQLException ex) {
             fail("SQLException occured:" + ex.getMessage());
         }
         // dcels table
@@ -162,7 +163,7 @@ public class TestDatabaseHandler {
             rows.clear();
             rows.add("2, 1, 1, 2, 2, 2");
             DatabaseHandler.insertContent("dcels", rows);
-            
+
         } catch (SQLException ex) {
             fail("SQLException occured:" + ex.getSQLState());
         }
@@ -176,13 +177,13 @@ public class TestDatabaseHandler {
         int grp = 1;
         try {
             List<Point> expected = new LinkedList<>();
-            expected.add(new Point(0.0,0.0));
-            expected.add(new Point(2.0,0.0));
+            expected.add(new Point(0.0, 0.0));
+            expected.add(new Point(2.0, 0.0));
             addPoints(grp, expected);
             int actual1 = DatabaseHandler.getIndexFromPoint(expected.get(0), grp);
             int actual2 = DatabaseHandler.getIndexFromPoint(expected.get(1), grp);
-            assertEquals(1,actual1);
-            assertEquals(2,actual2);
+            assertEquals(1, actual1);
+            assertEquals(2, actual2);
         } catch (SQLException ex) {
             fail("SQLException occured:" + ex.getMessage());
         }
@@ -196,19 +197,19 @@ public class TestDatabaseHandler {
         int grp = 1;
         try {
             List<Point> points = new LinkedList<>();
-            points.add(new Point(0.0,0.0));
-            points.add(new Point(2.0,0.0));
+            points.add(new Point(0.0, 0.0));
+            points.add(new Point(2.0, 0.0));
             addPoints(grp, points);
             addBinaryTree();
             int actual = DatabaseHandler.getIndexOfBinarytTreeRoot(grp);
-            assertEquals(1,actual);
+            assertEquals(1, actual);
         } catch (SQLException ex) {
             fail("SQLException occured:" + ex.getMessage());
         }
     }
-    
+
     private BinaryTree buildBinaryTree(int grp) {
-        Map<Integer,Point> mp = DatabaseHandler.getPointsByGroup(grp);
+        Map<Integer, Point> mp = DatabaseHandler.getPointsByGroup(grp);
         BinaryTree ret = null;
         Set<Integer> sk = mp.keySet();
         for (Integer i : sk) {
@@ -223,17 +224,17 @@ public class TestDatabaseHandler {
         }
         return ret;
     }
-    
+
     @Test
     public void testStoreDcels() {
         int grp = 10;
         try {
             List<Point> points = new LinkedList<>();
-            points.add(new Point(0.0,0.0));
-            points.add(new Point(0.0,2.0));
-            points.add(new Point(1.0,1.0));
-            points.add(new Point(2.0,0.0));
-            points.add(new Point(2.0,2.0));
+            points.add(new Point(0.0, 0.0));
+            points.add(new Point(0.0, 2.0));
+            points.add(new Point(1.0, 1.0));
+            points.add(new Point(2.0, 0.0));
+            points.add(new Point(2.0, 2.0));
             addPoints(grp, points);
             BinaryTree bt = buildBinaryTree(grp);
             VTree v = new VTree();
@@ -260,7 +261,7 @@ public class TestDatabaseHandler {
             assertTrue(actual, actual.contains(exp7));
             assertTrue(actual, actual.contains(exp8));
         } catch (SQLException ex) {
-            fail("SQLException occured:" + ex.getMessage());            
+            fail("SQLException occured:" + ex.getMessage());
         }
     }
 }

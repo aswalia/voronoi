@@ -1,67 +1,134 @@
-<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="C:/Users/asi/Documents/home/Development/Voronoi/Voronoi/src/main/resources/VD.db" readonly="0" foreign_keys="" case_sensitive_like="" temp_store="" wal_autocheckpoint="" synchronous=""/><attached/><window><main_tabs open="structure browser pragmas query" current="1"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="2609"/><column_width id="4" width="0"/></tab_structure><tab_browse><current_table name="0,0:"/><default_encoding codec=""/><browse_table_settings/></tab_browse><tab_sql><sql name="SQL 1">SELECT point FROM binaryTrees WHERE point not in (
-  SELECT left FROM binaryTrees WHERE (left is not null)
-UNION
-  SELECT right FROM binaryTrees WHERE (right is not null)
-);
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project>
+    <db path="C:/Users/asi/Documents/home/Development/Voronoi/voronoi/Voronoi/src/main/resources/VD.db" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/>
+    <attached/>
+    <window>
+        <main_tabs open="structure browser pragmas query" current="3"/>
+    </window>
+    <tab_structure>
+        <column_width id="0" width="300"/>
+        <column_width id="1" width="0"/>
+        <column_width id="2" width="100"/>
+        <column_width id="3" width="2609"/>
+        <column_width id="4" width="0"/>
+        <expanded_item id="0" parent="1"/>
+        <expanded_item id="1" parent="1"/>
+        <expanded_item id="2" parent="1"/>
+        <expanded_item id="3" parent="1"/>
+    </tab_structure>
+    <tab_browse>
+        <current_table name="4,6:mainpoints"/>
+        <default_encoding codec=""/>
+        <browse_table_settings>
+            <table schema="main" name="binaryTrees" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_">
+                <sort/>
+                <column_widths>
+                    <column index="1" value="50"/>
+                    <column index="2" value="40"/>
+                    <column index="3" value="40"/>
+                    <column index="4" value="48"/>
+                </column_widths>
+                <filter_values/>
+                <conditional_formats/>
+                <row_id_formats/>
+                <display_formats/>
+                <hidden_columns/>
+                <plot_y_axes/>
+                <global_filter/>
+            </table>
+            <table schema="main" name="points" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_">
+                <sort/>
+                <column_widths>
+                    <column index="1" value="40"/>
+                    <column index="2" value="40"/>
+                    <column index="3" value="46"/>
+                    <column index="4" value="46"/>
+                </column_widths>
+                <filter_values/>
+                <conditional_formats/>
+                <row_id_formats/>
+                <display_formats/>
+                <hidden_columns/>
+                <plot_y_axes/>
+                <global_filter/>
+            </table>
+        </browse_table_settings>
+    </tab_browse>
+    <tab_sql>
+        <sql name="SQL 1">SELECT point, grp FROM binaryTrees WHERE point not in (
+            SELECT left FROM binaryTrees WHERE (left is not null)
+            UNION
+            SELECT right FROM binaryTrees WHERE (right is not null)
+            );
 
-SELECT binaryTrees.point, binaryTrees.left, binaryTrees.right, points.x, points.y FROM points, binaryTrees
-WHERE ((points.id = binaryTrees.point) AND (points.grp = binaryTrees.grp));
+            SELECT binaryTrees.point, binaryTrees.left, binaryTrees.right, points.x, points.y, points.grp FROM points, binaryTrees
+            WHERE ((points.id = binaryTrees.point) AND (points.grp = binaryTrees.grp));
   
   
-SELECT point
-FROM binaryTrees;
+            SELECT point, grp
+            FROM binaryTrees
 
-SELECT conveksHulls.point, conveksHulls.next, conveksHulls.previous, points.x, points.y 
-FROM conveksHulls, points
-WHERE ((points.id = conveksHulls.point) AND (points.grp = conveksHulls.grp))
-ORDER BY points.x, points.y ASC; 
+            ORDER BY grp;
+
+            SELECT conveksHulls.point, conveksHulls.next, conveksHulls.previous, points.x, points.y, points.grp 
+            FROM conveksHulls, points
+            WHERE ((points.id = conveksHulls.point) AND (points.grp = conveksHulls.grp))
+            ORDER BY points.grp, points.x, points.y ASC; 
   
-SELECT conveksHullsAsLinesegments.linesegment, linesegments.beginpoint, linesegments.endpoint, points.x, points.y 
-FROM conveksHullsAsLinesegments, linesegments, points
-WHERE (conveksHullsAsLinesegments.linesegment = linesegments.id) 
-  AND (conveksHullsAsLinesegments.grp = linesegments.grp)
-  AND (linesegments.beginpoint = points.id);
+            SELECT conveksHullsAsLinesegments.linesegment, linesegments.beginpoint, linesegments.endpoint, points.x, points.y, points.grp 
+            FROM conveksHullsAsLinesegments, linesegments, points
+            WHERE (conveksHullsAsLinesegments.linesegment = linesegments.id) 
+            AND (conveksHullsAsLinesegments.grp = linesegments.grp)
+            AND (linesegments.beginpoint = points.id)
+
+            ORDER BY points.grp;
   
-SELECT d.edge, d.f_l, d.f_r, l.beginpoint, l.endpoint
-FROM dcels d, linesegments l
-WHERE (((l.beginpoint NOTNULL) AND (l.endpoint NOTNULL) AND l.id = d.edge) AND (l.grp = d.grp));
+            SELECT d.edge, d.f_l, d.f_r, l.beginpoint, l.endpoint, d.grp
+            FROM dcels d, linesegments l
+            WHERE (((l.beginpoint NOTNULL) AND (l.endpoint NOTNULL) AND l.id = d.edge) AND (l.grp = d.grp));
 
-SELECT dcels.edge, dcels.f_l, dcels.f_r, linesegments.beginpoint, linesegments.endpoint
-FROM dcels, linesegments
-WHERE ((((linesegments.beginpoint ISNULL) OR (linesegments.endpoint ISNULL)) AND linesegments.id = dcels.edge) AND (linesegments.grp = dcels.grp));
+            SELECT dcels.edge, dcels.f_l, dcels.f_r, linesegments.beginpoint, linesegments.endpoint, dcels.grp
+            FROM dcels, linesegments
+            WHERE ((((linesegments.beginpoint ISNULL) OR (linesegments.endpoint ISNULL)) AND linesegments.id = dcels.edge) AND (linesegments.grp = dcels.grp));
 
-SELECT dcels.edge, dcels.f_l, dcels.f_r, linesegments.beginpoint, linesegments.endpoint
-FROM dcels, linesegments
-WHERE (( linesegments.id = dcels.edge) AND (linesegments.grp = dcels.grp));
+            SELECT dcels.edge, dcels.f_l, dcels.f_r, linesegments.beginpoint, linesegments.endpoint, dcels.grp
+            FROM dcels, linesegments
+            WHERE (( linesegments.id = dcels.edge) AND (linesegments.grp = dcels.grp));
 
-SELECT dx.edge, dy.edge
-FROM dcels dx, dcels dy, linesegments lx, linesegments ly, points px, points py
-WHERE ((lx.id = dx.edge) AND (lx.grp = dx.grp)) AND
-      ((ly.id = dy.edge) AND (ly.grp = dy.grp)) AND
-	  ((dx.f_l = dy.f_l) OR (dx.f_l = dy.f_r)) AND
-	  ((lx.beginpoint = px.id) AND (lx.grp = px.grp)) AND
-	  (dx.edge != dy.edge) AND
-	  (((ly.endpoint = py.id) AND (ly.grp = py.grp)) AND
-	   ((px.x = py.x) AND (px.y = py.y)) OR
-	   ((ly.beginpoint = py.id) AND (ly.grp = py.grp)) AND
-	   ((px.x = py.x) AND (px.y = py.y)));
+            SELECT dx.edge, dy.edge, dx.grp
+            FROM dcels dx, dcels dy, linesegments lx, linesegments ly, points px, points py
+            WHERE ((lx.id = dx.edge) AND (lx.grp = dx.grp)) AND
+            ((ly.id = dy.edge) AND (ly.grp = dy.grp)) AND
+            ((dx.f_l = dy.f_l) OR (dx.f_l = dy.f_r)) AND
+            ((lx.beginpoint = px.id) AND (lx.grp = px.grp)) AND
+            (dx.edge != dy.edge) AND
+            (((ly.endpoint = py.id) AND (ly.grp = py.grp)) AND
+            ((px.x = py.x) AND (px.y = py.y)) OR
+            ((ly.beginpoint = py.id) AND (ly.grp = py.grp)) AND
+            ((px.x = py.x) AND (px.y = py.y)));
 	  
-SELECT dx.edge, dy.edge
-FROM dcels dx, dcels dy, linesegments lx, linesegments ly, points px, points py
-WHERE ((lx.id = dx.edge) AND (lx.grp = dx.grp)) AND
-      ((ly.id = dy.edge) AND (ly.grp = dy.grp)) AND
-	  ((dx.f_r = dy.f_l) OR (dx.f_r = dy.f_r)) AND
-	  ((lx.endpoint = px.id) AND (lx.grp = px.grp)) AND
-	  (dx.edge != dy.edge) AND
-	  (((ly.endpoint = py.id) AND (ly.grp = py.grp) AND
-	    (px.x = py.x) AND (px.y = py.y)) OR
-	   ((ly.beginpoint = py.id) AND (ly.grp = py.grp) AND
-	    (px.x = py.x) AND (px.y = py.y)));
-	   
-SELECT edge
-FROM dcels
-WHERE (dcels.bp_ref IS NULL) AND (dcels.ep_ref IS NULL);
-
-SELECT edge
-FROM dcels
-WHERE (dcels.bp_ref IS NULL) OR (dcels.ep_ref IS NULL);</sql><current_tab id="0"/></tab_sql></sqlb_project>
+            SELECT dx.edge, dy.edge, dx.grp
+            FROM dcels dx, dcels dy, linesegments lx, linesegments ly, points px, points py
+            WHERE ((lx.id = dx.edge) AND (lx.grp = dx.grp)) AND
+            ((ly.id = dy.edge) AND (ly.grp = dy.grp)) AND
+            ((dx.f_r = dy.f_l) OR (dx.f_r = dy.f_r)) AND
+            ((lx.endpoint = px.id) AND (lx.grp = px.grp)) AND
+            (dx.edge != dy.edge) AND
+            (((ly.endpoint = py.id) AND (ly.grp = py.grp) AND
+            (px.x = py.x) AND (px.y = py.y)) OR
+            ((ly.beginpoint = py.id) AND (ly.grp = py.grp) AND
+            (px.x = py.x) AND (px.y = py.y)));
+	   
+            SELECT edge
+            FROM dcels
+            WHERE (dcels.bp_ref IS NULL) AND (dcels.ep_ref IS NULL);
+
+            SELECT edge, grp
+            FROM dcels
+            WHERE (dcels.bp_ref IS NULL) OR (dcels.ep_ref IS NULL);
+
+
+
+            SELECT DISTINCT grp FROM points;</sql>
+        <current_tab id="0"/>
+    </tab_sql>
+</sqlb_project>

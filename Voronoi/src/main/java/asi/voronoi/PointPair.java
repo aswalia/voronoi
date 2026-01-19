@@ -10,18 +10,19 @@ package asi.voronoi;
  * @author asi
  */
 public class PointPair {
+
     private final Point lft;
     private final Point rgt;
-    
+
     public PointPair(Point l, Point r) {
         lft = l;
         rgt = r;
     }
-    
+
     public Point getLft() {
         return lft;
     }
-    
+
     public Point getRgt() {
         return rgt;
     }

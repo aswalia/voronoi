@@ -1,6 +1,7 @@
 package asi.voronoi;
 
 interface Constant {
+
     Point ZERO = new Point(0, 0);
     short CONCAVE = 1;
     short REFLEX = 2;

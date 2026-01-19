@@ -63,11 +63,10 @@ public class BTView extends Pane {
         Bounds b = pTxt.getLayoutBounds();
         double w = b.getWidth();
         double h = b.getHeight();
-        
-        Rectangle rect = new Rectangle(x-adjust/2, y-h/2, w+adjust, h+adjust);
+
+        Rectangle rect = new Rectangle(x - adjust / 2, y - h / 2, w + adjust, h + adjust);
         rect.setFill(Color.WHITE);
         rect.setStroke(Color.BLACK);
         getChildren().addAll(rect, pTxt);
     }
 }
-

@@ -1,6 +1,7 @@
 package asi.voronoi;
 
 public class Point implements java.io.Serializable {
+
     private double x, y;
 
     public Point(int ix, int iy) {
@@ -54,9 +55,9 @@ public class Point implements java.io.Serializable {
         ret.y /= 2;
         return ret;
     }
-    
+
     public static double areaDouble(Point a, Point b, Point c) {
-        return a.x*(b.y-c.y) + b.x*(c.y-a.y) + c.x*(a.y-b.y);
+        return a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y);
     }
 
     public static short area(Point a, Point b, Point c) {
@@ -83,7 +84,7 @@ public class Point implements java.io.Serializable {
         if (!(t instanceof Point)) {
             return false;
         } else {
-            Point s = (Point)t;
+            Point s = (Point) t;
             return ((this.x == s.x) && (this.y == s.y));
         }
     }
@@ -108,5 +109,5 @@ public class Point implements java.io.Serializable {
     public static Point coordinat(Point d, Point p, double t) {
         return p.add(d.mult(t));
     }
-    
+
 }

@@ -16,32 +16,34 @@ import org.junit.Test;
  * @author asi
  */
 public class TestCircularLinkedList {
+
     private CircularLinkedList t;
+
     @Before
     public void setUp() throws Exception {
-        Point p = new Point(0,5);
+        Point p = new Point(0, 5);
         t = new CircularLinkedList(p);
-        assertEquals(p,t.get(0));
+        assertEquals(p, t.get(0));
     }
-    
+
     @After
     public void tearDown() throws Exception {
         t = null;
     }
-    
+
     @Test
     public void testGet() {
         // only one point, so any index returns same point
-        Point expected = new Point(0,5);
+        Point expected = new Point(0, 5);
         assertEquals(expected, t.get(0));
         assertEquals(expected, t.get(-24));
         assertEquals(expected, t.get(47));
         // add some more points and verify that get returns correct value
         Point _1 = new Point(-1, 10);
         t.add(0, -1, _1);
-        Point _2 = new Point(3,3);
+        Point _2 = new Point(3, 3);
         t.add(0, -1, _2);
-        Point _3 = new Point(1,0);
+        Point _3 = new Point(1, 0);
         t.add(0, -1, _3);
         // points are added in sequence, but head moved to point to lowest value
         assertEquals(_1, t.get(0));
@@ -59,111 +61,111 @@ public class TestCircularLinkedList {
         assertEquals(_2, t.get(-2));
         assertEquals(_3, t.get(-1));
         // 4 times away
-        assertEquals(_1, t.get(4*4));
-        assertEquals(expected, t.get(4*4+1));
-        assertEquals(_2, t.get(6*4+2));
-        assertEquals(_3, t.get(7*4+3));
+        assertEquals(_1, t.get(4 * 4));
+        assertEquals(expected, t.get(4 * 4 + 1));
+        assertEquals(_2, t.get(6 * 4 + 2));
+        assertEquals(_3, t.get(7 * 4 + 3));
         // 8 time, in negative direction
-        assertEquals(_1, t.get(-4*8));
-        assertEquals(expected, t.get(-3*8+1));
-        assertEquals(_2, t.get(-2*8+2));
-        assertEquals(_3, t.get(-1*8+3));        
+        assertEquals(_1, t.get(-4 * 8));
+        assertEquals(expected, t.get(-3 * 8 + 1));
+        assertEquals(_2, t.get(-2 * 8 + 2));
+        assertEquals(_3, t.get(-1 * 8 + 3));
     }
-    
+
     @Test
     public void testAdd() {
-        Point expected = new Point(-1,10); 
+        Point expected = new Point(-1, 10);
         t.add(0, -1, expected);
-        assertEquals(expected,t.get(0));
-        expected = new Point(1,0);
+        assertEquals(expected, t.get(0));
+        expected = new Point(1, 0);
         t.add(0, -1, expected);
-        assertTrue(new Point(-1,10).equals(t.get(0)));
+        assertTrue(new Point(-1, 10).equals(t.get(0)));
         Point actual = t.get(1);
-        assertTrue(new Point(0,5).equals(actual));
-        assertEquals(expected,t.get(2));
-        expected = new Point(2,5);
+        assertTrue(new Point(0, 5).equals(actual));
+        assertEquals(expected, t.get(2));
+        expected = new Point(2, 5);
         t.add(0, -1, expected);
         actual = t.get(3);
-        assertEquals(expected,actual);
+        assertEquals(expected, actual);
         String exp = "(-1.0,10.0)(0.0,5.0)(1.0,0.0)(2.0,5.0)";
-        assertEquals(exp,t.toString());
-        expected = new Point(-2,5);
+        assertEquals(exp, t.toString());
+        expected = new Point(-2, 5);
         t.add(2, 1, expected);
         exp = "(-2.0,5.0)(1.0,0.0)(2.0,5.0)(-1.0,10.0)(0.0,5.0)";
-        assertEquals(exp,t.toString());
+        assertEquals(exp, t.toString());
         // problem with setHead i add (CirculrList) when head is not part of list after merge
         // (34.0,36.0)(35.0,13.0)(42.0,3.0)(37.0,47.0)(34.0,40.0)
-        CircularLinkedList c = new CircularLinkedList(new Point(34,36));
-        c.add(0, -1, new Point(35,13));
-        c.add(0, -1, new Point(42,3));
-        c.add(0, -1, new Point(37,47));
-        c.add(0, -1, new Point(34,40));
+        CircularLinkedList c = new CircularLinkedList(new Point(34, 36));
+        c.add(0, -1, new Point(35, 13));
+        c.add(0, -1, new Point(42, 3));
+        c.add(0, -1, new Point(37, 47));
+        c.add(0, -1, new Point(34, 40));
         // verify that CH is as in failed test case
         exp = "(34.0,36.0)(35.0,13.0)(42.0,3.0)(37.0,47.0)(34.0,40.0)";
-        assertEquals(exp,c.toString());       
+        assertEquals(exp, c.toString());
         // simulate failure as when merging (31,30) with CH
-        c.add(1, 4, new Point(31,30));
+        c.add(1, 4, new Point(31, 30));
         exp = "(31.0,30.0)(35.0,13.0)(42.0,3.0)(37.0,47.0)(34.0,40.0)";
-        assertEquals(exp,c.toString());
+        assertEquals(exp, c.toString());
         // test remove of several points when adding a new node
-        c = new CircularLinkedList(new Point(7,0));
-        c.add(0, -1, new Point(10,0));
-        c.add(0, -1, new Point(10,3));
-        c.add(0, -1, new Point(10,5));
-        c.add(0, -1, new Point(7,5));
-        c.add(0, -1, new Point(7,4));
-        c.add(0, -1, new Point(7,3));
-        c.add(0, -1, new Point(7,2));
-        c.add(0, -1, new Point(7,1));
+        c = new CircularLinkedList(new Point(7, 0));
+        c.add(0, -1, new Point(10, 0));
+        c.add(0, -1, new Point(10, 3));
+        c.add(0, -1, new Point(10, 5));
+        c.add(0, -1, new Point(7, 5));
+        c.add(0, -1, new Point(7, 4));
+        c.add(0, -1, new Point(7, 3));
+        c.add(0, -1, new Point(7, 2));
+        c.add(0, -1, new Point(7, 1));
         exp = "(7.0,0.0)(10.0,0.0)(10.0,3.0)(10.0,5.0)(7.0,5.0)(7.0,4.0)(7.0,3.0)(7.0,2.0)(7.0,1.0)";
-        assertEquals(exp,c.toString());       
-        c.add(0, 4, new Point(0,3));
+        assertEquals(exp, c.toString());
+        c.add(0, 4, new Point(0, 3));
         exp = "(0.0,3.0)(7.0,0.0)(10.0,0.0)(10.0,3.0)(10.0,5.0)(7.0,5.0)";
-        assertEquals(exp,c.toString());
+        assertEquals(exp, c.toString());
     }
-    
+
     @Test
     public void testRemove() {
-        t.add(0, -1, new Point(-1,10));
-        t.add(0, -1, new Point(1,0));
-        t.add(0, -1, new Point(2,5));
+        t.add(0, -1, new Point(-1, 10));
+        t.add(0, -1, new Point(1, 0));
+        t.add(0, -1, new Point(2, 5));
         String expected = "(-1.0,10.0)(0.0,5.0)(1.0,0.0)(2.0,5.0)";
-        assertEquals(expected,t.toString());
+        assertEquals(expected, t.toString());
         t.remove(2);
         expected = "(-1.0,10.0)(0.0,5.0)(2.0,5.0)";
-        assertEquals(expected,t.toString());
-        t.add(2, 1, new Point(0,0));
+        assertEquals(expected, t.toString());
+        t.add(2, 1, new Point(0, 0));
         expected = "(-1.0,10.0)(0.0,5.0)(0.0,0.0)(2.0,5.0)";
-        assertEquals(expected,t.toString());
+        assertEquals(expected, t.toString());
         t.remove(0);
         expected = "(0.0,0.0)(2.0,5.0)(0.0,5.0)";
-        assertEquals(expected,t.toString());
+        assertEquals(expected, t.toString());
     }
-    
+
     @Test
     public void testCopy() {
-        t.add(0, -1, new Point(-1,10));
-        t.add(0, -1, new Point(1,0));
-        t.add(0, -1, new Point(2,5));
+        t.add(0, -1, new Point(-1, 10));
+        t.add(0, -1, new Point(1, 0));
+        t.add(0, -1, new Point(2, 5));
         String expected = "(-1.0,10.0)(0.0,5.0)(1.0,0.0)(2.0,5.0)";
-        assertEquals(expected,t.toString());
+        assertEquals(expected, t.toString());
         CircularLinkedList c = t.copy();
-        assertEquals(expected,c.toString());
-        
+        assertEquals(expected, c.toString());
+
     }
-    
+
     @Test
     public void testLength() {
-        assertTrue("actual: "+t.length(),1 == t.length());
-        t.add(0, -1, new Point(-1,10));
-        t.add(0, -1, new Point(1,0));
-        t.add(0, -1, new Point(2,5));
+        assertTrue("actual: " + t.length(), 1 == t.length());
+        t.add(0, -1, new Point(-1, 10));
+        t.add(0, -1, new Point(1, 0));
+        t.add(0, -1, new Point(2, 5));
         int actual = t.length();
-        assertTrue("actual: "+actual,4 == actual);
+        assertTrue("actual: " + actual, 4 == actual);
         t.remove(0);
         t.remove(0);
         actual = t.length();
-        assertTrue("actual: "+actual,2 == actual);
+        assertTrue("actual: " + actual, 2 == actual);
     }
-    
+
 }

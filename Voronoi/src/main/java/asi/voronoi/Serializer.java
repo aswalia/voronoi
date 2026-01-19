@@ -3,6 +3,7 @@ package asi.voronoi;
 import java.io.*;
 
 public class Serializer implements Serializable {
+
     public static void store(String filename, Object obj) throws IOException {
         FileOutputStream out = new FileOutputStream(filename);
         try (ObjectOutputStream s = new ObjectOutputStream(out)) {

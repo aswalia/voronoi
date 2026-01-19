@@ -1,6 +1,7 @@
 package asi.voronoi;
 
 class DCELPair implements java.io.Serializable {
+
     DCEL currentElem;
     DCEL nextElem;
     DCEL cutBy;
