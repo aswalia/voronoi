@@ -1,6 +1,7 @@
 package asi.voronoi.tree;
 
 import asi.voronoi.DatabaseHandler;
+import asi.voronoi.Line;
 import asi.voronoi.ModelObject;
 import asi.voronoi.Point;
 import asi.voronoi.Serializer;
@@ -8,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -188,6 +190,42 @@ public class BinaryTree implements java.io.Serializable, ModelObject {
     public double maxX() {
         return max().x();
     }
+
+    // Hent alle punkter fra BinaryTree (in-order)
+    public static List<Point> collectPoints(BinaryTree t) {
+        List<Point> pts = new ArrayList<>();
+        collectRec(t, pts);
+        return pts;
+    }
+
+    private static void collectRec(BinaryTree n, List<Point> pts) {
+        if (n == null) {
+            return;
+        }
+        collectRec(n.lft(), pts);
+        if (n.getP() != null) {
+            pts.add(n.getP());
+        }
+        collectRec(n.rgt(), pts);
+    }
+    
+    public static void inorder(int d, BinaryTree t) {
+        Line l = new Line();
+        int nd = d;
+        
+        if (t != null) {
+            nd++;
+            if (t.lft != null) {
+                l.setStartToEnd(t.p,t.lft.p);
+                inorder(nd, t.lft);
+            }
+            if (t.rgt != null) {
+                l.setStartToEnd(t.p,t.rgt.p);
+                inorder(nd, t.rgt);                
+            }
+        }
+    }
+  
     private static LinkedList<PointElem> pList;
 
     private static class PointElem<T> {
