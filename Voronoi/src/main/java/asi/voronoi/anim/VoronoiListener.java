@@ -29,4 +29,17 @@ public interface VoronoiListener {
 
     default void onFinalized(List<Line> edges) {
     }
+
+    // ---------------- BinaryTree traversal events ----------------
+    default void onBtEnterNode(String nodeId, String parentId, String label) {
+    }
+
+    default void onBtVisitNode(String nodeId, String parentId, String label) {
+    }
+
+    default void onBtExitNode(String nodeId, String parentId, String label) {
+    }
+
+    default void onBtHighlightEdge(String childId, String parentId) {
+    }
 }

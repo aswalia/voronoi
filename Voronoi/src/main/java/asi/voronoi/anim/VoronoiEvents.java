@@ -52,4 +52,23 @@ public final class VoronoiEvents {
     public static void fireFinalized(List<Line> edges) {
         LS.forEach(l -> l.onFinalized(edges));
     }
+
+    // ----------------------------------------------------------------
+    // BinaryTree traversal (ENTER / VISIT / EXIT / HIGHLIGHT_EDGE)
+    // ----------------------------------------------------------------
+    public static void fireBtEnterNode(String nodeId, String parentId, String label) {
+        LS.forEach(l -> l.onBtEnterNode(nodeId, parentId, label));
+    }
+
+    public static void fireBtVisitNode(String nodeId, String parentId, String label) {
+        LS.forEach(l -> l.onBtVisitNode(nodeId, parentId, label));
+    }
+
+    public static void fireBtExitNode(String nodeId, String parentId, String label) {
+        LS.forEach(l -> l.onBtExitNode(nodeId, parentId, label));
+    }
+
+    public static void fireBtHighlightEdge(String childId, String parentId) {
+        LS.forEach(l -> l.onBtHighlightEdge(childId, parentId));
+    }
 }

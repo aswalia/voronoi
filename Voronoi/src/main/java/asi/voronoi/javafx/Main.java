@@ -44,6 +44,10 @@ public class Main extends Application {
     private BorderPane rootPane;
     private AnimationPane animationView;
 
+    // Hvilken afspiller toolbaren styrer
+    private enum PlaybackMode { VORONOI, BINARY_TREE }
+    private PlaybackMode mode = PlaybackMode.VORONOI;
+
     // Toolbar controls
     private ToolBar toolBar;
     private Button btnPlay, btnPause, btnResume, btnExport;
@@ -190,44 +194,49 @@ public class Main extends Application {
     
     
      private void animateBinaryTree() {
+        mode = PlaybackMode.BINARY_TREE;
         // Reset recorder/bus
         recorder = new StoryboardRecorder();
         VoronoiEvents.clear();
         VoronoiEvents.add(recorder);
 
-        // 1) Division (x-akse, y-tiebreak; hvis alle x ens -> vandret split)
+        // Sites til minimap/overview
         List<Point> pts = asi.voronoi.tree.BinaryTree.collectPoints(tree);
-//        MedianDivideAnimator.animateDivide(pts);
 
-        BinaryTree.inorder(0, tree);
-
-        // 2) Merge (mikro-frames via DCEL.fireSnapshot() i sigma-trin)
-//        VTree vt = new VTree();
-//        vt.buildStructure(tree);
-
-        
-        
-
-        // 3) Vis i center
+        // Sørg for view
         if (animationView == null) {
             animationView = new AnimationPane();
         }
-        animationView.setSites(pts);
-        animationView.setFrames(recorder.getFrames());
-        zoomLabel.setText(String.format("Zoom %.0f%%", animationView.getZoomPercent()));
-        animationView.setSpeed(speedSlider != null ? speedSlider.getValue() : 1.0);
-        animationView.play();
+        // Ryd Voronoi-lag og skift mode i pane:
+        animationView.setVisualizationMode(AnimationPane.Mode.BINARY_TREE);
 
+        animationView.setSites(pts);             // behold eksisterende features
+        animationView.renderBinaryTree(tree);    // tegn statisk BinaryTree
+        animationView.resetBinaryTreeColors();   // nulstil farver
+        animationView.setBtStatusSink(txt -> frameStatus.set(txt)); // ← statusBar opdatering
+
+        // Optag traversal events
+        BinaryTree.inorder(0, tree);
+
+        // Vis i center
         rootPane.setCenter(animationView);
         BorderPane.setMargin(animationView, new Insets(10));
 
+        // Afspil med fps proportional med speed-slider
+        double rate = (speedSlider != null ? speedSlider.getValue() : 1.0);
+        double fps = Math.max(1.0, 24.0 * rate);
+        animationView.playBinaryTreeStoryboard(recorder, fps);
+        zoomLabel.setText(String.format("Zoom %.0f%%", animationView.getZoomPercent()));
+
         // Aktiver knapper
         setToolbarEnabled(true);
-    }
+
+     }
    
     
 
     private void animateDivideAndMerge() {
+        mode = PlaybackMode.VORONOI;
         // Reset recorder/bus
         recorder = new StoryboardRecorder();
         VoronoiEvents.clear();
@@ -245,6 +254,9 @@ public class Main extends Application {
         if (animationView == null) {
             animationView = new AnimationPane();
         }
+        // Ryd BinaryTree-lag og skift mode i pane:
+        animationView.setVisualizationMode(AnimationPane.Mode.VORONOI);
+
         animationView.setSites(pts);
         animationView.setFrames(recorder.getFrames());
         zoomLabel.setText(String.format("Zoom %.0f%%", animationView.getZoomPercent()));
@@ -315,38 +327,62 @@ public class Main extends Application {
         speedLabel = new Label("Speed 1.00×");
 
         btnPlay.setOnAction(e -> {
-            if (animationView != null) {
-                animationView.stop(); // genstart fra 0
+            if (animationView == null) return;
+            if (mode == PlaybackMode.BINARY_TREE) {
+                animationView.stopBinaryTreeStoryboard();
+                animationView.resetBinaryTreeColors();
+                double rate = speedSlider != null ? speedSlider.getValue() : 1.0;
+                double fps = Math.max(1.0, 24.0 * rate);
+                animationView.playBinaryTreeStoryboard(recorder, fps);
+            } else {
+                animationView.stop(); // Voronoi
                 animationView.play();
             }
         });
         btnPause.setOnAction(e -> {
-            if (animationView != null) {
+            if (animationView == null) return;
+            if (mode == PlaybackMode.BINARY_TREE) {
+                animationView.pauseBinaryTreeStoryboard();
+            } else {
                 animationView.pause();
             }
         });
         btnResume.setOnAction(e -> {
-            if (animationView != null) {
+            if (animationView == null) return;
+            if (mode == PlaybackMode.BINARY_TREE) {
+                animationView.resumeBinaryTreeStoryboard();
+            } else {
                 animationView.resume();
             }
         });
+
         speedSlider.valueProperty().addListener((obs, oldV, newV) -> {
             double rate = newV.doubleValue();
             speedLabel.setText(String.format("Speed %.2f×", rate));
-            if (animationView != null) {
+            if (animationView == null) return;
+            if (mode == PlaybackMode.BINARY_TREE) {
+                animationView.setBinaryTreeRate(rate);
+            } else {
                 animationView.setSpeed(rate);
             }
         });
 
-        // Step
         btnStepPrev.setOnAction(e -> {
-            if (animationView != null) {
+            if (animationView == null) return;
+            if (mode == PlaybackMode.BINARY_TREE) {
+                animationView.pauseBinaryTreeStoryboard();
+                animationView.stepBackBinaryTreeStoryboard(recorder);
+            } else {
                 animationView.pause();
                 animationView.stepBack();
             }
         });
         btnStepNext.setOnAction(e -> {
-            if (animationView != null) {
+            if (animationView == null) return;
+            if (mode == PlaybackMode.BINARY_TREE) {
+                animationView.pauseBinaryTreeStoryboard();
+                animationView.stepBinaryTreeStoryboard(recorder);
+            } else {
                 animationView.pause();
                 animationView.stepForward();
             }
@@ -373,7 +409,11 @@ public class Main extends Application {
         });
         btnFit.setOnAction(e -> {
             if (animationView != null) {
-                animationView.fitToData();
+                if (mode == PlaybackMode.BINARY_TREE) {
+                    animationView.fitBinaryTreeToView();
+                } else {
+                    animationView.fitToData();
+                }
                 zoomLabel.setText(String.format("Zoom %.0f%%", animationView.getZoomPercent()));
             }
         });

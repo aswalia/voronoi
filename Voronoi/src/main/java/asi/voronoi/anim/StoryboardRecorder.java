@@ -3,6 +3,7 @@ package asi.voronoi.anim;
 import asi.voronoi.Line;
 import asi.voronoi.Point;
 import java.util.*;
+import java.util.function.Consumer;
 
 public class StoryboardRecorder implements VoronoiListener {
 
@@ -100,4 +101,57 @@ public class StoryboardRecorder implements VoronoiListener {
         frames.add(new Frame(0, null, null, null, null, null, currentEdges, List.copyOf(mergeMarks),
                 "final"));
     }
+
+    // ---------------- BinaryTree storyboard ----------------
+    public enum BtEventType { ENTER_NODE, VISIT_NODE, EXIT_NODE, HIGHLIGHT_EDGE }
+
+    public static final class BtFrame {
+        private final BtEventType type;
+        private final String nodeId;
+        private final String parentId;
+        private final String label;
+        public BtFrame(BtEventType type, String nodeId, String parentId, String label) {
+            this.type = type; this.nodeId = nodeId; this.parentId = parentId; this.label = label;
+        }
+        public BtEventType type() { return type; }
+        public String nodeId() { return nodeId; }
+        public String parentId() { return parentId; }
+        public String label() { return label; }
+        @Override public String toString() {
+            return "BtFrame{" + type + ", node=" + nodeId +
+                   (parentId != null ? ", parent=" + parentId : "") +
+                   (label != null ? ", label=" + label : "") + "}";
+        }
+    }
+
+    private final List<BtFrame> btFrames = new ArrayList<>();
+    public void clearBt() { btFrames.clear(); }
+    public List<BtFrame> getBtFrames() { return Collections.unmodifiableList(btFrames); }
+    private void btRecord(BtEventType t, String n, String p, String lab) {
+        btFrames.add(new BtFrame(t, n, p, lab));
+    }
+
+    // VoronoiListener: BinaryTree events -> frames
+    @Override public void onBtEnterNode(String nodeId, String parentId, String label) {
+        btRecord(BtEventType.ENTER_NODE, nodeId, parentId, label);
+    }
+
+    @Override public void onBtVisitNode(String nodeId, String parentId, String label) {
+        btRecord(BtEventType.VISIT_NODE, nodeId, parentId, label);
+    }
+
+    @Override public void onBtExitNode(String nodeId, String parentId, String label) {
+        btRecord(BtEventType.EXIT_NODE, nodeId, parentId, label);
+    }
+
+    @Override public void onBtHighlightEdge(String childId, String parentId) {
+        btRecord(BtEventType.HIGHLIGHT_EDGE, childId, parentId, null);
+    }
+
+    // (Valgfri) afspilning ved behov
+    public void playBt(Consumer<BtFrame> onFrame) {
+        for (BtFrame f : btFrames) onFrame.accept(f);
+    }
+
+
 }

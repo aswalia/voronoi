@@ -5,6 +5,7 @@ import asi.voronoi.Line;
 import asi.voronoi.ModelObject;
 import asi.voronoi.Point;
 import asi.voronoi.Serializer;
+import asi.voronoi.anim.VoronoiEvents;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -224,8 +225,56 @@ public class BinaryTree implements java.io.Serializable, ModelObject {
                 inorder(nd, t.rgt);                
             }
         }
+        inorderRec(d, t, null);
     }
-  
+
+    // --- NY: inorder med events (ENTER / VISIT / EXIT / HIGHLIGHT_EDGE) ---
+    private static void inorderRec(int depth, BinaryTree t, BinaryTree parent) {
+        if (t == null) return;
+
+        final String nodeId = btNodeId(t);
+        final String parentId = (parent != null ? btNodeId(parent) : null);
+        final String label = (t.p != null ? t.p.toString() : null);
+
+        // ENTER + highlight relation
+        VoronoiEvents.fireBtEnterNode(nodeId, parentId, label);
+        if (parent != null) {
+            VoronoiEvents.fireBtHighlightEdge(nodeId, parentId);
+        }
+
+        // Bevar eksisterende line-logik
+        Line l = new Line();
+        int nd = depth + 1;
+
+        // Venstre
+        if (t.lft != null) {
+            l.setStartToEnd(t.p, t.lft.p);
+            inorderRec(nd, t.lft, t);
+        }
+
+        // VISIT (inorder midten)
+        VoronoiEvents.fireBtVisitNode(nodeId, parentId, label);
+
+        // Højre
+        if (t.rgt != null) {
+            l.setStartToEnd(t.p, t.rgt.p);
+            inorderRec(nd, t.rgt, t);
+        }
+
+        // EXIT
+        VoronoiEvents.fireBtExitNode(nodeId, parentId, label);
+    }
+
+    private static String btNodeId(BinaryTree n) {
+        if (n != null && n.p != null) {
+            return "P(" + n.p.x() + "," + n.p.y() + ")";
+        }
+        return "n@" + System.identityHashCode(n);
+    }
+   
+    
+    
+    
     private static LinkedList<PointElem> pList;
 
     private static class PointElem<T> {
