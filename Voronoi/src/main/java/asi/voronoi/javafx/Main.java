@@ -42,7 +42,7 @@ public class Main extends Application {
     // Animation state
     private StoryboardRecorder recorder = new StoryboardRecorder();
     private BorderPane rootPane;
-    private AnimationPane animationView;
+    private AnimationView animationView;
 
     // Hvilken afspiller toolbaren styrer
     private enum PlaybackMode { VORONOI, BINARY_TREE }
@@ -205,10 +205,10 @@ public class Main extends Application {
 
         // Sørg for view
         if (animationView == null) {
-            animationView = new AnimationPane();
+            animationView = new AnimationView();
         }
         // Ryd Voronoi-lag og skift mode i pane:
-        animationView.setVisualizationMode(AnimationPane.Mode.BINARY_TREE);
+        animationView.setVisualizationMode(AnimationView.Mode.BINARY_TREE);
 
         animationView.setSites(pts);             // behold eksisterende features
         animationView.renderBinaryTree(tree);    // tegn statisk BinaryTree
@@ -252,10 +252,10 @@ public class Main extends Application {
 
         // 3) Vis i center
         if (animationView == null) {
-            animationView = new AnimationPane();
+            animationView = new AnimationView();
         }
         // Ryd BinaryTree-lag og skift mode i pane:
-        animationView.setVisualizationMode(AnimationPane.Mode.VORONOI);
+        animationView.setVisualizationMode(AnimationView.Mode.VORONOI);
 
         animationView.setSites(pts);
         animationView.setFrames(recorder.getFrames());
@@ -270,13 +270,13 @@ public class Main extends Application {
             String v = miniCorner.getValue();
             switch (v) {
                 case "Top-Left" ->
-                    animationView.setMinimapPosition(AnimationPane.MinimapPos.TOP_LEFT);
+                    animationView.setMinimapPosition(AnimationView.MinimapPos.TOP_LEFT);
                 case "Top-Right" ->
-                    animationView.setMinimapPosition(AnimationPane.MinimapPos.TOP_RIGHT);
+                    animationView.setMinimapPosition(AnimationView.MinimapPos.TOP_RIGHT);
                 case "Bottom-Left" ->
-                    animationView.setMinimapPosition(AnimationPane.MinimapPos.BOTTOM_LEFT);
+                    animationView.setMinimapPosition(AnimationView.MinimapPos.BOTTOM_LEFT);
                 case "Bottom-Right" ->
-                    animationView.setMinimapPosition(AnimationPane.MinimapPos.BOTTOM_RIGHT);
+                    animationView.setMinimapPosition(AnimationView.MinimapPos.BOTTOM_RIGHT);
             }
             animationView.setMinimapSize(miniWSpin.getValue(), miniHSpin.getValue());
         }
@@ -436,13 +436,13 @@ public class Main extends Application {
             String v = miniCorner.getValue();
             switch (v) {
                 case "Top-Left" ->
-                    animationView.setMinimapPosition(AnimationPane.MinimapPos.TOP_LEFT);
+                    animationView.setMinimapPosition(AnimationView.MinimapPos.TOP_LEFT);
                 case "Top-Right" ->
-                    animationView.setMinimapPosition(AnimationPane.MinimapPos.TOP_RIGHT);
+                    animationView.setMinimapPosition(AnimationView.MinimapPos.TOP_RIGHT);
                 case "Bottom-Left" ->
-                    animationView.setMinimapPosition(AnimationPane.MinimapPos.BOTTOM_LEFT);
+                    animationView.setMinimapPosition(AnimationView.MinimapPos.BOTTOM_LEFT);
                 case "Bottom-Right" ->
-                    animationView.setMinimapPosition(AnimationPane.MinimapPos.BOTTOM_RIGHT);
+                    animationView.setMinimapPosition(AnimationView.MinimapPos.BOTTOM_RIGHT);
             }
         });
 
@@ -544,7 +544,7 @@ public class Main extends Application {
     private void beginAddPoints() {
         // Sørg for at have et view klar
         if (animationView == null) {
-            animationView = new AnimationPane();
+            animationView = new AnimationView();
             rootPane.setCenter(animationView);
             BorderPane.setMargin(animationView, new Insets(10));
         }
