@@ -154,6 +154,17 @@ public class ZoomPanController {
     }
 
     /**
+     * Pan the view by world coordinate offsets.
+     */
+    public void panByWorld(double dwx, double dwy) {
+        viewXmin += dwx;
+        viewXmax += dwx;
+        viewYmin += dwy;
+        viewYmax += dwy;
+        notifyViewChanged();
+    }
+
+    /**
      * Pan the view by screen pixel offsets.
      */
     public void panByScreen(double dx, double dy) {

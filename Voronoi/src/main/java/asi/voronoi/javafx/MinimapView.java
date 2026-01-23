@@ -43,6 +43,7 @@ public class MinimapView extends Canvas {
     private Consumer<WorldPoint> onCenterRequest;
     private BiConsumer<WorldPoint, Double> onZoomRequest;
     private Runnable onRedraw;
+    private BiConsumer<Double, Double> onPanRequest; // dx, dy in world coords
 
     public enum MinimapPos {
         TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT
@@ -123,6 +124,13 @@ public class MinimapView extends Canvas {
      */
     public void setOnZoomRequest(BiConsumer<WorldPoint, Double> callback) {
         this.onZoomRequest = callback;
+    }
+
+    /**
+     * Set callback for pan events in world coordinates.
+     */
+    public void setOnPanRequest(BiConsumer<Double, Double> callback) {
+        this.onPanRequest = callback;
     }
 
     /**
@@ -320,7 +328,7 @@ public class MinimapView extends Canvas {
         });
         
         setOnMouseDragged(ev -> {
-            if (!enabled || !draggingRect) {
+            if (!enabled || !draggingRect || zoomPan == null) {
                 return;
             }
             WorldPoint p0 = minimapToWorld(dragStartX, dragStartY);
@@ -332,12 +340,9 @@ public class MinimapView extends Canvas {
             double dx = p1.x - p0.x;
             double dy = p1.y - p0.y;
             
-            // Pan the view by the delta
-            if (zoomPan != null) {
-                zoomPan.panByScreen(dx / (zoomPan.getViewXmax() - zoomPan.getViewXmin()) * 
-                    (zoomPan.sx(zoomPan.getViewXmax()) - zoomPan.sx(zoomPan.getViewXmin())),
-                    -dy / (zoomPan.getViewYmax() - zoomPan.getViewYmin()) * 
-                    (zoomPan.sy(zoomPan.getViewYmin()) - zoomPan.sy(zoomPan.getViewYmax())));
+            // Request pan via callback
+            if (onPanRequest != null) {
+                onPanRequest.accept(dx, dy);
             }
         });
         
