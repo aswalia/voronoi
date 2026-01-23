@@ -14,6 +14,7 @@ import java.util.List;
 class MinimapView {
     private final Canvas canvas;
     private boolean enabled = true;
+    private static final double MINIMAP_LINE_EXTENSION = 2000; // Shorter extension for minimap overview
 
     enum Position {
         TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT
@@ -178,23 +179,23 @@ class MinimapView {
                                 mmx(e.x(), world), mmy(e.y(), world));
                 } else if (b != null) {
                     Point d = ln.getDir();
-                    double x2 = b.x() + d.x() * 2000;
-                    double y2 = b.y() + d.y() * 2000;
+                    double x2 = b.x() + d.x() * MINIMAP_LINE_EXTENSION;
+                    double y2 = b.y() + d.y() * MINIMAP_LINE_EXTENSION;
                     g.strokeLine(mmx(b.x(), world), mmy(b.y(), world), 
                                 mmx(x2, world), mmy(y2, world));
                 } else if (e != null) {
                     Point d = ln.getDir();
-                    double x1 = e.x() - d.x() * 2000;
-                    double y1 = e.y() - d.y() * 2000;
+                    double x1 = e.x() - d.x() * MINIMAP_LINE_EXTENSION;
+                    double y1 = e.y() - d.y() * MINIMAP_LINE_EXTENSION;
                     g.strokeLine(mmx(x1, world), mmy(y1, world), 
                                 mmx(e.x(), world), mmy(e.y(), world));
                 } else {
                     Point m = ln.getMidP();
                     Point d = ln.getDir();
-                    double x1 = m.x() - d.x() * 2000;
-                    double y1 = m.y() - d.y() * 2000;
-                    double x2 = m.x() + d.x() * 2000;
-                    double y2 = m.y() + d.y() * 2000;
+                    double x1 = m.x() - d.x() * MINIMAP_LINE_EXTENSION;
+                    double y1 = m.y() - d.y() * MINIMAP_LINE_EXTENSION;
+                    double x2 = m.x() + d.x() * MINIMAP_LINE_EXTENSION;
+                    double y2 = m.y() + d.y() * MINIMAP_LINE_EXTENSION;
                     g.strokeLine(mmx(x1, world), mmy(y1, world), 
                                 mmx(x2, world), mmy(y2, world));
                 }

@@ -8,6 +8,7 @@ class ZoomPanController {
     private final double pad = 30; // padding around canvas content
     private final double MIN_ZOOM = 0.05; // 5%
     private final double MAX_ZOOM = 50.0; // 5000%
+    private static final double EPSILON = 1e-9; // Small value to prevent division by zero
 
     // World bounds (data)
     private WorldBounds world;
@@ -71,7 +72,7 @@ class ZoomPanController {
      */
     double sx(double x) {
         double contentW = Math.max(1, canvasWidth - 2 * pad);
-        return pad + (x - viewXmin) * (contentW / Math.max(1e-9, viewXmax - viewXmin));
+        return pad + (x - viewXmin) * (contentW / Math.max(EPSILON, viewXmax - viewXmin));
     }
 
     /**
@@ -79,7 +80,7 @@ class ZoomPanController {
      */
     double sy(double y) {
         double contentH = Math.max(1, canvasHeight - 2 * pad);
-        return canvasHeight - pad - (y - viewYmin) * (contentH / Math.max(1e-9, viewYmax - viewYmin));
+        return canvasHeight - pad - (y - viewYmin) * (contentH / Math.max(EPSILON, viewYmax - viewYmin));
     }
 
     /**

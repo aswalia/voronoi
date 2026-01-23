@@ -66,6 +66,7 @@ class AnimationView extends Pane implements MinimapView.MinimapInteractionHandle
     private static final Color COLOR_NODE_DEFAULT = Color.web("#D3D3D3");
     private static final Color COLOR_NODE_STROKE = Color.web("#555555");
     private static final Color COLOR_EDGE_DEFAULT = Color.web("#808080");
+    private static final double LINE_EXTENSION_LENGTH = 5000; // Length for infinite/semi-infinite line segments
 
     private final Group btEdgesLayer = new Group();
     private final Group btNodesLayer = new Group();
@@ -662,10 +663,10 @@ class AnimationView extends Pane implements MinimapView.MinimapInteractionHandle
             asi.voronoi.Line s = f.split;
             Point mp = s.getMidP();
             Point d = s.getDir();
-            double x1 = mp.x() - d.x() * 5000;
-            double y1 = mp.y() - d.y() * 5000;
-            double x2 = mp.x() + d.x() * 5000;
-            double y2 = mp.y() + d.y() * 5000;
+            double x1 = mp.x() - d.x() * LINE_EXTENSION_LENGTH;
+            double y1 = mp.y() - d.y() * LINE_EXTENSION_LENGTH;
+            double x2 = mp.x() + d.x() * LINE_EXTENSION_LENGTH;
+            double y2 = mp.y() + d.y() * LINE_EXTENSION_LENGTH;
             g.strokeLine(zoomPanController.sx(x1), zoomPanController.sy(y1),
                     zoomPanController.sx(x2), zoomPanController.sy(y2));
             g.setLineDashes();
@@ -726,23 +727,23 @@ class AnimationView extends Pane implements MinimapView.MinimapInteractionHandle
                     zoomPanController.sx(e.x()), zoomPanController.sy(e.y()));
         } else if (b != null) {
             Point d = ln.getDir();
-            double x2 = b.x() + d.x() * 5000;
-            double y2 = b.y() + d.y() * 5000;
+            double x2 = b.x() + d.x() * LINE_EXTENSION_LENGTH;
+            double y2 = b.y() + d.y() * LINE_EXTENSION_LENGTH;
             g.strokeLine(zoomPanController.sx(b.x()), zoomPanController.sy(b.y()),
                     zoomPanController.sx(x2), zoomPanController.sy(y2));
         } else if (e != null) {
             Point d = ln.getDir();
-            double x1 = e.x() - d.x() * 5000;
-            double y1 = e.y() - d.y() * 5000;
+            double x1 = e.x() - d.x() * LINE_EXTENSION_LENGTH;
+            double y1 = e.y() - d.y() * LINE_EXTENSION_LENGTH;
             g.strokeLine(zoomPanController.sx(x1), zoomPanController.sy(y1),
                     zoomPanController.sx(e.x()), zoomPanController.sy(e.y()));
         } else {
             Point m = ln.getMidP();
             Point d = ln.getDir();
-            double x1 = m.x() - d.x() * 5000;
-            double y1 = m.y() - d.y() * 5000;
-            double x2 = m.x() + d.x() * 5000;
-            double y2 = m.y() + d.y() * 5000;
+            double x1 = m.x() - d.x() * LINE_EXTENSION_LENGTH;
+            double y1 = m.y() - d.y() * LINE_EXTENSION_LENGTH;
+            double x2 = m.x() + d.x() * LINE_EXTENSION_LENGTH;
+            double y2 = m.y() + d.y() * LINE_EXTENSION_LENGTH;
             g.strokeLine(zoomPanController.sx(x1), zoomPanController.sy(y1),
                     zoomPanController.sx(x2), zoomPanController.sy(y2));
         }
