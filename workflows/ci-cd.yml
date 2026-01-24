@@ -34,4 +34,4 @@ jobs:
 
       - name: Report status
         run: |
-          echo "Build and Tests completed successfully!"
+          echo "Build successfully!"
