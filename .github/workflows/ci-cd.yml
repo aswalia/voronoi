@@ -11,27 +11,30 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
+      - name: Set up JDK
+        uses: actions/setup-java@v3
         with:
-          node-version: '14'
+          java-version: '21' # Use the appropriate Java version for your project
+          distribution: 'zulu' # Options: 'temurin', 'zulu', 'adopt', etc.
 
-      - name: Install dependencies
-        run: |
-          npm install
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
 
-      - name: Run tests
-        run: |
-          npm test
+      - name: Build with Maven
+        run: mvn clean install
 
-      - name: Build project
-        run: |
-          npm run build
+      - name: Run Tests
+        run: mvn test
 
-      - name: Report status
-        run: |
-          echo "Build successfully!"
+      - name: Report Status
+        run: echo "Maven Build and Tests completed successfully!"
