@@ -31,10 +31,10 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Build with Maven
-        run: mvn clean install
+        run: mvn -f Voronoi/pom.xml clean install
 
       - name: Run Tests
-        run: mvn test
+        run: mvn -f Voronoi/pom.xml test
 
       - name: Report Status
         run: echo "Maven Build and Tests completed successfully!"
