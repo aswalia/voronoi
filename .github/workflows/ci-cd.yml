@@ -19,7 +19,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          java-version: '21' # Use the appropriate Java version for your project
+          java-version: '20' # Use the appropriate Java version for your project
           distribution: 'zulu' # Options: 'temurin', 'zulu', 'adopt', etc.
 
       - name: Cache Maven dependencies

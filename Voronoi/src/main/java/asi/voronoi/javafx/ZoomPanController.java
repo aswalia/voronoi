@@ -5,34 +5,43 @@ import javafx.scene.canvas.Canvas;
 import java.util.function.Consumer;
 
 /**
- * Encapsulates view window math (world <-> screen), zoom & pan state.
- * Exposes callback onViewChanged to trigger redraws.
+ * Encapsulates view window math (world <-> screen), zoom & pan state. Exposes
+ * callback onViewChanged to trigger redraws.
  */
 public class ZoomPanController {
+
     private final Canvas canvas;
     private final double pad;
-    private WorldBounds world = new WorldBounds(0,0,1,1);
+    private WorldBounds world = new WorldBounds(0, 0, 1, 1);
 
     private double viewXmin, viewXmax, viewYmin, viewYmax;
     private double initXmin, initXmax, initYmin, initYmax;
     private final double MIN_ZOOM = 0.05;
     private final double MAX_ZOOM = 50.0;
 
-    private Consumer<Void> onViewChanged = v -> {};
+    private Consumer<Void> onViewChanged = v -> {
+    };
 
     public ZoomPanController(Canvas canvas, double pad) {
         this.canvas = canvas;
         this.pad = pad;
     }
 
-    public void setOnViewChanged(Consumer<Void> cb) { this.onViewChanged = cb != null ? cb : v -> {}; }
+    public void setOnViewChanged(Consumer<Void> cb) {
+        this.onViewChanged = cb != null ? cb : v -> {
+        };
+    }
 
     public void setWorldBounds(WorldBounds w) {
-        if (w == null) return;
+        if (w == null) {
+            return;
+        }
         this.world = w;
 
         double mx = (world.xmax - world.xmin) * 0.05;
-        if (mx <= 0) mx = 1;
+        if (mx <= 0) {
+            mx = 1;
+        }
         initXmin = viewXmin = world.xmin - mx;
         initXmax = viewXmax = world.xmax + mx;
         initYmin = viewYmin = world.ymin - mx;
@@ -40,18 +49,33 @@ public class ZoomPanController {
         onViewChanged.accept(null);
     }
 
-    public WorldBounds getWorldBounds() { return world; }
+    public WorldBounds getWorldBounds() {
+        return world;
+    }
+
+    // New methods: Provide the width and height of the canvas
+    public double getCanvasWidth() {
+        return canvas.getWidth();
+    }
+
+    public double getCanvasHeight() {
+        return canvas.getHeight();
+    }
 
     public void resetView() {
-        viewXmin = initXmin; viewXmax = initXmax;
-        viewYmin = initYmin; viewYmax = initYmax;
+        viewXmin = initXmin;
+        viewXmax = initXmax;
+        viewYmin = initYmin;
+        viewYmax = initYmax;
         onViewChanged.accept(null);
     }
 
     public void centerViewOn(double wx, double wy) {
         double w = viewXmax - viewXmin, h = viewYmax - viewYmin;
-        viewXmin = wx - w / 2; viewXmax = wx + w / 2;
-        viewYmin = wy - h / 2; viewYmax = wy + h / 2;
+        viewXmin = wx - w / 2;
+        viewXmax = wx + w / 2;
+        viewYmin = wy - h / 2;
+        viewYmax = wy + h / 2;
         onViewChanged.accept(null);
     }
 
@@ -64,8 +88,10 @@ public class ZoomPanController {
         double dxWorld = dx * (w / contentW);
         double dyWorld = -dy * (h / contentH); // screen Y-flip
 
-        viewXmin -= dxWorld; viewXmax -= dxWorld;
-        viewYmin -= dyWorld; viewYmax -= dyWorld;
+        viewXmin -= dxWorld;
+        viewXmax -= dxWorld;
+        viewYmin -= dyWorld;
+        viewYmax -= dyWorld;
         onViewChanged.accept(null);
     }
 
@@ -82,7 +108,8 @@ public class ZoomPanController {
 
         double nx = (screenX - pad) / Math.max(1, canvas.getWidth() - 2 * pad);
         double ny = (canvas.getHeight() - pad - screenY) / Math.max(1, canvas.getHeight() - 2 * pad); // flip
-        nx = clamp(nx, 0.0, 1.0); ny = clamp(ny, 0.0, 1.0);
+        nx = clamp(nx, 0.0, 1.0);
+        ny = clamp(ny, 0.0, 1.0);
 
         double vx = viewXmin + nx * (viewXmax - viewXmin);
         double vy = viewYmin + ny * (viewYmax - viewYmin);
@@ -158,14 +185,27 @@ public class ZoomPanController {
     public double getZoomRatio() {
         double initW = (initXmax - initXmin);
         double curW = (viewXmax - viewXmin);
-        if (curW <= 0 || !Double.isFinite(curW)) return 1.0;
+        if (curW <= 0 || !Double.isFinite(curW)) {
+            return 1.0;
+        }
         return initW / curW;
     }
 
-    public double getViewXmin() { return viewXmin; }
-    public double getViewXmax() { return viewXmax; }
-    public double getViewYmin() { return viewYmin; }
-    public double getViewYmax() { return viewYmax; }
+    public double getViewXmin() {
+        return viewXmin;
+    }
+
+    public double getViewXmax() {
+        return viewXmax;
+    }
+
+    public double getViewYmin() {
+        return viewYmin;
+    }
+
+    public double getViewYmax() {
+        return viewYmax;
+    }
 
     private double clamp(double v, double a, double b) {
         return Math.max(a, Math.min(b, v));

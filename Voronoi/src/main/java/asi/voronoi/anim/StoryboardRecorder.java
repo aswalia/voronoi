@@ -31,6 +31,19 @@ public class StoryboardRecorder implements VoronoiListener {
             this.marks = marks != null ? new ArrayList<>(marks) : List.of();
             this.label = label;
         }
+
+        public Frame() {
+            // used for testing purpose
+            this.depth = 0;
+            this.bbox = null;
+            this.pivot = null;
+            this.split = null;
+            this.leftPts = null;
+            this.rightPts = null;
+            this.edges = null;
+            this.marks = null;
+            this.label = null;            
+        }
     }
 
     private final List<Frame> frames = new ArrayList<>();
