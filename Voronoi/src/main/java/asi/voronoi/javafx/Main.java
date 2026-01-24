@@ -15,6 +15,7 @@ import java.io.File;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 // JavaFX
@@ -42,7 +43,7 @@ public class Main extends Application {
     // Animation state
     private StoryboardRecorder recorder = new StoryboardRecorder();
     private BorderPane rootPane;
-    private AnimationPane animationView;
+    private AnimationView animationView;
 
     // Toolbar controls
     private ToolBar toolBar;
@@ -54,7 +55,7 @@ public class Main extends Application {
     private static ToolBar statusBar;
     static final StringProperty frameStatus = new SimpleStringProperty();
 
-// I klassens felter (sammen med de andre knapper):
+    // I klassens felter (sammen med de andre knapper):
     private Button btnZoomIn, btnZoomOut, btnReset, btnFit;
     private Label zoomLabel;
 
@@ -65,8 +66,8 @@ public class Main extends Application {
     private HBox drawingBar;
     private Button btnFinishDraw, btnUndoDraw, btnClearDraw, btnCancelDraw;
     private Label drawCountLabel;
-    
-// Menu
+
+    // Menu
     private MenuItem addPointsMenuItem;
 
     @Override
@@ -115,7 +116,6 @@ public class Main extends Application {
         points.getItems().add(fromFile);
 
         MenuItem showTree = new MenuItem("Show Tree");
-        showTree.setOnAction(e -> animateBinaryTree());
         points.getItems().add(showTree);
 
         MenuItem fromDB = new MenuItem("Read from DB");
@@ -163,7 +163,7 @@ public class Main extends Application {
         // --- Toolbar (Play/Pause/Speed/Export) ---
         toolBar = buildToolBar();
         statusBar = buildStatusBar();
-        
+
         VBox top = new VBox(menuBar, toolBar, statusBar);
         rootPane.setTop(top);
 
@@ -187,45 +187,24 @@ public class Main extends Application {
         vt.buildStructure(tree);
         vt.getInfo();
     }
-    
-    
-     private void animateBinaryTree() {
-        // Reset recorder/bus
-        recorder = new StoryboardRecorder();
-        VoronoiEvents.clear();
-        VoronoiEvents.add(recorder);
 
-        // 1) Division (x-akse, y-tiebreak; hvis alle x ens -> vandret split)
-        List<Point> pts = asi.voronoi.tree.BinaryTree.collectPoints(tree);
-//        MedianDivideAnimator.animateDivide(pts);
-
-        BinaryTree.inorder(0, tree);
-
-        // 2) Merge (mikro-frames via DCEL.fireSnapshot() i sigma-trin)
-//        VTree vt = new VTree();
-//        vt.buildStructure(tree);
-
-        
-        
-
-        // 3) Vis i center
-        if (animationView == null) {
-            animationView = new AnimationPane();
-        }
-        animationView.setSites(pts);
-        animationView.setFrames(recorder.getFrames());
-        zoomLabel.setText(String.format("Zoom %.0f%%", animationView.getZoomPercent()));
-        animationView.setSpeed(speedSlider != null ? speedSlider.getValue() : 1.0);
-        animationView.play();
-
-        rootPane.setCenter(animationView);
-        BorderPane.setMargin(animationView, new Insets(10));
-
-        // Aktiver knapper
-        setToolbarEnabled(true);
+    // Hent alle punkter fra BinaryTree (in-order)
+    private List<Point> collectPoints(BinaryTree t) {
+        List<Point> pts = new ArrayList<>();
+        collectRec(t, pts);
+        return pts;
     }
-   
-    
+
+    private void collectRec(BinaryTree n, List<Point> pts) {
+        if (n == null) {
+            return;
+        }
+        collectRec(n.lft(), pts);
+        if (n.getP() != null) {
+            pts.add(n.getP());
+        }
+        collectRec(n.rgt(), pts);
+    }
 
     private void animateDivideAndMerge() {
         // Reset recorder/bus
@@ -234,16 +213,18 @@ public class Main extends Application {
         VoronoiEvents.add(recorder);
 
         // 1) Division (x-akse, y-tiebreak; hvis alle x ens -> vandret split)
-        List<Point> pts = asi.voronoi.tree.BinaryTree.collectPoints(tree);
+        List<Point> pts = collectPoints(tree);
         MedianDivideAnimator.animateDivide(pts);
-
+        System.out.println("[Main] recorder.getFrames().size() = " + recorder.getFrames().size());
         // 2) Merge (mikro-frames via DCEL.fireSnapshot() i sigma-trin)
         VTree vt = new VTree();
         vt.buildStructure(tree);
 
         // 3) Vis i center
         if (animationView == null) {
-            animationView = new AnimationPane();
+            animationView = new AnimationView();
+            // forward frame status updates to the Main frameStatus property
+            animationView.setOnFrameLabelChanged(s -> frameStatus.setValue(s));
         }
         animationView.setSites(pts);
         animationView.setFrames(recorder.getFrames());
@@ -258,13 +239,13 @@ public class Main extends Application {
             String v = miniCorner.getValue();
             switch (v) {
                 case "Top-Left" ->
-                    animationView.setMinimapPosition(AnimationPane.MinimapPos.TOP_LEFT);
+                    animationView.setMinimapPosition(MinimapView.MinimapPos.TOP_LEFT);
                 case "Top-Right" ->
-                    animationView.setMinimapPosition(AnimationPane.MinimapPos.TOP_RIGHT);
+                    animationView.setMinimapPosition(MinimapView.MinimapPos.TOP_RIGHT);
                 case "Bottom-Left" ->
-                    animationView.setMinimapPosition(AnimationPane.MinimapPos.BOTTOM_LEFT);
+                    animationView.setMinimapPosition(MinimapView.MinimapPos.BOTTOM_LEFT);
                 case "Bottom-Right" ->
-                    animationView.setMinimapPosition(AnimationPane.MinimapPos.BOTTOM_RIGHT);
+                    animationView.setMinimapPosition(MinimapView.MinimapPos.BOTTOM_RIGHT);
             }
             animationView.setMinimapSize(miniWSpin.getValue(), miniHSpin.getValue());
         }
@@ -275,15 +256,15 @@ public class Main extends Application {
         // Aktiver knapper
         setToolbarEnabled(true);
     }
-    
+
     private ToolBar buildStatusBar() {
         Label statusText = new Label();
         statusText.textProperty().bind(frameStatus);
-        
+
         ToolBar sb = new ToolBar(
-            statusText
+                statusText
         );
-        
+
         return sb;
 
     }
@@ -352,7 +333,7 @@ public class Main extends Application {
             }
         });
 
-// Knap-handlers
+        // Knap-handlers
         btnZoomIn.setOnAction(e -> {
             if (animationView != null) {
                 animationView.zoomAtCenter(1.25);                 // 25% ind
@@ -396,13 +377,13 @@ public class Main extends Application {
             String v = miniCorner.getValue();
             switch (v) {
                 case "Top-Left" ->
-                    animationView.setMinimapPosition(AnimationPane.MinimapPos.TOP_LEFT);
+                    animationView.setMinimapPosition(MinimapView.MinimapPos.TOP_LEFT);
                 case "Top-Right" ->
-                    animationView.setMinimapPosition(AnimationPane.MinimapPos.TOP_RIGHT);
+                    animationView.setMinimapPosition(MinimapView.MinimapPos.TOP_RIGHT);
                 case "Bottom-Left" ->
-                    animationView.setMinimapPosition(AnimationPane.MinimapPos.BOTTOM_LEFT);
+                    animationView.setMinimapPosition(MinimapView.MinimapPos.BOTTOM_LEFT);
                 case "Bottom-Right" ->
-                    animationView.setMinimapPosition(AnimationPane.MinimapPos.BOTTOM_RIGHT);
+                    animationView.setMinimapPosition(MinimapView.MinimapPos.BOTTOM_RIGHT);
             }
         });
 
@@ -419,7 +400,7 @@ public class Main extends Application {
             }
         });
 
-// ... og indsæt i ToolBar (placér fx efter step-knapperne):
+        // ... og indsæt i ToolBar (placér fx efter step-knapperne):
         ToolBar tb = new ToolBar(
                 btnPlay, btnPause, btnResume,
                 new Separator(),
@@ -433,7 +414,7 @@ public class Main extends Application {
                 new Separator(),
                 new Label("Speed:"), speedSlider, speedLabel
         );
-    
+
         setToolbarEnabled(false);
         return tb;
     }
@@ -504,7 +485,8 @@ public class Main extends Application {
     private void beginAddPoints() {
         // Sørg for at have et view klar
         if (animationView == null) {
-            animationView = new AnimationPane();
+            animationView = new AnimationView();
+            animationView.setOnFrameLabelChanged(s -> frameStatus.setValue(s));
             rootPane.setCenter(animationView);
             BorderPane.setMargin(animationView, new Insets(10));
         }
@@ -515,13 +497,13 @@ public class Main extends Application {
 
         // Stop afspilning og gå i capture-mode
         animationView.stop();
+        animationView.clearOverlay();
         animationView.startPointCapture();
-
-// ... efter animationView.startPointCapture();
+        // ... efter animationView.startPointCapture();
         animationView.requestFocus(); // så Enter/Esc/Backspace virker med det samme
 
         animationView.setOnCapturedCountChanged(n -> drawCountLabel.setText("Points: " + n));
-//        drawCountLabel.setText("Points: 0");
+        //        drawCountLabel.setText("Points: 0");
 
         // UI
         ensureDrawingBar();
