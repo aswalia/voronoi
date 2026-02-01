@@ -4,7 +4,6 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
 
-import java.io.File;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -16,10 +15,10 @@ import asi.voronoi.anim.StoryboardRecorder;
  */
 public class Animator {
 
-    private List<StoryboardRecorder.Frame> frames = List.of();
-    private Timeline timeline;
-    private double frameMs = 200;
-    private int currentIndex = 0;
+    private List<StoryboardRecorder.Frame> frames = List.of(); // List of animation frames
+    private Timeline timeline;                                // Timeline for playback
+    private double frameMs = 200;                             // Milliseconds per frame
+    private int currentIndex = 0;                             // Current frame index
     private Consumer<StoryboardRecorder.Frame> onFrame = f -> {
     };
     private Runnable onAnimationEnd = () -> {
@@ -32,7 +31,7 @@ public class Animator {
     public void setFrames(List<StoryboardRecorder.Frame> frames) {
         this.frames = frames == null ? List.of() : frames;
         currentIndex = 0;
-        System.out.println("[Animator] setFrames count=" + this.frames.size());        
+        System.out.println("[Animator] setFrames count=" + this.frames.size());
         if (!this.frames.isEmpty()) {
             onFrame.accept(this.frames.get(currentIndex));
         }
@@ -62,17 +61,25 @@ public class Animator {
             return;
         }
 
-        // schedule remaining frames at interval frameMs
+        stop(); // Stop any existing timeline for a fresh play
+
+        currentIndex = 0; // Start from the first frame
+        onFrame.accept(frames.get(currentIndex)); // Render the first frame immediately
+
         timeline = new Timeline(new KeyFrame(Duration.millis(frameMs), ev -> {
             currentIndex++;
             if (currentIndex < frames.size()) {
-                onFrame.accept(frames.get(currentIndex));
+                onFrame.accept(frames.get(currentIndex)); // Trigger rendering for the next frame
+            } else {
+                stop(); // Stop playback once all frames are done
+                if (onAnimationEnd != null) {
+                    onAnimationEnd.run(); // Invoke end-of-animation callback
+                }
             }
         }));
-        timeline.setCycleCount(Math.max(0, frames.size() - 1));
-        timeline.setOnFinished(ev -> onAnimationEnd.run());
+
+        timeline.setCycleCount(frames.size() - currentIndex); // Set remaining frames to play
         timeline.playFromStart();
-        
     }
 
     public void pause() {
@@ -113,32 +120,20 @@ public class Animator {
     }
 
     /**
-     * Export frames by calling the provided renderer for each frame and letting
-     * it snapshot. Implementation of snapshot/export is delegated to the caller
-     * (e.g. AnimationView).
+     * Returns the list of animation frames.
+     *
+     * @return The list of animation frames.
      */
-    public interface FrameRenderer {
-
-        void renderFrame(StoryboardRecorder.Frame frame, int index) throws Exception;
+    public List<StoryboardRecorder.Frame> getFrames() {
+        return frames;
     }
 
-    public void exportPngs(File dir, String prefix, FrameRenderer renderer) throws Exception {
-        if (frames.isEmpty()) {
-            return;
-        }
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-
-        boolean wasPlaying = (timeline != null);
-        stop();
-
-        for (int i = 0; i < frames.size(); i++) {
-            renderer.renderFrame(frames.get(i), i);
-        }
-
-        if (wasPlaying) {
-            play();
-        }
+    /**
+     * Returns the index of the current frame being played.
+     *
+     * @return The current frame index.
+     */
+    public int getCurrentFrameIndex() {
+        return currentIndex;
     }
 }
