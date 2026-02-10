@@ -125,7 +125,7 @@
         </plugins>
     </build>
     <properties>
-        <javafx.version>21.0.9</javafx.version>
+        <javafx.version>22.0.2</javafx.version>
         <mainClass>asi.voronoi.javafx.Main</mainClass>
         <log4j.version>2.25.3</log4j.version>
         <noOfPoints>100</noOfPoints>

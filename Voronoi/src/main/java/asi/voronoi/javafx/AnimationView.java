@@ -62,7 +62,7 @@ public class AnimationView extends Pane {
     private final double pad = 30;
 
     public AnimationView() {
-        canvas = new Canvas(900, 700);
+        canvas = new Canvas(1000, 800);
         minimapView = new MinimapView();
         getChildren().addAll(canvas, minimapView.getCanvas());
 
