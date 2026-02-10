@@ -116,6 +116,11 @@ public class Main extends Application {
         points.getItems().add(fromFile);
 
         MenuItem showTree = new MenuItem("Show Tree");
+        showTree.setOnAction(e -> {
+            BinaryTreeView btv = new BinaryTreeView();               
+            btv.renderTree(tree);
+            rootPane.setCenter(btv);
+        });
         points.getItems().add(showTree);
 
         MenuItem fromDB = new MenuItem("Read from DB");
@@ -168,7 +173,7 @@ public class Main extends Application {
         rootPane.setTop(top);
 
         // Scene
-        Scene scene = new Scene(rootPane, 900, 700);
+        Scene scene = new Scene(rootPane, 1000, 800);
         primaryStage.setTitle("Voronoi Diagram");
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -385,6 +390,7 @@ public class Main extends Application {
                 case "Bottom-Right" ->
                     animationView.setMinimapPosition(MinimapView.MinimapPos.BOTTOM_RIGHT);
             }
+            animationView.getMinimapView().layoutMinimap(animationView.getWidth(), animationView.getHeight());
         });
 
         miniWSpin = new Spinner<>(100, 400, 220, 10);

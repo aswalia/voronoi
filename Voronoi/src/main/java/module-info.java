@@ -1,6 +1,5 @@
 module asi.voronoi {
     requires javafx.controls;
-    requires javafx.graphics;
     requires javafx.swing;
     requires java.desktop;
     requires java.sql;

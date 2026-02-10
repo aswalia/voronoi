@@ -41,12 +41,12 @@ public class AnimationView extends Pane {
     private WorldBounds world;
 
     // timeline and frame state
-    private double frameMs = 200;
+    private final double frameMs = 200;
     private int currentIndex = 0;
 
     // minimap sizing (default)
     private double miniW = 220, miniH = 160;
-    private double miniPad = 6;
+    private final double miniPad = 6;
 
     // interactions/panning state (for main canvas)
     private double lastMouseX = Double.NaN, lastMouseY = Double.NaN;
@@ -61,7 +61,7 @@ public class AnimationView extends Pane {
     private final double pad = 30;
 
     public AnimationView() {
-        canvas = new Canvas(900, 700);
+        canvas = new Canvas(1000, 800);
         minimapView = new MinimapView();
         getChildren().addAll(canvas, minimapView.getCanvas());
 
