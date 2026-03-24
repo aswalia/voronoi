@@ -1,0 +1,40 @@
+name: CI/CD Workflow
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '20' # Use the appropriate Java version for your project
+          distribution: 'zulu' # Options: 'temurin', 'zulu', 'adopt', etc.
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Build with Maven
+        run: mvn -f Voronoi/pom.xml clean install
+
+      - name: Run Tests
+        run: mvn -f Voronoi/pom.xml test
+
+      - name: Report Status
+        run: echo "Maven Build and Tests completed successfully!"

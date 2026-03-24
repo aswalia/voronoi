@@ -49,7 +49,6 @@ public class Animator {
     }
 
     public void play() {
-        System.out.println("[Animator] play() frames=" + (frames == null ? 0 : frames.size()) + " frameMs=" + frameMs);
         if (frames == null || frames.isEmpty()) return;
         stop();
 

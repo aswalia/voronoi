@@ -30,6 +30,7 @@ public class AnimationView extends Pane {
     private final MinimapView minimapView;
     private final ZoomPanController zoomPan;
     private final Animator animator;
+    private final PointCaptureManager pointCapture;
 
     // Data (mirrors original fields used by draw code)
     private List<Point> allSites = List.of();
@@ -41,12 +42,12 @@ public class AnimationView extends Pane {
     private WorldBounds world;
 
     // timeline and frame state
-    private double frameMs = 200;
+    private final double frameMs = 200;
     private int currentIndex = 0;
 
     // minimap sizing (default)
     private double miniW = 220, miniH = 160;
-    private double miniPad = 6;
+    private final double miniPad = 6;
 
     // interactions/panning state (for main canvas)
     private double lastMouseX = Double.NaN, lastMouseY = Double.NaN;
@@ -61,12 +62,14 @@ public class AnimationView extends Pane {
     private final double pad = 30;
 
     public AnimationView() {
-        canvas = new Canvas(900, 700);
+        canvas = new Canvas(1000, 800);
         minimapView = new MinimapView();
         getChildren().addAll(canvas, minimapView.getCanvas());
 
         zoomPan = new ZoomPanController(canvas, pad);
         animator = new Animator();
+        
+        pointCapture = new PointCaptureManager();
 
         // wire animator -> draw + minimap
         animator.setOnFrame(f -> {
@@ -125,7 +128,6 @@ public class AnimationView extends Pane {
 
     public void setFrames(List<StoryboardRecorder.Frame> frames) {
         this.frames = frames == null ? List.of() : new ArrayList<>(frames);
-        System.out.println("[AnimationView] setFrames count=" + this.frames.size());
         this.world = computeWorld(this.frames);
         if (this.world != null) {
             zoomPan.setWorldBounds(this.world);
@@ -192,28 +194,26 @@ public class AnimationView extends Pane {
 
     // capture APIs
     public void startPointCapture() {
-        captureMode = true;
-        capturedPoints.clear();
+        pointCapture.startPointCapture();
         redrawCurrent();
     }
 
     public void stopPointCapture() {
-        captureMode = false;
+        pointCapture.stopPointCapture();
         redrawCurrent();
     }
 
     public void clearCapturedPoints() {
-        capturedPoints.clear();
+        pointCapture.clearCapturedPoints();
         redrawCurrent();
     }
 
     public int getCapturedSize() {
-        return capturedPoints.size();
+        return pointCapture.getCapturedSize();
     }
 
     public boolean undoCapturedPoint() {
-        if (!capturedPoints.isEmpty()) {
-            capturedPoints.remove(capturedPoints.size() - 1);
+        if (pointCapture.undoCapturedPoint()) {
             redrawCurrent();
             if (onCapturedCountChanged != null) {
                 onCapturedCountChanged.accept(capturedPoints.size());
@@ -224,7 +224,7 @@ public class AnimationView extends Pane {
     }
 
     public List<Point> getCapturedPoints() {
-        return new ArrayList<>(capturedPoints);
+        return pointCapture.getCapturedPoints();
     }
 
     // minimap API
@@ -279,7 +279,7 @@ public class AnimationView extends Pane {
         animator.stop();
 
         // clear captured points overlay
-        capturedPoints.clear();
+        pointCapture.clearCapturedPoints();
 
         // clear visuals
         GraphicsContext g = canvas.getGraphicsContext2D();
@@ -296,7 +296,7 @@ public class AnimationView extends Pane {
         animator.stop();
         frames = List.of();
         allSites = List.of();
-        capturedPoints.clear();
+        pointCapture.clearCapturedPoints();
 
         GraphicsContext g = canvas.getGraphicsContext2D();
         g.setFill(javafx.scene.paint.Color.WHITE);
@@ -331,18 +331,18 @@ public class AnimationView extends Pane {
             var g = canvas.getGraphicsContext2D();
             g.setFill(javafx.scene.paint.Color.WHITE);
             g.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
-            if (!capturedPoints.isEmpty()) {
+            if (pointCapture.getCapturedSize()>0) {
                 g.setFill(javafx.scene.paint.Color.web("#a100ff"));
-                for (Point s : capturedPoints) {
+                for (Point s : pointCapture.getCapturedPoints()) {
                     g.fillOval(zoomPan.sx(s.x()) - 3.5, zoomPan.sy(s.y()) - 3.5, 7, 7);
                 }
             }
-            minimapView.drawMinimap(captureMode && !capturedPoints.isEmpty() ? capturedPoints : allSites, zoomPan, null, frames, currentIndex);
+            minimapView.drawMinimap(pointCapture.isCaptureMode() && pointCapture.getCapturedSize()>0 ? pointCapture.getCapturedPoints() : allSites, zoomPan, null, frames, currentIndex);
             return;
         }
         StoryboardRecorder.Frame f = frames.get(Math.max(0, Math.min(frames.size() - 1, currentIndex)));
         drawFrame(f);
-        minimapView.drawMinimap(captureMode && !capturedPoints.isEmpty() ? capturedPoints : allSites, zoomPan, f, frames, currentIndex);
+        minimapView.drawMinimap(pointCapture.isCaptureMode() && pointCapture.getCapturedSize()>0 ? pointCapture.getCapturedPoints() : allSites, zoomPan, f, frames, currentIndex);
     }
 
     /**
@@ -433,9 +433,9 @@ public class AnimationView extends Pane {
         }
 
         // Captured points overlay (magenta) — only in captureMode
-        if (captureMode && !capturedPoints.isEmpty()) {
+        if (pointCapture.isCaptureMode() && pointCapture.getCapturedSize()>0) {
             g.setFill(javafx.scene.paint.Color.web("#a100ff")); // magenta
-            for (Point s : capturedPoints) {
+            for (Point s : pointCapture.getCapturedPoints()) {
                 g.fillOval(zoomPan.sx(s.x()) - 3.5, zoomPan.sy(s.y()) - 3.5, 7, 7);
             }
         }
@@ -473,31 +473,25 @@ public class AnimationView extends Pane {
         });
 
         canvas.setOnMouseClicked(ev -> {
-            if (captureMode) {
+            if (pointCapture.isCaptureMode()) {
                 if (ev.getButton() == MouseButton.PRIMARY) {
                     double wx = zoomPan.screenToWorldX(ev.getX());
                     double wy = zoomPan.screenToWorldY(ev.getY());
-                    capturedPoints.add(new Point(wx, wy));
+                    pointCapture.addPoint(new Point(wx, wy));
                     if (onCapturedCountChanged != null) {
-                        onCapturedCountChanged.accept(capturedPoints.size());
+                        onCapturedCountChanged.accept(pointCapture.getCapturedSize());
                     }
                     redrawCurrent();
                     ev.consume();
                 } else if (ev.getButton() == MouseButton.SECONDARY) {
-                    if (!capturedPoints.isEmpty()) {
-                        capturedPoints.remove(capturedPoints.size() - 1);
-                        if (onCapturedCountChanged != null) {
-                            onCapturedCountChanged.accept(capturedPoints.size());
-                        }
-                        redrawCurrent();
-                    }
+                    undoCapturedPoint();
                     ev.consume();
                 }
             }
         });
 
         canvas.setOnMousePressed(ev -> {
-            if (captureMode) {
+            if (pointCapture.isCaptureMode()) {
                 return;
             }
             if (ev.isPrimaryButtonDown()) {
@@ -509,7 +503,7 @@ public class AnimationView extends Pane {
         });
 
         canvas.setOnMouseDragged(ev -> {
-            if (captureMode) {
+            if (pointCapture.isCaptureMode()) {
                 return;
             }
             if (panning) {

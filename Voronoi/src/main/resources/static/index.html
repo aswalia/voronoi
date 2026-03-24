@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Voronoi Web</title>
+    <style>
+        body { margin: 0; display: flex; flex-direction: column; height: 100vh; font-family: sans-serif; }
+        #toolbar { padding: 10px; background: #f0f0f0; border-bottom: 1px solid #ccc; }
+        #canvas-container { flex: 1; position: relative; overflow: hidden; background: #fafafa; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <div id="toolbar">
+        <button onclick="addRandomPoints()">Add Random Points</button>
+        <button onclick="clearCanvas()">Clear</button>
+        <button onclick="computeVoronoi()">Compute</button>
+        <span id="status">Points: 0</span>
+        <button onclick="fetchAnimation()">Fetch Animation</button>
+        <button onclick="playAnimation(30)">Play</button>
+        <button onclick="stopAnimation()">Stop</button>
+    </div>
+    <div id="canvas-container">
+        <canvas id="voronoiCanvas"></canvas>
+    </div>
+    <script src="voronoi.js"></script>
+</body>
+</html>

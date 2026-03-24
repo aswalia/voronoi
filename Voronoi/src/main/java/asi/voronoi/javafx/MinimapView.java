@@ -45,10 +45,18 @@ public class MinimapView {
         double margin = 10;
         double x = 0, y = 0;
         switch (pos) {
-            case TOP_LEFT: x = margin; y = margin; break;
-            case TOP_RIGHT: x = parentW - miniW - margin; y = margin; break;
-            case BOTTOM_LEFT: x = margin; y = parentH - miniH - margin; break;
-            case BOTTOM_RIGHT: x = parentW - miniW - margin; y = parentH - miniH - margin; break;
+            case TOP_LEFT -> {
+                x = margin; y = margin;
+            }
+            case TOP_RIGHT -> {
+                x = parentW - miniW - margin; y = margin;
+            }
+            case BOTTOM_LEFT -> {
+                x = margin; y = parentH - miniH - margin;
+            }
+            case BOTTOM_RIGHT -> {
+                x = parentW - miniW - margin; y = parentH - miniH - margin;
+            }
         }
         minimap.setLayoutX(x);
         minimap.setLayoutY(y);
