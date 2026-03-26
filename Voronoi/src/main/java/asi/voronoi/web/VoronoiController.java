@@ -4,6 +4,8 @@ import asi.voronoi.DCEL;
 import asi.voronoi.DCELNode;
 import asi.voronoi.Line;
 import asi.voronoi.Point;
+import asi.voronoi.anim.StoryboardRecorder;
+import asi.voronoi.anim.VoronoiEvents;
 import asi.voronoi.tree.AVLTree;
 import asi.voronoi.tree.VTree;
 import org.springframework.web.bind.annotation.*;
@@ -47,11 +49,7 @@ public class VoronoiController {
         List<EdgeDTO> edgesOut = new ArrayList<>();
         for (DCELNode dn : root.getNode().getVoronoiEdgeList()) {
             Line seg = dn.getLineSegment();
-            if (seg == null || seg.getBeginP().isEmpty() || seg.getEndP().isEmpty()) continue;
-
-            Point a = seg.getBeginP().get();
-            Point b = seg.getEndP().get();
-            edgesOut.add(new EdgeDTO(a.x(), a.y(), b.x(), b.y()));
+            edgesOut.add(drawLineSegment(seg));
         }
         return edgesOut;
     }
@@ -68,14 +66,14 @@ public class VoronoiController {
                 .toList();
 
         // Attach recorder to event bus
-        var recorder = new asi.voronoi.anim.StoryboardRecorder();
-        asi.voronoi.anim.VoronoiEvents.clear();
-        asi.voronoi.anim.VoronoiEvents.add(recorder);
+        var recorder = new StoryboardRecorder();
+        VoronoiEvents.clear();
+        VoronoiEvents.add(recorder);
 
         // Build tree + compute (this should fire snapshots/final)
-        var btree = new asi.voronoi.tree.AVLTree(pts.get(0));
+        var btree = new AVLTree(pts.get(0));
         for (int i = 1; i < pts.size(); i++) {
-            btree = (asi.voronoi.tree.AVLTree) btree.insertNode(pts.get(i));
+            btree = (AVLTree) btree.insertNode(pts.get(i));
         }
         var vTree = new asi.voronoi.tree.VTree();
         vTree.buildStructure(btree);
@@ -89,15 +87,36 @@ public class VoronoiController {
 
             List<EdgeDTO> edges = new ArrayList<>();
             for (Line l : f.edges) {
-                if (l == null || l.getBeginP().isEmpty() || l.getEndP().isEmpty()) continue;
-                Point a = l.getBeginP().get();
-                Point b = l.getEndP().get();
-                edges.add(new EdgeDTO(a.x(), a.y(), b.x(), b.y()));
+                edges.add(drawLineSegment(l));
             }
 
             framesOut.add(new FrameDTO(i, f.label, edges));
         }
 
         return new AnimationResponse(framesOut);
-    }    
+    }
+
+    private EdgeDTO drawLineSegment(asi.voronoi.Line ln) {
+        EdgeDTO dtoLine;
+        var b = ln.getBeginP().orElse(null);
+        var e = ln.getEndP().orElse(null);
+        if (b != null && e != null) {
+            dtoLine = new EdgeDTO(b.x(), b.y(), e.x(), e.y());
+        } else if (b != null) {
+            var d = ln.getDir();
+            double x2 = b.x() + d.x()*10, y2 = b.y() + d.y()*10;
+            dtoLine = new EdgeDTO(b.x(), b.y(), x2, y2);            
+        } else if (e != null) {
+            var d = ln.getDir();
+            double x1 = e.x() - d.x()*10, y1 = e.y() - d.y()*10;
+            dtoLine = new EdgeDTO(x1, y1, e.x(), e.y());
+        } else {
+            var m = ln.getMidP();
+            var d = ln.getDir();
+            double x1 = m.x() - d.x()*10, y1 = m.y() - d.y()*10;
+            double x2 = m.x() + d.x()*10, y2 = m.y() + d.y()*10;
+            dtoLine = new EdgeDTO(x1, y1, x2, y2);
+        }
+        return dtoLine;
+    }   
 }
