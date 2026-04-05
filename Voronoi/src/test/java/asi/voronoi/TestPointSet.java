@@ -5,7 +5,9 @@
 package asi.voronoi;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import org.junit.After;
 import org.junit.Before;
@@ -34,14 +36,14 @@ public class TestPointSet {
     public void testBuildPointSet() {
         String fileName = "src/test/resources/pointset_01.test";
         File file = new File(fileName);
-        Set<Point> expected = new HashSet<>();
-        expected.add(new Point(1, 52));
-        expected.add(new Point(0.52, 0));
-        expected.add(new Point(-3.1415, 3.1415));
-        expected.add(new Point(3.1416, -123));
-        Set<Point> res;
+        Map<Integer, Point> expected = new HashMap<>();
+        expected.put(1, new Point(1, 52));
+        expected.put(2, new Point(0.52, 0));
+        expected.put(3, new Point(-3.1415, 3.1415));
+        expected.put(4, new Point(3.1416, -123));
+        Map<Integer, Point> res;
         try {
-            res = actual.buildPointSet(file);
+            res = actual.buildPointMap(file);
             assertEquals(expected, res);
         } catch (Exception ex) {
             fail("Unexpected exception: " + ex.getMessage());
@@ -53,7 +55,7 @@ public class TestPointSet {
         String fileName = "src/test/resources/pointset_02.test";
         File file = new File(fileName);
         try {
-            actual.buildPointSet(file);
+            actual.buildPointMap(file);
             fail("Exception expected");
         } catch (Exception ex) {
             assertEquals("Parse error - in state 'beginPoint' Got: [", ex.getMessage());

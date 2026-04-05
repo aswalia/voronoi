@@ -292,4 +292,10 @@ public class TestBinaryTree {
         b.insertNode(new Point(5, 4));
         Assert.assertTrue("insert 4", b.count() == 5);
     }
+    
+    @Test
+    public void testCountEmpty() {
+        BinaryTree b = new BinaryTree();
+        Assert.assertTrue("Empty tree", b.count() == 0);
+    }
 }

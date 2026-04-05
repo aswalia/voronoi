@@ -8,9 +8,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.sql.SQLException;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -81,31 +82,32 @@ public class PointSet {
     private CharType tokenType;
     private char nextToken;
     private String valueX, valueY;
-    private final Set<Point> ps;
+    private final Map<Integer, Point> pm;
+    private int id;
 
     public PointSet() {
-        ps = new HashSet<>();
+        pm = new HashMap<>();
         state = State.beginPoint;
+        id = 0;
     }
 
-    public Set<Point> getPointSet() {
-        return ps;
+    public Map<Integer, Point> getPointMap() {
+        return pm;
     }
 
-    public Set<Point> buildPointSet(File filename) throws Exception {
+    public Map<Integer, Point> buildPointMap(File filename) throws Exception {
         FileReader fr;
         fr = new FileReader(filename);
         br = new BufferedReader(fr);
         return parsePointSet();
     }
 
-    public static void store(int group, Set<Point> sp) throws SQLException {
+    public static void store(int group, Map<Integer, Point> pm) throws SQLException {
         List<String> l = new LinkedList<>();
-        int count = 1;
-        for (Point p : sp) {
-            String r = count + " , " + group + " , " + p.x() + " , " + p.y();
+        Set<Integer> sp = pm.keySet();
+        for (Integer i : sp) {
+            String r = i + " , " + group + " , " + pm.get(i).x() + " , " + pm.get(i).y();
             l.add(r);
-            count++;
         }
         DatabaseHandler.insertContent("points", l);
     }
@@ -144,6 +146,7 @@ public class PointSet {
             case lPerentes -> {
                 valueX = "";
                 valueY = "";
+                id++;
             }
         }
     }
@@ -173,7 +176,9 @@ public class PointSet {
     }
 
     private void storePoint() {
-        ps.add(new Point(Double.parseDouble(valueX), Double.parseDouble(valueY)));
+        if (!pm.containsKey(id)) {
+            pm.put(id, new Point(Double.parseDouble(valueX), Double.parseDouble(valueY)));
+        }
     }
 
     private void endPoint() throws Exception {
@@ -183,7 +188,7 @@ public class PointSet {
         }
     }
 
-    private Set<Point> parsePointSet() throws Exception {
+    private Map<Integer, Point> parsePointSet() throws Exception {
         int ch;
         State oldState = null;
         while ((ch = br.read()) != -1) {
@@ -213,6 +218,6 @@ public class PointSet {
             oldState = state;
             state = STATE_MACHINE[state.ordinal()][tokenType.ordinal()];
         }
-        return ps;
+        return pm;
     }
 }

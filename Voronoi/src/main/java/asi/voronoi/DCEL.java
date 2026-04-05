@@ -70,6 +70,14 @@ public class DCEL implements Constant, java.io.Serializable {
         }
         return ret;
     }
+    
+    public int size() {
+        if (node == null) {
+            return 0;
+        } else {
+            return node.getVoronoiEdgeList().size();
+        }
+    }
 
     private void support(ConveksHull ch) throws Exception {
         String methodName = getClass().getName() + " : "

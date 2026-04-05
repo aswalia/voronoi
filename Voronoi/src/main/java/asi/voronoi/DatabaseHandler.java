@@ -33,6 +33,10 @@ public class DatabaseHandler {
         return myObj.delete();
     }
 
+    /** 
+     * 
+     * @param fileName 
+     */
     public static void connectToDatabase(String fileName) {
 
         // SQLite connection string
@@ -49,6 +53,11 @@ public class DatabaseHandler {
         }
     }
 
+    /**
+     * 
+     * @param sql - 
+     * @throws SQLException 
+     */
     private static void createNew(String sql) throws SQLException {
         try (Connection conn = DriverManager.getConnection(url); Statement stmt = conn.createStatement()) {
             stmt.execute(sql);
@@ -57,6 +66,14 @@ public class DatabaseHandler {
 
     public static void createContent() throws SQLException {
         String sql;
+        
+        sql = """
+              CREATE TABLE IF NOT EXISTS groups (
+               grp INTEGER,
+               name VARCHAR(20),
+               PRIMARY KEY (grp)
+              );""";
+        createNew(sql);
 
         sql = """
               CREATE TABLE IF NOT EXISTS points (
@@ -64,7 +81,8 @@ public class DatabaseHandler {
                grp INTEGER,
                x REAL NOT NULL,
                y REAL NOT NULL,
-               PRIMARY KEY (id, grp)
+               PRIMARY KEY (id, grp),
+               FOREIGN KEY (grp) REFERENCES groups(grp)
               );""";
         createNew(sql);
 
@@ -81,6 +99,7 @@ public class DatabaseHandler {
                FOREIGN KEY(endpoint, grp) REFERENCES points(id, grp),
                FOREIGN KEY(midpoint, grp) REFERENCES points(id, grp),
                FOREIGN KEY(direction, grp) REFERENCES points(id, grp)
+               FOREIGN KEY (grp) REFERENCES groups(grp)
               );""";
         createNew(sql);
 
@@ -94,6 +113,7 @@ public class DatabaseHandler {
                FOREIGN KEY(point, grp) REFERENCES points(id, grp),
                FOREIGN KEY(left, grp) REFERENCES points(id, grp),
                FOREIGN KEY(right, grp) REFERENCES points(id, grp)
+               FOREIGN KEY (grp) REFERENCES groups(grp)
               );""";
         createNew(sql);
 
@@ -106,7 +126,8 @@ public class DatabaseHandler {
                PRIMARY KEY (point, grp),
                FOREIGN KEY(point, grp) REFERENCES points(id, grp),
                FOREIGN KEY(next, grp) REFERENCES points(id, grp),
-               FOREIGN KEY(previous, grp) REFERENCES points(id, grp)
+               FOREIGN KEY(previous, grp) REFERENCES points(id, grp),
+               FOREIGN KEY (grp) REFERENCES groups(grp)
               );""";
         createNew(sql);
 
@@ -115,7 +136,8 @@ public class DatabaseHandler {
                linesegment INTEGER,
                grp INTEGER,
                PRIMARY KEY (linesegment, grp),
-               FOREIGN KEY(linesegment, grp) REFERENCES linesegments(id, grp)
+               FOREIGN KEY(linesegment, grp) REFERENCES linesegments(id, grp),
+               FOREIGN KEY (grp) REFERENCES groups(grp)
               );""";
         createNew(sql);
 
@@ -132,42 +154,49 @@ public class DatabaseHandler {
                FOREIGN KEY(f_r, grp) REFERENCES points(id, grp),
                FOREIGN KEY(edge, grp) REFERENCES linesegments(id, grp),
                FOREIGN KEY(bp_ref, grp) REFERENCES linesegments(id, grp),
-               FOREIGN KEY(ep_ref, grp) REFERENCES linesegments(id, grp)
+               FOREIGN KEY(ep_ref, grp) REFERENCES linesegments(id, grp),
+               FOREIGN KEY (grp) REFERENCES groups(grp)
               );""";
         createNew(sql);
 
         sql = """
-              CREATE INDEX idx_points_grp
+              CREATE INDEX IF NOT EXISTS idx_groups_grp
+              ON groups(grp)
+              """;
+        createNew(sql);
+
+        sql = """
+              CREATE INDEX IF NOT EXISTS idx_points_grp
               ON points(grp)
               """;
         createNew(sql);
 
         sql = """
-              CREATE INDEX idx_linesegments_grp
+              CREATE INDEX IF NOT EXISTS idx_linesegments_grp
               ON linesegments(grp)
               """;
         createNew(sql);
 
         sql = """
-              CREATE INDEX idx_binaryTrees_grp
+              CREATE INDEX IF NOT EXISTS idx_binaryTrees_grp
               ON binaryTrees(grp)
               """;
         createNew(sql);
 
         sql = """
-              CREATE INDEX idx_conveksHulls_grp
+              CREATE INDEX IF NOT EXISTS idx_conveksHulls_grp
               ON conveksHulls(grp)
               """;
         createNew(sql);
 
         sql = """
-              CREATE INDEX idx_conveksHullsAsLinesegments_grp
+              CREATE INDEX IF NOT EXISTS idx_conveksHullsAsLinesegments_grp
               ON conveksHullsAsLinesegments(grp)
               """;
         createNew(sql);
 
         sql = """
-              CREATE INDEX idx_dcels_grp
+              CREATE INDEX IF NOT EXISTS idx_dcels_grp
               ON dcels(grp)
               """;
         createNew(sql);
@@ -344,15 +373,35 @@ public class DatabaseHandler {
             conn.commit();
         }
     }
+    
+    public static record GroupNames(int grp, String name) {       
+    }
+    
+    public static List<GroupNames> getNamesByGroup() {
+        List<GroupNames> ln = new LinkedList<>();
+        String sql = "SELECT grp, name FROM groups"; 
+        try (Connection conn = DriverManager.getConnection(url); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            // set the value
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                int grp = rs.getInt("grp");
+                String name = rs.getString("name");
+                GroupNames nm = new GroupNames(grp, name);
+                ln.add(nm);
+            }
+        } catch (SQLException e) {
+            LOG.error(e.getMessage());
+        }
+        return ln;
+    }
 
     public static Map<Integer, Point> getPointsByGroup(int grp) {
+        Map<Integer, Point> mp = new HashMap<>();
         String sql = "SELECT id, x, y FROM points WHERE grp = ?";
-
         try (Connection conn = DriverManager.getConnection(url); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             // set the value
             pstmt.setInt(1, grp);
             ResultSet rs = pstmt.executeQuery();
-            Map<Integer, Point> mp = new HashMap<>();
             while (rs.next()) {
                 int id = rs.getInt("id");
                 double x = rs.getDouble("x");
@@ -360,11 +409,10 @@ public class DatabaseHandler {
                 Point p = new Point(x, y);
                 mp.put(id, p);
             }
-            return mp;
         } catch (SQLException e) {
             LOG.error(e.getMessage());
-            return null;
         }
+        return mp;
     }
 
     public static int getIndexFromPoint(Point p, int grp) {
@@ -405,16 +453,7 @@ public class DatabaseHandler {
         }
     }
 
-    private static class BinaryTreeNode {
-
-        Point p;
-        int lft, rgt;
-
-        BinaryTreeNode(Point p, int lft, int rgt) {
-            this.p = p;
-            this.lft = lft;
-            this.rgt = rgt;
-        }
+    private static record BinaryTreeNode(Point p, int lft, int rgt) {
     }
 
     public static List<Integer> getIndexFromBinaryTree(int grp) {
@@ -432,16 +471,14 @@ public class DatabaseHandler {
                 var id = rs.getInt("binaryTrees.point");
                 li.add(id);
             }
-            return li;
         } catch (SQLException e) {
             LOG.error(e.getMessage());
-            return null;
         }
+        return li;
     }
 
     public static BinaryTree getBinaryTreeByGroup(int grp) {
-        Map<Integer, BinaryTreeNode> m = new HashMap<>();
-        Map<Integer, BinaryTree> mbt = new HashMap<>();
+        BinaryTree bt = new BinaryTree();
         String sql = """
                      SELECT binaryTrees.point, binaryTrees.left, binaryTrees.right, points.x, points.y 
                      FROM points, binaryTrees 
@@ -451,6 +488,8 @@ public class DatabaseHandler {
                             (points.grp = binaryTrees.grp))""";
 
         try (Connection conn = DriverManager.getConnection(url); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            Map<Integer, BinaryTreeNode> m = new HashMap<>();
+            Map<Integer, BinaryTree> mbt = new HashMap<>();
             // set the value
             pstmt.setInt(1, grp);
             ResultSet rs = pstmt.executeQuery();
@@ -465,7 +504,6 @@ public class DatabaseHandler {
                 m.put(id, btn);
             }
             int root = DatabaseHandler.getIndexOfBinarytTreeRoot(grp);
-            BinaryTree bt;
             Set<Integer> mi = m.keySet();
             for (Integer i : mi) {
                 btn = m.get(i);
@@ -479,28 +517,19 @@ public class DatabaseHandler {
                 bt.setLft(mbt.get(btn.lft));
                 bt.setRgt(mbt.get(btn.rgt));
             }
-            bt = mbt.get(root);
-            return bt;
+            BinaryTree temp = mbt.get(root);
+            bt = (temp == null) ? bt : temp; //avoid bt to be null
         } catch (SQLException e) {
             LOG.error(e.getMessage());
-            return null;
         }
+        return bt;
     }
 
-    private static class ConveksHullNode {
-
-        Point p;
-        int prv;
-
-        ConveksHullNode(Point p, int prv, int nxt) {
-            this.p = p;
-            this.prv = prv;
-        }
+    private static record ConveksHullNode(Point p, int prv, int nxt) {
     }
 
     public static ConveksHull getConveksHullByGroup(int grp) {
-        Map<Integer, ConveksHullNode> m = new HashMap<>();
-        Map<Integer, ConveksHull> mch = new HashMap<>();
+        ConveksHull head = new ConveksHull();
         String sql = """
                      SELECT conveksHulls.point, conveksHulls.next, conveksHulls.previous, points.x, points.y 
                      FROM points, conveksHulls
@@ -509,6 +538,8 @@ public class DatabaseHandler {
                      ORDER BY points.x, points.y ASC""";
         try (Connection conn = DriverManager.getConnection(url); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             // set the value
+            Map<Integer, ConveksHullNode> m = new HashMap<>();
+            Map<Integer, ConveksHull> mch = new HashMap<>();
             pstmt.setInt(1, grp);
             ResultSet rs = pstmt.executeQuery();
             ConveksHullNode chn;
@@ -525,8 +556,7 @@ public class DatabaseHandler {
                 chn = new ConveksHullNode(p, prev, next);
                 m.put(id, chn);
             }
-            ConveksHull ch = null;
-            ConveksHull head = null;
+            ConveksHull ch;
             Set<Integer> mi = m.keySet();
             for (Integer i : mi) {
                 chn = m.get(i);
@@ -542,31 +572,34 @@ public class DatabaseHandler {
                 chn = m.get(i);
                 ch.connect(mch.get(chn.prv), ch);
             }
-            return head;
         } catch (SQLException e) {
             LOG.error(e.getMessage());
-            return null;
         }
+        return head;
     }
 
     private static class DcelStruct {
 
-        DCELNode dn = new DCELNode();
+        DCELNode node = new DCELNode();
         int bp_ref, ep_ref;
-
-        DcelStruct(double a_b, double a_e, Point mp, Point dir, int bp_ref, int ep_ref, Point f_l, Point f_r) {
-            dn.a_b = a_b;
-            dn.a_e = a_e;
-            dn.p = mp;
-            dn.d = dir;
-            dn.f_l = f_l;
-            dn.f_r = f_r;
+        
+        DcelStruct(double a_b, double a_e, 
+                          Point mp, Point dir, 
+                          int bp_ref, int ep_ref, 
+                          Point f_l, Point f_r) {
+            node.a_b = a_b;
+            node.a_e = a_e;
+            node.p = mp;
+            node.d = dir;
+            node.f_l = f_l;
+            node.f_r = f_r;
             this.bp_ref = bp_ref;
             this.ep_ref = ep_ref;
         }
     }
 
     public static DCEL getVoronoiDiagramByGroup(int grp) {
+        DCEL ret = new DCEL();
         String sql1 = """
                       SELECT d.edge, d.bp_ref, d.ep_ref, bp.x, bp.y, ep.x, ep.y, mp.x, mp.y, dir.x, dir.y, lp.x, lp.y, rp.x, rp.y
                       FROM dcels d, linesegments l, points bp, points ep, points mp, points dir, points lp, points rp
@@ -655,12 +688,16 @@ public class DatabaseHandler {
             Map<Integer, DCELNode> mdn = new HashMap<>();
             for (Integer i : mi) {
                 ds = m.get(i);
-                DCELNode dn = new DCELNode(ds.dn);
+                DCELNode dn = new DCELNode(ds.node);
                 mdn.put(i, dn);
             }
             for (Integer i : mi) {
                 ds = m.get(i);
                 DCELNode dn = mdn.get(i);
+                if (ret.node == null) {
+                // ret is not set, so set it    
+                    ret.node = dn;
+                }
                 if (ds.bp_ref != 0) {
                     dn.p_b = new DCEL(mdn.get(ds.bp_ref));
                 }
@@ -668,15 +705,13 @@ public class DatabaseHandler {
                     dn.p_e = new DCEL(mdn.get(ds.ep_ref));
                 }
             }
-            DCEL ret = new DCEL(mdn.get(1));
-            return ret;
         } catch (SQLException e) {
             LOG.error(e.getMessage());
-            return null;
         }
+        return ret;
     }
 
-    public static int getLargestPointId(int grp) throws SQLException {
+    public static int getLargestPointId(int grp) {
         String sql = """
                      SELECT id FROM points
                      WHERE (grp = ?)
@@ -687,11 +722,13 @@ public class DatabaseHandler {
             pstmt.setInt(1, grp);
             ResultSet rs = pstmt.executeQuery();
             ni = rs.getInt("id") + 1;
+        } catch (SQLException e) {
+            LOG.error(e.getMessage());
         }
         return ni;
     }
 
-    public static int getLargestLinesegmentId(int grp) throws SQLException {
+    public static int getLargestLinesegmentId(int grp) {
         String sql = """
                      SELECT id FROM linesegments
                      WHERE (grp = ?)
@@ -702,6 +739,8 @@ public class DatabaseHandler {
             pstmt.setInt(1, grp);
             ResultSet rs = pstmt.executeQuery();
             ni = rs.getInt("id") + 1;
+        } catch (SQLException e) {
+            LOG.error(e.getMessage());
         }
         return ni;
     }
@@ -727,6 +766,12 @@ public class DatabaseHandler {
         return ni;
     }
 
+    /**
+     * 
+     * @param grp The 
+     * @return The number of inserted line segments into the line segment table 
+     * @throws SQLException 
+     */
     public static int insertConveksHullLinesegment(int grp) throws SQLException {
         int ni = insertLinesegment(grp);
         List<String> lni = new LinkedList<>();

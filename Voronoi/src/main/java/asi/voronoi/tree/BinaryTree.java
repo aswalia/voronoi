@@ -279,15 +279,17 @@ public class BinaryTree implements java.io.Serializable, ModelObject {
     }
 
     public int count() {
-        int ret;
-        if (isLeaf()) {
-            ret = 1;
-        } else if (lft == null) {
-            ret = rgt.count() + 1;
-        } else if (rgt == null) {
-            ret = lft.count() + 1;
-        } else {
-            ret = lft.count() + rgt.count() + 1;
+        int ret = 0;
+        if (p != null) {
+            if (isLeaf()) {
+                ret = 1;
+            } else if (lft == null) {
+                ret = rgt.count() + 1;
+            } else if (rgt == null) {
+                ret = lft.count() + 1;
+            } else {
+                ret = lft.count() + rgt.count() + 1;
+            }
         }
         return ret;
     }

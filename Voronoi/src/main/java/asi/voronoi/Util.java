@@ -7,7 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -31,12 +31,12 @@ public class Util {
 
     public static void prepareDatabaseWithRandomPoints(int noOfPoints, int group) throws SQLException {
         double x, y;
-        Set<Point> sp = new HashSet<>();
+        Map<Integer, Point> sp = new HashMap<>();
         for (int i = 0; i < noOfPoints; i++) {
             x = (int) (Math.random() * FACTOR * noOfPoints);
             y = (int) (Math.random() * FACTOR * noOfPoints);
             Point p = new Point(x, y);
-            sp.add(p);
+            sp.put(i,p);
         }
         PointSet.store(group, sp);
     }
@@ -80,22 +80,23 @@ public class Util {
 
     public static BinaryTree bTreeFromPointSet(File file) throws Exception {
         PointSet ps = new PointSet();
-        Set<Point> pointsFromFile = ps.buildPointSet(file);
+        Map<Integer, Point> pointsFromFile = ps.buildPointMap(file);
         BinaryTree ret = null;
-        for (Point p : pointsFromFile) {
+        Set<Integer> points = pointsFromFile.keySet();
+        for (Integer i:points) {
             if (ret == null) {
-                ret = new AVLTree(p);
+                ret = new AVLTree(pointsFromFile.get(i));
             } else {
-                ret = ret.insertNode(p);
+                ret = ret.insertNode(pointsFromFile.get(i));
             }
         }
         return ret;
     }
 
-    public static Set<Point> getPoints(File file) throws Exception {
+    public static Map<Integer, Point> getPoints(File file) throws Exception {
         PointSet ps = new PointSet();
 //        Set<Point> pointsFromFile = ps.buildPointSet(file);
-        return ps.buildPointSet(file);
+        return ps.buildPointMap(file);
     }
 
     public static BinaryTree generateBTree(File file) {
@@ -152,23 +153,24 @@ public class Util {
         String dbFileName = "src/main/resources/VD.db";
         String psFileName = "src/test/resources/pointset_01.test";
         int grp = 1;
-        Set<Point> pointsFromFile = null;
+        Map<Integer, Point> pointsFromFile = null;
         try {
             DatabaseHandler.connectToDatabase(dbFileName);
             PointSet ps = new PointSet();
-            pointsFromFile = ps.buildPointSet(new File(psFileName));
+            pointsFromFile = ps.buildPointMap(new File(psFileName));
             PointSet.store(grp, pointsFromFile);
         } catch (Exception ex) {
             LOG.error("Unable to store Points in Database: " + ex.getMessage());
             System.exit(-1);
         }
-        for (Point p : pointsFromFile) {
+        Set<Integer> sp = pointsFromFile.keySet();
+        for (Integer p : sp) {
             if (t == null) {
                 // first point in set
-                t = new AVLTree(p);
+                t = new AVLTree(pointsFromFile.get(p));
             } else {
                 // rest of the set
-                t = t.insertNode(new Point(p));
+                t = t.insertNode(pointsFromFile.get(p));
             }
         }
         // Store BinaryTree to database
