@@ -95,7 +95,6 @@ canvas.addEventListener('mousedown', (e) => {
     points.push(new Point(e.clientX - rect.left, e.clientY - rect.top));
     updateStatus();
     draw();
-    computeVoronoi(); 
 });
 
 let animationFrames = [];
@@ -124,7 +123,7 @@ async function fetchAnimation() {
   console.log("frames:", animationFrames.length);
 }
 
-function playAnimation(fps = 10) {
+function playAnimation(fps = 100) {
   stopAnimation();
   if (!animationFrames.length) return;
 

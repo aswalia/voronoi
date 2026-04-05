@@ -1,5 +1,9 @@
 package asi.voronoi.javafx;
 
+import asi.voronoi.ConveksHull;
+import asi.voronoi.DCEL;
+import asi.voronoi.DatabaseHandler;
+import asi.voronoi.DatabaseHandler.GroupNames;
 import asi.voronoi.tree.BinaryTree;
 import asi.voronoi.Util;
 import asi.voronoi.tree.ConveksHullTree;
@@ -10,26 +14,30 @@ import asi.voronoi.Point;
 import asi.voronoi.anim.MedianDivideAnimator;
 import asi.voronoi.anim.StoryboardRecorder;
 import asi.voronoi.anim.VoronoiEvents;
+import asi.voronoi.tree.AVLTree;
 
 import java.io.File;
-import java.sql.SQLException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 // JavaFX
 import javafx.application.Application;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.event.ActionEvent;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import static javafx.scene.input.KeyCode.BACK_SPACE;
+import static javafx.scene.input.KeyCode.DELETE;
+import static javafx.scene.input.KeyCode.ENTER;
+import static javafx.scene.input.KeyCode.ESCAPE;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -37,14 +45,25 @@ public class Main extends Application {
 
     private static String[] commandLineArgs; // hold the commandline args
 
-    private final String dbFileName = "src/main/resources/VD.db";
-    private static BinaryTree tree = new BinaryTree(); // Create a tree
+    private static final String DB_FILENAME = "src/main/resources/VD.db";   
+    private static Map<Integer, Point> mappedPoints = new HashMap<>();
+    private static BinaryTree binTree = new BinaryTree(); // Create a binTree
+    private static ConveksHull conveksHull = new ConveksHull();
+    private static DCEL voronoi = new DCEL();
 
     // Animation state
     private StoryboardRecorder recorder = new StoryboardRecorder();
     private BorderPane rootPane;
     private AnimationView animationView;
 
+    private MenuBar menuBar;
+    private ToolBar dataBar;
+    private ToggleGroup dataTypeGroup;
+    private RadioButton pointButton;
+    private RadioButton bTreeButton;
+    private RadioButton conveksHullButton;
+    private RadioButton voronoiButton;
+    private ChoiceBox<GroupNames> dataSetGroup;
     // Toolbar controls
     private ToolBar toolBar;
     private Button btnPlay, btnPause, btnResume, btnExport;
@@ -66,9 +85,8 @@ public class Main extends Application {
     private HBox drawingBar;
     private Button btnFinishDraw, btnUndoDraw, btnClearDraw, btnCancelDraw;
     private Label drawCountLabel;
-
     // Menu
-    private MenuItem addPointsMenuItem;
+
 
     @Override
     public void start(Stage primaryStage) {
@@ -76,68 +94,13 @@ public class Main extends Application {
         VoronoiEvents.clear();
         VoronoiEvents.add(recorder);
 
-        Menu points = new Menu("Points");
-        points.setOnShowing(e -> System.out.println("Showing Points"));
-        Menu convekshull = new Menu("Conveks Hull");
-        Menu voronoi = new Menu("Voronoi Diagram");
-
-        MenuBar menuBar = new MenuBar();
-        menuBar.getMenus().add(points);
-        menuBar.getMenus().add(convekshull);
-        menuBar.getMenus().add(voronoi);
-
-        addPointsMenuItem = new MenuItem("Add Points");
-        addPointsMenuItem.setOnAction(e -> beginAddPoints());
-        points.getItems().add(addPointsMenuItem);
-
         rootPane = new BorderPane();
 
-        // --- Menu items ---
-        MenuItem fromFile = new MenuItem("Read from file");
-        fromFile.setOnAction(e -> {
-            try {
-                String path = "src/main/resources/";
-                StringBuilder sb = new StringBuilder(path);
-                FileChooser fileChooser = new FileChooser();
-                fileChooser.setInitialDirectory(new File(sb.toString()));
-                File selectedFile = fileChooser.showOpenDialog(primaryStage);
-                if (selectedFile == null) {
-                    return;
-                }
-                sb.delete(0, sb.length());
-                sb.append(selectedFile.getParent());
-//                System.out.println("In read from file");
-                tree = Util.bTreeFromPointSet(selectedFile);
-                initialize(); // bygger CH + VD som før
-            } catch (Exception ex) {
-                showError("Error building Voronoi diagram: ", ex.getMessage());
-            }
-        });
-        points.getItems().add(fromFile);
-
-        MenuItem showTree = new MenuItem("Show Tree");
-        showTree.setOnAction(e -> {
+/*        showTree.setOnAction(e -> {
             BinaryTreeView btv = new BinaryTreeView();               
-            btv.renderTree(tree);
+            btv.renderTree(binTree);
             rootPane.setCenter(btv);
         });
-        points.getItems().add(showTree);
-
-        MenuItem fromDB = new MenuItem("Read from DB");
-        fromDB.setOnAction(e -> {
-            try {
-                System.out.println("In read from DB");
-                tree = Util.generateBTree(
-                        Integer.parseInt(Main.commandLineArgs[0]),
-                        dbFileName,
-                        Integer.parseInt(Main.commandLineArgs[1])
-                );
-                initialize();
-            } catch (SQLException ex) {
-                showError("Database error: ", ex.getMessage());
-            }
-        });
-        points.getItems().add(fromDB);
 
         MenuItem animate = new MenuItem("Animate Divide & Merge");
         animate.setOnAction(e -> animateDivideAndMerge());
@@ -164,12 +127,14 @@ public class Main extends Application {
             }
         });
         voronoi.getItems().add(export);
-
+*/
         // --- Toolbar (Play/Pause/Speed/Export) ---
+        dataBar = buildDataBar();
+        menuBar = buildMenuBar(primaryStage);
         toolBar = buildToolBar();
         statusBar = buildStatusBar();
 
-        VBox top = new VBox(menuBar, toolBar, statusBar);
+        VBox top = new VBox(dataBar, menuBar, toolBar, statusBar);
         rootPane.setTop(top);
 
         // Scene
@@ -180,16 +145,18 @@ public class Main extends Application {
     }
 
     public static void main(String[] args) throws Exception {
+        DatabaseHandler.connectToDatabase(DB_FILENAME);
+        DatabaseHandler.createContent();
         commandLineArgs = args;
         launch(args);
     }
 
     private void initialize() {
         ConveksHullTree cht = new ConveksHullTree();
-        cht.buildStructure(tree);
+        cht.buildStructure(binTree);
         cht.getInfo();
         VTree vt = new VTree();
-        vt.buildStructure(tree);
+        vt.buildStructure(binTree);
         vt.getInfo();
     }
 
@@ -218,12 +185,12 @@ public class Main extends Application {
         VoronoiEvents.add(recorder);
 
         // 1) Division (x-akse, y-tiebreak; hvis alle x ens -> vandret split)
-        List<Point> pts = collectPoints(tree);
+        List<Point> pts = collectPoints(binTree);
         MedianDivideAnimator.animateDivide(pts);
 
         // 2) Merge (mikro-frames via DCEL.fireSnapshot() i sigma-trin)
         VTree vt = new VTree();
-        vt.buildStructure(tree);
+        vt.buildStructure(binTree);
 
         // 3) Vis i center
         if (animationView == null) {
@@ -272,6 +239,43 @@ public class Main extends Application {
 
         return sb;
 
+    }
+    
+    private ToolBar buildDataBar() {
+        dataTypeGroup = new ToggleGroup();
+        pointButton = new RadioButton("points");
+        pointButton.setUserData("points");
+        pointButton.setToggleGroup(dataTypeGroup);
+        pointButton.setSelected(false);
+        bTreeButton = new RadioButton("binary tree");
+        bTreeButton.setUserData("binary tree");
+        bTreeButton.setToggleGroup(dataTypeGroup);
+        bTreeButton.setSelected(false);
+        conveksHullButton = new RadioButton("conveks hull");
+        conveksHullButton.setUserData("conveks hull");
+        conveksHullButton.setToggleGroup(dataTypeGroup);
+        conveksHullButton.setSelected(false);
+        voronoiButton = new RadioButton("voronoi diagram");
+        voronoiButton.setUserData("voronoi diagram");
+        voronoiButton.setToggleGroup(dataTypeGroup);
+        voronoiButton.setSelected(false);
+        List<GroupNames> gn = DatabaseHandler.getNamesByGroup();
+        ObservableList<GroupNames> names = FXCollections.observableArrayList(gn);
+        dataSetGroup = new ChoiceBox<>(names);
+        ToolBar db = new ToolBar(
+                new Label("Data type: "),
+                pointButton,
+                bTreeButton,
+                conveksHullButton,
+                voronoiButton,
+                new Separator(),
+                new Label("Data set group: "),
+                dataSetGroup);
+        return db;
+    }
+    
+    private MenuBar buildMenuBar(Stage primaryStage) {
+        return new VoronoiMenuView(this, primaryStage).getVoronoiMenuBar();        
     }
 
     private ToolBar buildToolBar() {
@@ -488,7 +492,26 @@ public class Main extends Application {
         drawingBar.setPadding(new Insets(6, 10, 6, 10));
     }
 
-    private void beginAddPoints() {
+    private void finishAddPoints() {
+        if (animationView == null) {
+            return;
+        }
+        var pts = animationView.getCapturedPoints();
+        showInfo("Canvas", "Points: " + pts + "\nNumber of points: " + pts.size());
+    }
+
+    private void cancelAddPoints() {
+        if (animationView != null) {
+            animationView.stopPointCapture();
+        }
+        rootPane.setBottom(null);
+        setToolbarEnabled(true);
+        // behold eksisterende binTree/animation uændret
+    }
+    
+    // -------------- Menu Item Actions --------------------
+    
+    void setFromCanvas() {
         // Sørg for at have et view klar
         if (animationView == null) {
             animationView = new AnimationView();
@@ -496,7 +519,7 @@ public class Main extends Application {
             rootPane.setCenter(animationView);
             BorderPane.setMargin(animationView, new Insets(10));
         }
-        // Ryd alt fra tidligere animation
+/*        // Ryd alt fra tidligere animation
         recorder = new StoryboardRecorder();
         VoronoiEvents.clear();
         VoronoiEvents.add(recorder);
@@ -504,7 +527,7 @@ public class Main extends Application {
         // Stop afspilning og gå i capture-mode
         animationView.stop();
         animationView.clearOverlay();
-        animationView.startPointCapture();
+*/        animationView.startPointCapture();
         // ... efter animationView.startPointCapture();
         animationView.requestFocus(); // så Enter/Esc/Backspace virker med det samme
 
@@ -515,7 +538,7 @@ public class Main extends Application {
         ensureDrawingBar();
         rootPane.setBottom(drawingBar);
         setToolbarEnabled(false);          // disable play/step/export mens vi tegner
-        zoomLabel.setText(String.format("Zoom %.0f%%", animationView.getZoomPercent()));
+//        zoomLabel.setText(String.format("Zoom %.0f%%", animationView.getZoomPercent()));
 
         // Tastaturgenveje: Enter (finish), Esc (cancel), Backspace (undo)
         var scene = rootPane.getScene();
@@ -538,23 +561,86 @@ public class Main extends Application {
         }
     }
 
-    private void finishAddPoints() {
+    void setFromFile(Stage stage) {
+        try {
+            String path = "src/main/resources/";
+            StringBuilder sb = new StringBuilder(path);
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setInitialDirectory(new File(sb.toString()));
+            File selectedFile = fileChooser.showOpenDialog(stage);
+            if (selectedFile == null) {
+                return;
+            }
+            sb.delete(0, sb.length());
+            sb.append(selectedFile.getParent());
+            mappedPoints = Util.getPoints(selectedFile);
+            showInfo("Source - File", "Number of points read: " + mappedPoints.size());
+        } catch (Exception ex) {
+            showError("PointSet Error", ex.getMessage());
+        }
+    }
+
+    void setFromDB() {
+        int grp = dataSetGroup.getValue().grp();
+        Toggle bt = dataTypeGroup.getSelectedToggle();
+        if (bt.getUserData().equals("points"))  {
+            mappedPoints = DatabaseHandler.getPointsByGroup(grp);
+            showInfo("Source - Database", "Number of points read: " + mappedPoints.size());
+        } 
+        if (bt.getUserData().equals("binary tree")) {
+            binTree = DatabaseHandler.getBinaryTreeByGroup(grp);
+            showInfo("Source - Database", "BinaryTree size: " + binTree.count());
+        }
+        if (bt.getUserData().equals("conveks hull")) {
+            conveksHull = DatabaseHandler.getConveksHullByGroup(grp);
+            showInfo("Source - Database", "ConveksHull size: " + conveksHull.size());
+        }
+        if (bt.getUserData().equals("voronoi diagram")) {
+            voronoi = DatabaseHandler.getVoronoiDiagramByGroup(grp);
+            showInfo("Source - Database", "Voronoi Diagram size: " + voronoi.size());
+        }
+    }
+
+    void doPoints() {
+        showInfo("Function", "Clicked Points");
+    }
+
+    void doBTree() {
+        showInfo("Function", "Clicked Binary Tree");
+    }
+
+    void doConveksHull() {
+        showInfo("Function", "Clicked Conveks Hull");
+    }
+
+    void doVoronoi() {
+        showInfo("Function", "Clicked Voronoi Diagram");
+    }
+
+    void drawRepresentation() {
+        showInfo("View", "Clicked Representation");
+    }
+
+    void drawGeometric() {
+        showInfo("View", "Clicked Geometric");
+    }
+
+    void drawStatic() {
+        showInfo("Temporal", "Clicked Static");
+    }
+
+    void drawAnimation() {
         if (animationView == null) {
             return;
         }
         var pts = animationView.getCapturedPoints();
-        if (pts.isEmpty()) {
-            showError("No points", "Add at least one point before finishing.");
-            return;
-        }
         // Byg nyt BinaryTree af punkterne (bevar din logik: første punkt som rod, derefter inserts)
-        BinaryTree newTree = new BinaryTree(pts.get(0));
+        BinaryTree newTree = new AVLTree(pts.get(0));
         for (int i = 1; i < pts.size(); i++) {
             newTree = newTree.insertNode(pts.get(i));
         }
-        tree = newTree;
+        binTree = newTree;
 
-        animationView.stopPointCapture();
         rootPane.setBottom(null);
         setToolbarEnabled(true);
 
@@ -562,12 +648,7 @@ public class Main extends Application {
         animateDivideAndMerge();
     }
 
-    private void cancelAddPoints() {
-        if (animationView != null) {
-            animationView.stopPointCapture();
-        }
-        rootPane.setBottom(null);
-        setToolbarEnabled(true);
-        // behold eksisterende tree/animation uændret
-    }
+    
+    
+    
 }

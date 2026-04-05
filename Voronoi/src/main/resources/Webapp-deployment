@@ -1,0 +1,25 @@
+To integrate Spring Boot into your project, we need to add the parent POM and the web starter. 
+This will allow your Voronoi logic to be served over HTTP.
+
+### 1. Add Spring Boot Parent and Dependencies
+
+Add this to your Voronoi/pom.xml. 
+Note that I've kept your existing JavaFX dependencies so you can still run the fat client if needed.
+
+### 2. The Application Entry Point
+Create a new main class for the web server. This will launch the Spring Boot container.
+
+java name=Voronoi/src/main/java/asi/voronoi/web/VoronoiWebApplication.java
+
+### 3. Running the Solution
+1.  **Start the Server:** Run `mvn spring-boot:run`. The server will start on `http://localhost:8080`.
+2.  **Open the Web Page:** Open the `index.html` file we created earlier in any browser.
+3.  **Interact:** As you click on the canvas, the browser sends the points to your Java algorithm, 
+                  which computes the Voronoi Diagram and sends the edges back to be drawn on the HTML5 canvas.
+
+### Summary of what we've built:
+*   **Backend:** A Spring Boot API that encapsulates your `asi.voronoi` logic.
+*   **Protocol:** JSON over REST for passing points and edges.
+*   **Frontend:** A responsive HTML5/JavaScript UI that replaces the JavaFX Stage.
+
+This architecture is exactly how professional "Algorithm-as-a-Service" platforms work! 

@@ -4,6 +4,7 @@
  */
 package asi.voronoi;
 
+import asi.voronoi.DatabaseHandler.GroupNames;
 import asi.voronoi.tree.AVLTree;
 import asi.voronoi.tree.BinaryTree;
 import asi.voronoi.tree.VTree;
@@ -97,7 +98,33 @@ public class TestDatabaseHandler {
         rows.add("1, 1, null, 2");
         rows.add("2, 1, null, null");
         DatabaseHandler.insertContent("binaryTrees", rows);
+    }
+    
+    private void addGroups(List<String> rows) throws SQLException {
+        DatabaseHandler.insertContent("groups", rows);
+    }
 
+    @Test
+    public void testGetGroupNames() {
+        List<GroupNames> expected = new LinkedList<>();
+        expected.add(new GroupNames(1, "Test"));
+        expected.add(new GroupNames(100, "Alice1"));
+        expected.add(new GroupNames(200, "Bob1"));
+        expected.add(new GroupNames(300, "Alice2"));
+        expected.add(new GroupNames(400, "Bob2"));
+        try {
+            List<String> rows = new LinkedList<>();
+            rows.add("1, 'Test'");
+            rows.add("100, 'Alice1'");
+            rows.add("200, 'Bob1'");
+            rows.add("300, 'Alice2'");
+            rows.add("400, 'Bob2'");
+            addGroups(rows);
+            List<GroupNames> actual = DatabaseHandler.getNamesByGroup();
+            assertEquals(expected, actual);
+        } catch(SQLException ex) {
+            fail("SQLException occured:" + ex.getMessage());
+        }
     }
 
     /**
@@ -168,7 +195,7 @@ public class TestDatabaseHandler {
             fail("SQLException occured:" + ex.getSQLState());
         }
     }
-
+    
     /**
      * Test of getIndexFromPoint method, of class DatabaseHandler.
      */
