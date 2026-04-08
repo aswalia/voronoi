@@ -5,10 +5,10 @@ import asi.voronoi.DCEL;
 import asi.voronoi.DatabaseHandler;
 import asi.voronoi.DatabaseHandler.GroupNames;
 import asi.voronoi.tree.BinaryTree;
-import asi.voronoi.Util;
 import asi.voronoi.tree.ConveksHullTree;
 import asi.voronoi.tree.VTree;
 import asi.voronoi.Point;
+import asi.voronoi.PointSet;
 
 // Animation / events
 import asi.voronoi.anim.MedianDivideAnimator;
@@ -24,6 +24,10 @@ import java.util.Map;
 
 // JavaFX
 import javafx.application.Application;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -42,8 +46,9 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 public class Main extends Application {
-
-    private static String[] commandLineArgs; // hold the commandline args
+    public static BooleanProperty noDbGroup = new SimpleBooleanProperty(true);
+    public static BooleanProperty notPointType = new SimpleBooleanProperty(true);
+    public static IntegerProperty dataSetSize = new SimpleIntegerProperty(0);
 
     private static final String DB_FILENAME = "src/main/resources/VD.db";   
     private static Map<Integer, Point> mappedPoints = new HashMap<>();
@@ -86,7 +91,7 @@ public class Main extends Application {
     private Button btnFinishDraw, btnUndoDraw, btnClearDraw, btnCancelDraw;
     private Label drawCountLabel;
     // Menu
-
+    private MenuView menuView;
 
     @Override
     public void start(Stage primaryStage) {
@@ -130,7 +135,8 @@ public class Main extends Application {
 */
         // --- Toolbar (Play/Pause/Speed/Export) ---
         dataBar = buildDataBar();
-        menuBar = buildMenuBar(primaryStage);
+        menuView = buildMenuBar(primaryStage);
+        menuBar = menuView.getMenuBar();
         toolBar = buildToolBar();
         statusBar = buildStatusBar();
 
@@ -147,7 +153,6 @@ public class Main extends Application {
     public static void main(String[] args) throws Exception {
         DatabaseHandler.connectToDatabase(DB_FILENAME);
         DatabaseHandler.createContent();
-        commandLineArgs = args;
         launch(args);
     }
 
@@ -247,21 +252,26 @@ public class Main extends Application {
         pointButton.setUserData("points");
         pointButton.setToggleGroup(dataTypeGroup);
         pointButton.setSelected(false);
+        pointButton.setOnAction(e -> setBindingProperties(false, mappedPoints.size()));
         bTreeButton = new RadioButton("binary tree");
         bTreeButton.setUserData("binary tree");
         bTreeButton.setToggleGroup(dataTypeGroup);
         bTreeButton.setSelected(false);
+        bTreeButton.setOnAction(e -> setBindingProperties(true, binTree.count()));
         conveksHullButton = new RadioButton("conveks hull");
         conveksHullButton.setUserData("conveks hull");
         conveksHullButton.setToggleGroup(dataTypeGroup);
         conveksHullButton.setSelected(false);
+        conveksHullButton.setOnAction(e -> setBindingProperties(true, conveksHull.size()));
         voronoiButton = new RadioButton("voronoi diagram");
         voronoiButton.setUserData("voronoi diagram");
         voronoiButton.setToggleGroup(dataTypeGroup);
         voronoiButton.setSelected(false);
+        voronoiButton.setOnAction(e -> setBindingProperties(true, voronoi.size()));
         List<GroupNames> gn = DatabaseHandler.getNamesByGroup();
         ObservableList<GroupNames> names = FXCollections.observableArrayList(gn);
         dataSetGroup = new ChoiceBox<>(names);
+        dataSetGroup.setOnAction(e -> {Main.noDbGroup.set(false);});
         ToolBar db = new ToolBar(
                 new Label("Data type: "),
                 pointButton,
@@ -274,8 +284,13 @@ public class Main extends Application {
         return db;
     }
     
-    private MenuBar buildMenuBar(Stage primaryStage) {
-        return new VoronoiMenuView(this, primaryStage).getVoronoiMenuBar();        
+    private void setBindingProperties(boolean notPointType, int dataSize) {
+        Main.notPointType.set(notPointType);
+        Main.dataSetSize.set(dataSize);        
+    }
+    
+    private MenuView buildMenuBar(Stage primaryStage) {
+        return new MenuView(this, primaryStage);        
     }
 
     private ToolBar buildToolBar() {
@@ -573,8 +588,12 @@ public class Main extends Application {
             }
             sb.delete(0, sb.length());
             sb.append(selectedFile.getParent());
-            mappedPoints = Util.getPoints(selectedFile);
-            showInfo("Source - File", "Number of points read: " + mappedPoints.size());
+            PointSet ps = new PointSet();
+            mappedPoints = ps.buildPointMap(selectedFile);
+            Main.dataSetSize.set(mappedPoints.size());
+            showInfo("Source - File", "Number of points read: " + mappedPoints.size() + 
+                                      "\nMax: " + ps.max() + 
+                                      "\nMin: " + ps.min());
         } catch (Exception ex) {
             showError("PointSet Error", ex.getMessage());
         }
@@ -582,23 +601,31 @@ public class Main extends Application {
 
     void setFromDB() {
         int grp = dataSetGroup.getValue().grp();
+        int dss = 0;
+        String text = "";
         Toggle bt = dataTypeGroup.getSelectedToggle();
         if (bt.getUserData().equals("points"))  {
             mappedPoints = DatabaseHandler.getPointsByGroup(grp);
-            showInfo("Source - Database", "Number of points read: " + mappedPoints.size());
+            dss = mappedPoints.size();
+            text = "Number of points read: " + dss;
         } 
         if (bt.getUserData().equals("binary tree")) {
             binTree = DatabaseHandler.getBinaryTreeByGroup(grp);
-            showInfo("Source - Database", "BinaryTree size: " + binTree.count());
+            dss = binTree.count();
+            text = "BinaryTree size: " + dss;
         }
         if (bt.getUserData().equals("conveks hull")) {
             conveksHull = DatabaseHandler.getConveksHullByGroup(grp);
-            showInfo("Source - Database", "ConveksHull size: " + conveksHull.size());
+            dss = conveksHull.size();
+            text = "ConveksHull size: " + dss;
         }
         if (bt.getUserData().equals("voronoi diagram")) {
             voronoi = DatabaseHandler.getVoronoiDiagramByGroup(grp);
-            showInfo("Source - Database", "Voronoi Diagram size: " + voronoi.size());
+            dss = voronoi.size();
+            text = "Voronoi Diagram size: " + dss;
         }
+        Main.dataSetSize.set(dss);
+        showInfo("Source - Database", text);
     }
 
     void doPoints() {
@@ -621,12 +648,8 @@ public class Main extends Application {
         showInfo("View", "Clicked Representation");
     }
 
-    void drawGeometric() {
-        showInfo("View", "Clicked Geometric");
-    }
-
     void drawStatic() {
-        showInfo("Temporal", "Clicked Static");
+        showInfo("Temporal", "Clicked Picture");
     }
 
     void drawAnimation() {
@@ -647,8 +670,4 @@ public class Main extends Application {
         // Kør animation pipeline på de nye punkter
         animateDivideAndMerge();
     }
-
-    
-    
-    
 }
