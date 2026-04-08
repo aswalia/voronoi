@@ -84,15 +84,70 @@ public class PointSet {
     private String valueX, valueY;
     private final Map<Integer, Point> pm;
     private int id;
+    private final Max max;
+    private final Min min;
+
+    private class Max {
+        private double X = Double.NEGATIVE_INFINITY;
+        private double Y = Double.NEGATIVE_INFINITY;
+        
+        void setX(double x) {
+            X = x;
+        }
+
+        void setY(double y) {
+            Y = y;
+        }
+        
+        double X() {
+            return X;
+        }
+
+        double Y() {
+            return Y;
+        }
+    }
+
+    private class Min {
+        private double X = Double.POSITIVE_INFINITY;
+        private double Y = Double.POSITIVE_INFINITY;
+        
+        void setX(double x) {
+            X = x;
+        }
+
+        void setY(double y) {
+            Y = y;
+        }
+
+        double X() {
+            return X;
+        }
+
+        double Y() {
+            return Y;
+        }
+    }
 
     public PointSet() {
         pm = new HashMap<>();
         state = State.beginPoint;
         id = 0;
+        max = new Max();
+        min = new Min();
+        
     }
 
     public Map<Integer, Point> getPointMap() {
         return pm;
+    }
+    
+    public Point max() {        
+        return new Point(max.X(), max.Y());
+    }
+    
+    public Point min() {
+        return new Point(min.X(), min.Y());
     }
 
     public Map<Integer, Point> buildPointMap(File filename) throws Exception {
@@ -111,7 +166,7 @@ public class PointSet {
         }
         DatabaseHandler.insertContent("points", l);
     }
-
+    
     private void error(State os, char oc) throws Exception {
         throw new Exception("Parse error - in state \'" + os + "\' Got: " + oc);
     }
@@ -177,7 +232,19 @@ public class PointSet {
 
     private void storePoint() {
         if (!pm.containsKey(id)) {
-            pm.put(id, new Point(Double.parseDouble(valueX), Double.parseDouble(valueY)));
+            double x = Double.parseDouble(valueX);
+            double y = Double.parseDouble(valueY);
+            pm.put(id, new Point(x, y));
+            if (x > max.X) {
+                max.setX(x);
+            } else if (x < min.X) {
+                min.setX(x);
+            }
+            if (y > max.Y) {
+                max.setY(y);
+            } else if (y < min.Y) {
+                min.setY(y);
+            }
         }
     }
 
